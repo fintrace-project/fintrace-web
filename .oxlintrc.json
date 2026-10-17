@@ -1,0 +1,44 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  },
+  "overrides": [
+    {
+      "files": ["src/components/ui/**"],
+      "rules": {
+        "react/only-export-components": "off"
+      }
+    },
+    {
+      "files": ["src/core/**"],
+      "rules": {
+        "no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "react",
+                  "react-*",
+                  "react/*",
+                  "@tanstack/*",
+                  "radix-ui",
+                  "lucide-react",
+                  "@/components/*",
+                  "@/pages/*",
+                  "@/lib/*",
+                  "@/hooks/*"
+                ],
+                "message": "src/core is framework-free (design-decisions §3.6): no React, no UI."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
