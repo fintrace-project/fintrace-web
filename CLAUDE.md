@@ -61,7 +61,13 @@ Node runs in Docker only — `./run.sh` wraps `node:22` as the calling user:
 **Verify with `./run.sh npm run format:check && ./run.sh npm run lint && ./run.sh npm run build`** —
 CI runs the same three.
 
+**The dev loop is the BFF's origin**: from the workspace root, `./run-local.sh core bff web -d`
+builds the `Dockerfile`'s `dev` stage — Vite over this working tree — and serves the app at
+`http://localhost:8100`, with login, `/api` and hot reload. The BFF's dev CSP allows Vite's inline
+scripts and styles only there; the production policy does not. `./run.sh dev` on port 5173 shows the
+UI alone, with no session and no API.
+
 ## Not here yet
 
-The generated API client (4.2b), the image, Compose service and release (4.2d), Playwright flows and
-the performance budget (4.2f), and the dev loop on the BFF's origin (once M5 exists).
+The generated API client (4.2b), the production image and its release (4.2d), Playwright flows and
+the performance budget (4.2f).
