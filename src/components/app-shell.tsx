@@ -1,5 +1,6 @@
-import { LayoutDashboard, List, type LucideIcon } from 'lucide-react'
+import { Layers, LayoutDashboard, List, LogOut, type LucideIcon } from 'lucide-react'
 import { NavLink, Outlet } from 'react-router'
+import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
 interface Tab {
@@ -11,6 +12,7 @@ interface Tab {
 const tabs: Tab[] = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/operations', label: 'Operations', icon: List },
+  { to: '/workspaces', label: 'Workspaces', icon: Layers },
 ]
 
 // Mobile-first (§3.6): a bottom tab bar on phones, header navigation from `md` up.
@@ -37,6 +39,12 @@ export function AppShell() {
               </NavLink>
             ))}
           </nav>
+          <form method="post" action="/auth/logout" className="ml-auto">
+            <Button type="submit" variant="ghost" className="h-11 md:h-8">
+              <LogOut aria-hidden />
+              Log out
+            </Button>
+          </form>
         </div>
       </header>
 
@@ -44,7 +52,7 @@ export function AppShell() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 grid grid-cols-2 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 grid grid-cols-3 border-t bg-background pb-[env(safe-area-inset-bottom)] md:hidden">
         {tabs.map((tab) => (
           <NavLink
             key={tab.to}
