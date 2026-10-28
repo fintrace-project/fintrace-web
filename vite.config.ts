@@ -12,4 +12,8 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // In the local stack the BFF proxies here with the upstream's own Host, which Vite refuses unless listed.
+  server: {
+    allowedHosts: ['fintrace-web'],
+  },
 })
