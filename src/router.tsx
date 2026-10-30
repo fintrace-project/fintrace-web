@@ -9,6 +9,7 @@ import { OperationsPage } from '@/pages/operations'
 import { OverviewPage } from '@/pages/overview'
 import { StatisticsPage } from '@/pages/statistics'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
+import { WorkspaceSettingsPage } from '@/pages/workspace-settings'
 import { WorkspacesPage } from '@/pages/workspaces'
 
 export const router = createBrowserRouter([
@@ -30,6 +31,7 @@ export const router = createBrowserRouter([
           { path: 'operations', Component: OperationsPage },
           { path: 'statistics', Component: StatisticsPage },
           { path: 'charts', Component: ChartsPage },
+          { path: 'settings', Component: WorkspaceSettingsPage },
         ],
       },
       { path: '*', Component: NotFoundPage },
