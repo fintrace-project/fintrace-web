@@ -1,3 +1,4 @@
+import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import { UnauthorizedError } from '@/core/api'
 
@@ -7,10 +8,9 @@ export function LoadError({ what, error, onRetry }: { what: string; error: Error
     return <p className="text-sm text-muted-foreground">Signing in…</p>
   }
   return (
-    <div className="space-y-2">
-      <p className="text-sm text-destructive">
-        Could not load {what}: {error.message}
-      </p>
+    <div className="flex flex-col items-start gap-2">
+      <p className="text-sm font-medium">Could not load {what}.</p>
+      <Problem error={error} />
       <Button variant="outline" className="h-11 md:h-8" onClick={onRetry}>
         Try again
       </Button>

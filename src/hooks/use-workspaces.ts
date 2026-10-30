@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { listWorkspaces, type Workspace } from '@/core/api'
 
 const visible = (workspaces: Workspace[]) => workspaces.filter((workspace) => workspace.status !== 'DELETED')
@@ -15,4 +15,10 @@ export function useWorkspaces() {
 export function useWorkspace(workspaceId: string | undefined) {
   const workspaces = useWorkspaces()
   return workspaces.data?.find((workspace) => workspace.id === workspaceId)
+}
+
+// After a version conflict: fetch the list again, so the next write carries the current version
+export function useReloadWorkspaces() {
+  const queryClient = useQueryClient()
+  return () => void queryClient.invalidateQueries({ queryKey: ['workspaces'], exact: true })
 }

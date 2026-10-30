@@ -15,6 +15,14 @@ export class UnauthorizedError extends Error {
   }
 }
 
+// Signed in, but without the role Core asks for (§7.4): the UI learns it only from Core's 403
+export class ForbiddenError extends Error {
+  constructor() {
+    super('No access')
+    this.name = 'ForbiddenError'
+  }
+}
+
 export class ApiError extends Error {
   readonly status: number
   // Core's and the BFF's refusals are problem+json; absent when the answer was not
@@ -28,11 +36,17 @@ export class ApiError extends Error {
   }
 }
 
+// Core's problem body behind a failure, when the failure is an ApiError that carried one
+export const problemOf = (error: Error | null) => (error instanceof ApiError ? error.problem : undefined)
+
 const isJson = (response: Response) => response.headers.get('Content-Type')?.includes('json') ?? false
 
 async function refuseFailures(path: string, response: Response): Promise<void> {
   if (response.status === 401) {
     throw new UnauthorizedError()
+  }
+  if (response.status === 403) {
+    throw new ForbiddenError()
   }
   if (!response.ok) {
     const problem = isJson(response) ? ((await response.clone().json()) as CoreProblem) : undefined

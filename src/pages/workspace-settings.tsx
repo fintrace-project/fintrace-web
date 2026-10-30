@@ -1,10 +1,10 @@
-import { useQueryClient } from '@tanstack/react-query'
 import { Archive, ArchiveRestore, Trash2 } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
 import { CurrencySelect } from '@/components/currency-select'
 import { PageHeader } from '@/components/page-header'
+import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -18,9 +18,9 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { ApiError, type Workspace } from '@/core/api'
+import { problemOf, type Workspace } from '@/core/api'
 import { useDeleteWorkspace, useEditWorkspace, useSetArchived } from '@/hooks/use-workspace-mutations'
-import { useWorkspace } from '@/hooks/use-workspaces'
+import { useReloadWorkspaces, useWorkspace } from '@/hooks/use-workspaces'
 
 export function WorkspaceSettingsPage() {
   // WorkspaceLayout renders this page only for a workspace it has found
@@ -45,6 +45,7 @@ function GeneralPanel({
   workspace: Workspace
   edit: ReturnType<typeof useEditWorkspace>
 }) {
+  const reload = useReloadWorkspaces()
   const [name, setName] = useState(workspace.name)
   const [currency, setCurrency] = useState(workspace.defaultCurrency)
   const changed = name.trim() !== workspace.name || currency !== workspace.defaultCurrency
@@ -85,7 +86,7 @@ function GeneralPanel({
             {edit.isPending ? 'Saving…' : 'Save'}
           </Button>
           {edit.isSuccess && !changed && <span className="text-sm text-positive">Saved.</span>}
-          {edit.error && !hasFieldErrors(edit.error) && <Problem error={edit.error} />}
+          {edit.error && !hasFieldErrors(edit.error) && <Problem error={edit.error} onReload={reload} />}
         </div>
       </form>
     </Panel>
@@ -173,6 +174,7 @@ function DeletePanel({ workspace }: { workspace: Workspace }) {
 // Mounted only while the dialog is open, so the typed name starts empty every time
 function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
   const remove = useDeleteWorkspace(workspace.id)
+  const reload = useReloadWorkspaces()
   const navigate = useNavigate()
   const [typed, setTyped] = useState('')
 
@@ -207,7 +209,7 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
           className="h-11"
         />
       </Field>
-      {remove.error && <Problem error={remove.error} />}
+      {remove.error && <Problem error={remove.error} onReload={reload} />}
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline" className="h-11 md:h-9">
@@ -248,30 +250,7 @@ function Field({
   )
 }
 
-const problemOf = (error: Error | null) => (error instanceof ApiError ? error.problem : undefined)
-
 const fieldError = (error: Error | null, field: string) =>
   problemOf(error)?.errors?.find((each) => each.field === field)?.message
 
 const hasFieldErrors = (error: Error) => (problemOf(error)?.errors?.length ?? 0) > 0
-
-// A stale version is the one failure the user can fix from here: reload and look again
-function Problem({ error }: { error: Error }) {
-  const queryClient = useQueryClient()
-  if (problemOf(error)?.code === 'VERSION_CONFLICT') {
-    return (
-      <span className="flex flex-wrap items-center gap-2 text-sm text-destructive">
-        This workspace changed since the page loaded.
-        <Button
-          type="button"
-          variant="outline"
-          className="h-9"
-          onClick={() => void queryClient.invalidateQueries({ queryKey: ['workspaces'], exact: true })}
-        >
-          Reload
-        </Button>
-      </span>
-    )
-  }
-  return <span className="text-sm text-destructive">{error.message}</span>
-}

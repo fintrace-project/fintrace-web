@@ -7,16 +7,18 @@ import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { OperationsPage } from '@/pages/operations'
 import { OverviewPage } from '@/pages/overview'
+import { RouteErrorPage } from '@/pages/route-error'
 import { StatisticsPage } from '@/pages/statistics'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
 import { WorkspaceSettingsPage } from '@/pages/workspace-settings'
 import { WorkspacesPage } from '@/pages/workspaces'
 
 export const router = createBrowserRouter([
-  { path: '/welcome', Component: HomePage },
+  { path: '/welcome', Component: HomePage, ErrorBoundary: RouteErrorPage },
   {
     path: '/',
     Component: AppShell,
+    ErrorBoundary: RouteErrorPage,
     children: [
       // Sign-in returns to `/` (the BFF's callback), so this is where every session starts
       { index: true, loader: () => redirect('/workspaces') },
