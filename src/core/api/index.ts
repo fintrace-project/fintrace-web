@@ -40,6 +40,12 @@ export class ApiError extends Error {
 // Core's problem body behind a failure, when the failure is an ApiError that carried one
 export const problemOf = (error: Error | null) => (error instanceof ApiError ? error.problem : undefined)
 
+// The message Core attached to one field of a refused request
+export const fieldError = (error: Error | null, field: string) =>
+  problemOf(error)?.errors?.find((each) => each.field === field)?.message
+
+export const hasFieldErrors = (error: Error) => (problemOf(error)?.errors?.length ?? 0) > 0
+
 const isJson = (response: Response) => response.headers.get('Content-Type')?.includes('json') ?? false
 
 async function refuseFailures(path: string, response: Response): Promise<void> {

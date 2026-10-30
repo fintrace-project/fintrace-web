@@ -48,3 +48,13 @@ export function useDeleteWorkspace(workspaceId: string) {
     },
   })
 }
+
+export function useCreateWorkspace() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: { workspaceName: string; defaultCurrency: string }) =>
+      dataOf(await api.POST('/api/v1/workspaces', { body })),
+    onSuccess: (workspace) =>
+      queryClient.setQueryData<Workspace[]>(['workspaces'], (list) => list && [...list, workspace]),
+  })
+}

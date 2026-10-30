@@ -1,9 +1,10 @@
 import { Archive, Trash2 } from 'lucide-react'
-import { useState, type FormEvent, type ReactNode } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
 import { CurrencySelect } from '@/components/currency-select'
 import { PageHeader } from '@/components/page-header'
+import { Field } from '@/components/field'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import {
@@ -17,8 +18,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { problemOf, type Workspace } from '@/core/api'
+import { fieldError, hasFieldErrors, type Workspace } from '@/core/api'
 import { useDeleteWorkspace, useEditWorkspace, useSetArchived } from '@/hooks/use-workspace-mutations'
 import { useReloadWorkspaces, useWorkspace } from '@/hooks/use-workspaces'
 
@@ -217,30 +217,3 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
     </form>
   )
 }
-
-function Field({
-  id,
-  label,
-  error,
-  children,
-}: {
-  id: string
-  label: ReactNode
-  error?: string
-  children: ReactNode
-}) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      <Label htmlFor={id} className="text-[13px] font-normal text-muted-foreground">
-        {label}
-      </Label>
-      {children}
-      {error && <span className="text-xs text-destructive">{error}</span>}
-    </div>
-  )
-}
-
-const fieldError = (error: Error | null, field: string) =>
-  problemOf(error)?.errors?.find((each) => each.field === field)?.message
-
-const hasFieldErrors = (error: Error) => (problemOf(error)?.errors?.length ?? 0) > 0
