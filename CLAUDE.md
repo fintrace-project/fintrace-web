@@ -93,5 +93,6 @@ UI alone, with no session and no API.
 `listWorkspaces` on the generated client (4.2's last item, waiting for a Core release); whether a
 session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the last of
 4.2e); the accounts' writes (4.4); the production image and its release (4.2d); Playwright flows and
-the performance budget (4.2f) — the bundle is already 194 kB gzipped of 150 kB, so routes loaded on
-demand come with it. A second language is post-MVP: a second YAML file beside `en.yml`.
+the performance budget (4.2f: first paint within 2.5 s failing the build, about 200 kB of gzipped
+initial JavaScript, about 50 kB per lazy route, §3.6) — the bundle is already 194 kB in one chunk,
+so routes loaded on demand come with it. A second language is post-MVP: a second YAML file beside `en.yml`.
