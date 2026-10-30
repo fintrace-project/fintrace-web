@@ -1,15 +1,19 @@
-import { Plus } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { AccountAvatar, Pending, TotalsTiles } from '@/components/cards'
+import { CreateAccountDialog } from '@/components/create-account-dialog'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
 import { formatBalance } from '@/core/format'
 import { useAccountRows, type AccountRow } from '@/hooks/use-accounts'
+import { useWorkspace } from '@/hooks/use-workspaces'
 
 export function AccountsPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
   const workspaceId = useParams().workspaceId!
+  const workspace = useWorkspace(workspaceId)!
+  // Core refuses every write to an archived workspace, and one mid-import
+  const writable = workspace.status === 'NEW' || workspace.status === 'ACTIVE'
   const { isPending, error, retry, rows } = useAccountRows(workspaceId)
   const { t } = useTranslation()
 
@@ -29,12 +33,7 @@ export function AccountsPage() {
             {rows.map((row) => (
               <AccountCard key={row.account.id} row={row} />
             ))}
-            {/* Not a button until it does something: creating an account is 4.4 */}
-            <div className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-input text-muted-foreground">
-              <Plus className="size-6" aria-hidden />
-              <span className="text-[15px] font-semibold">{t('accounts.add')}</span>
-              <span className="text-xs">{t('common.arrivesWith', { task: '4.4' })}</span>
-            </div>
+            {writable && <CreateAccountDialog workspace={workspace} />}
           </section>
         </>
       )}

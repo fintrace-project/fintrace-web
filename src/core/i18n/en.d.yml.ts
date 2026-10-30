@@ -126,6 +126,17 @@ declare const messages: {
   readonly accounts: {
     readonly empty: "No accounts yet."
     readonly add: "Add account"
+    readonly create: {
+      readonly title: "New account"
+      readonly text: "An account holds money in one currency, such as a bank account, a card or cash."
+      readonly closesImport: "An account holds money in one currency. Adding one closes import for this workspace for good."
+      readonly namePlaceholder: "Current account"
+      readonly currency: "Currency"
+      readonly initialBalance: "Balance today (optional)"
+      readonly initialBalanceHint: "What the account holds now, negative for a debt. Leave it empty to start from zero."
+      readonly action: "Add account"
+      readonly creating: "Adding…"
+    }
   }
   readonly operations: {
     readonly pending: "The operations feed arrives with 4.5."

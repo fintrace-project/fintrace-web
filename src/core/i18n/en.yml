@@ -126,6 +126,16 @@ overview:
 accounts:
   empty: No accounts yet.
   add: Add account
+  create:
+    title: New account
+    text: An account holds money in one currency, such as a bank account, a card or cash.
+    closesImport: An account holds money in one currency. Adding one closes import for this workspace for good.
+    namePlaceholder: Current account
+    currency: Currency
+    initialBalance: Balance today (optional)
+    initialBalanceHint: What the account holds now, negative for a debt. Leave it empty to start from zero.
+    action: Add account
+    creating: Adding…
 
 operations:
   pending: The operations feed arrives with 4.5.
