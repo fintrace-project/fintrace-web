@@ -7,6 +7,7 @@ import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { OperationsPage } from '@/pages/operations'
 import { OverviewPage } from '@/pages/overview'
+import { PreferencesPage } from '@/pages/preferences'
 import { RouteErrorPage } from '@/pages/route-error'
 import { StatisticsPage } from '@/pages/statistics'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
@@ -24,6 +25,7 @@ export const router = createBrowserRouter([
       { index: true, loader: () => redirect('/workspaces') },
       { path: 'workspaces', Component: WorkspacesPage },
       { path: 'workspaces/new', Component: WorkspaceNewPage },
+      { path: 'preferences', Component: PreferencesPage },
       {
         path: 'w/:workspaceId',
         Component: WorkspaceLayout,

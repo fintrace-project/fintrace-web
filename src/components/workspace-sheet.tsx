@@ -7,7 +7,7 @@ import type { Workspace } from '@/core/api'
 import { workspaceSummary } from '@/core/workspace-labels'
 import { useWorkspaces } from '@/hooks/use-workspaces'
 import { cn } from '@/lib/utils'
-import { workspaceAccent } from '@/lib/workspace-accent'
+import { accentOf } from '@/lib/accent'
 
 // Phone: the current workspace as a pill at the top, the list in a sheet rising from the bottom.
 export function WorkspaceSheet({ current }: { current: Workspace | undefined }) {
@@ -31,7 +31,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
         side="bottom"
         showCloseButton={false}
         // Portalled out of the shell, so the accent is not inherited
-        style={current && workspaceAccent(current.id)}
+        style={current && accentOf(current.id)}
         className="max-h-[85dvh] gap-1.5 rounded-t-3xl border-0 px-4 pt-2.5 pb-[max(2rem,env(safe-area-inset-bottom))]"
       >
         <div aria-hidden className="mb-2.5 h-1.5 w-10 self-center rounded-full bg-input" />

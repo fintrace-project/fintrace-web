@@ -6,15 +6,17 @@ import { PageHeader } from '@/components/page-header'
 import { Button } from '@/components/ui/button'
 import { WorkspaceAvatar } from '@/components/workspace-avatar'
 import type { Workspace } from '@/core/api'
-import { formatShortDate } from '@/core/format'
+import { displayName, formatShortDate } from '@/core/format'
 import { workspaceStatus } from '@/core/workspace-labels'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { useWorkspaces } from '@/hooks/use-workspaces'
 import { cn } from '@/lib/utils'
-import { workspaceAccent } from '@/lib/workspace-accent'
+import { accentOf } from '@/lib/accent'
 
 export function WorkspacesPage() {
   const workspaces = useWorkspaces()
   const [query, setQuery] = useState('')
+  const user = useCurrentUser()
 
   const search = (
     <label className="flex min-h-11 items-center gap-2 rounded-[10px] border bg-card px-3.5 text-sm text-muted-foreground">
@@ -43,6 +45,7 @@ export function WorkspacesPage() {
     <div className="flex flex-col gap-8">
       <PageHeader
         title="Your workspaces"
+        eyebrow={user.data && `Hello, ${user.data.firstName ?? displayName(user.data)}`}
         actions={
           <>
             {search}
@@ -87,7 +90,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
   return (
     <Link
       to={`/w/${workspace.id}`}
-      style={workspaceAccent(workspace.id)}
+      style={accentOf(workspace.id)}
       className={cn(
         'flex flex-col gap-4.5 rounded-[18px] border bg-card p-5.5 transition-shadow hover:shadow-md',
         workspace.status === 'ARCHIVED' && 'opacity-70',

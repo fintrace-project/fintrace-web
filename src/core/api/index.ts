@@ -7,6 +7,7 @@ export type Workspace = components['schemas']['WorkspaceResponse']
 export type Account = components['schemas']['AccountResponse']
 export type AccountBalance = components['schemas']['AccountBalanceResponse']
 export type CoreProblem = components['schemas']['CoreProblem']
+export type UserProfile = components['schemas']['UserProfileResponse']
 
 export class UnauthorizedError extends Error {
   constructor() {

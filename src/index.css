@@ -83,7 +83,7 @@
   --sidebar-accent-foreground: #1a1a1a;
   --sidebar-border: #e6e3dc;
   --sidebar-ring: #9a958b;
-  /* The current workspace's accent, overridden per workspace by workspaceAccent() */
+  /* The current workspace's accent, overridden per workspace by accentOf() */
   --ws: var(--primary);
   --ws-soft: var(--accent);
 }

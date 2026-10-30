@@ -1,7 +1,7 @@
 import type { Workspace } from '@/core/api'
 import { initials } from '@/core/format'
 import { cn } from '@/lib/utils'
-import { workspaceAccent } from '@/lib/workspace-accent'
+import { accentOf } from '@/lib/accent'
 
 export function WorkspaceAvatar({
   workspace,
@@ -13,7 +13,7 @@ export function WorkspaceAvatar({
   return (
     <span
       aria-hidden
-      style={workspaceAccent(workspace.id)}
+      style={accentOf(workspace.id)}
       className={cn(
         'flex size-10 shrink-0 items-center justify-center rounded-xl bg-(--ws) text-sm font-extrabold text-white',
         className,

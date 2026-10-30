@@ -12,10 +12,10 @@ const palette: [string, string][] = [
   ['#0369a1', '#e3f0f8'],
 ]
 
-// Core stores no colour: the id picks one, so a workspace keeps its colour on every device.
-export function workspaceAccent(workspaceId: string): CSSProperties {
+// Core stores no colour: the id picks one, so a workspace or a user keeps its colour on every device.
+export function accentOf(id: string): CSSProperties {
   let hash = 0
-  for (const char of workspaceId) {
+  for (const char of id) {
     hash = (hash * 31 + char.charCodeAt(0)) | 0
   }
   const [accent, soft] = palette[Math.abs(hash) % palette.length]!

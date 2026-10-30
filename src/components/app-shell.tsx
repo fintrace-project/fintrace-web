@@ -1,11 +1,15 @@
-import { LogOut, Settings } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { Link, NavLink, Outlet, useMatch } from 'react-router'
 import { AppSidebar } from '@/components/app-sidebar'
+import { UserMenu } from '@/components/user-menu'
 import { WorkspaceSheet } from '@/components/workspace-sheet'
 import { workspaceSections, workspaceSettings } from '@/components/workspace-sections'
+import { ForbiddenError } from '@/core/api'
+import { useCurrentUser } from '@/hooks/use-current-user'
 import { useWorkspace } from '@/hooks/use-workspaces'
 import { cn } from '@/lib/utils'
-import { workspaceAccent } from '@/lib/workspace-accent'
+import { accentOf } from '@/lib/accent'
+import { NoAccessPage } from '@/pages/no-access'
 
 const roundButton = 'flex size-11 items-center justify-center rounded-full border bg-card'
 
@@ -14,10 +18,15 @@ export function AppShell() {
   const workspaceId = useMatch('/w/:workspaceId/*')?.params.workspaceId
   const current = useWorkspace(workspaceId)
   const sections = workspaceId ? workspaceSections(workspaceId) : []
+  const user = useCurrentUser()
+
+  if (user.error instanceof ForbiddenError) {
+    return <NoAccessPage />
+  }
 
   return (
     <div
-      style={current && workspaceAccent(current.id)}
+      style={current && accentOf(current.id)}
       className={cn('min-h-dvh md:flex md:pb-0', sections.length > 0 && 'pb-20')}
     >
       <AppSidebar current={current} sections={sections} />
@@ -35,11 +44,7 @@ export function AppShell() {
                 <Settings className="size-[18px]" aria-hidden />
               </Link>
             )}
-            <form method="post" action="/auth/logout">
-              <button type="submit" aria-label="Log out" className={roundButton}>
-                <LogOut className="size-[18px]" aria-hidden />
-              </button>
-            </form>
+            <UserMenu />
           </div>
         </header>
 
