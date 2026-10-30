@@ -1,6 +1,7 @@
 import { createBrowserRouter, redirect } from 'react-router'
 import { AppShell } from '@/components/app-shell'
 import { WorkspaceLayout } from '@/components/workspace-layout'
+import { AccountsPage } from '@/pages/accounts'
 import { ChartsPage } from '@/pages/charts'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
         Component: WorkspaceLayout,
         children: [
           { index: true, Component: OverviewPage },
+          { path: 'accounts', Component: AccountsPage },
           { path: 'operations', Component: OperationsPage },
           { path: 'statistics', Component: StatisticsPage },
           { path: 'charts', Component: ChartsPage },

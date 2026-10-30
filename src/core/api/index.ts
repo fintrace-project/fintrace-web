@@ -4,6 +4,8 @@ import type { components, paths } from './schema'
 // Same-origin requests: the browser sends the BFF's session cookie, and no token reaches JavaScript.
 
 export type Workspace = components['schemas']['WorkspaceResponse']
+export type Account = components['schemas']['AccountResponse']
+export type AccountBalance = components['schemas']['AccountBalanceResponse']
 export type CoreProblem = components['schemas']['CoreProblem']
 
 export class UnauthorizedError extends Error {

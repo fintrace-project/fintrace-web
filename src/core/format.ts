@@ -1,3 +1,5 @@
+import type { AccountBalance } from '@/core/api'
+
 // Display only: every figure comes from Core, the client never computes money.
 const money = new Map<string, Intl.NumberFormat>()
 
@@ -9,6 +11,9 @@ export function formatMoney(amount: number, currency: string): string {
   }
   return format.format(amount)
 }
+
+export const formatBalance = (balance: AccountBalance | undefined) =>
+  balance ? formatMoney(balance.balance, balance.currency) : '—'
 
 const shortDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
