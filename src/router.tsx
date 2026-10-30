@@ -10,6 +10,7 @@ import { OverviewPage } from '@/pages/overview'
 import { PreferencesPage } from '@/pages/preferences'
 import { RouteErrorPage } from '@/pages/route-error'
 import { StatisticsPage } from '@/pages/statistics'
+import { WorkspaceImportPage } from '@/pages/workspace-import'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
 import { WorkspaceSettingsPage } from '@/pages/workspace-settings'
 import { WorkspacesPage } from '@/pages/workspaces'
@@ -36,6 +37,7 @@ export const router = createBrowserRouter([
           { path: 'statistics', Component: StatisticsPage },
           { path: 'charts', Component: ChartsPage },
           { path: 'settings', Component: WorkspaceSettingsPage },
+          { path: 'import', Component: WorkspaceImportPage },
         ],
       },
       { path: '*', Component: NotFoundPage },

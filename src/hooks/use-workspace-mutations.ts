@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient, type QueryClient } from '@tanstack/react-query'
-import { api, dataOf, type Workspace } from '@/core/api'
+import { api, dataOf, importDump, type Workspace } from '@/core/api'
+import type { ImportSource } from '@/core/import-sources'
 
 // Core answers every surviving write with the workspace and its new version: put it in the list, no refetch
 function replaceInList(queryClient: QueryClient, workspace: Workspace) {
@@ -56,5 +57,18 @@ export function useCreateWorkspace() {
       dataOf(await api.POST('/api/v1/workspaces', { body })),
     onSuccess: (workspace) =>
       queryClient.setQueryData<Workspace[]>(['workspaces'], (list) => list && [...list, workspace]),
+  })
+}
+
+export function useImportDump(workspaceId: string) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ source, file }: { source: ImportSource; file: File }) =>
+      importDump(source.uploadPath(workspaceId), file),
+    // Succeeded, failed or timed out, the workspace's status may have moved, and an import fills every list in it
+    onSettled: () => {
+      void queryClient.invalidateQueries({ queryKey: ['workspaces'], exact: true })
+      void queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId] })
+    },
   })
 }

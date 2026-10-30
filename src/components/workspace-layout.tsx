@@ -1,6 +1,7 @@
-import { Outlet, useParams } from 'react-router'
+import { Outlet, useMatch, useParams } from 'react-router'
 import { ArchivedBanner } from '@/components/archive-controls'
 import { LoadError } from '@/components/load-error'
+import { NewWorkspaceBanner } from '@/components/new-workspace-banner'
 import { useWorkspaces } from '@/hooks/use-workspaces'
 import { NotFoundPage } from '@/pages/not-found'
 
@@ -8,6 +9,7 @@ import { NotFoundPage } from '@/pages/not-found'
 export function WorkspaceLayout() {
   const { workspaceId } = useParams()
   const workspaces = useWorkspaces()
+  const importing = useMatch('/w/:workspaceId/import') !== null
 
   if (workspaces.isPending) {
     return <p className="text-sm text-muted-foreground">Loading…</p>
@@ -22,6 +24,7 @@ export function WorkspaceLayout() {
   return (
     <div className="flex flex-col gap-5">
       {workspace.status === 'ARCHIVED' && <ArchivedBanner workspace={workspace} />}
+      {workspace.status === 'NEW' && !importing && <NewWorkspaceBanner workspace={workspace} />}
       <Outlet />
     </div>
   )

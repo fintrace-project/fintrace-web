@@ -8,6 +8,7 @@ export type Account = components['schemas']['AccountResponse']
 export type AccountBalance = components['schemas']['AccountBalanceResponse']
 export type CoreProblem = components['schemas']['CoreProblem']
 export type UserProfile = components['schemas']['UserProfileResponse']
+export type ImportJob = components['schemas']['ImportJobResponse']
 
 export class UnauthorizedError extends Error {
   constructor() {
@@ -89,4 +90,19 @@ export async function listWorkspaces(signal?: AbortSignal): Promise<Workspace[]>
   const response = await fetch('/api/v1/workspaces', { headers: { Accept: 'application/json' }, signal })
   await refuseFailures('/api/v1/workspaces', response)
   return (await response.json()) as Workspace[]
+}
+
+// Uploads go to an importer, not Core, and the generated paths leave `/import` out, so this call is
+// written by hand on Core's generated job type, which every importer answers in. A refused import
+// answers 422 with the FAILED job and its problems: that is the result to show, not a failure.
+export async function importDump(path: string, file: File): Promise<ImportJob> {
+  const body = new FormData()
+  body.append('file', file)
+  const response = await fetch(path, { method: 'POST', body, headers: { Accept: 'application/json' } })
+  const type = response.headers.get('Content-Type') ?? ''
+  if (response.status === 422 && type.includes('json') && !type.includes('problem+json')) {
+    return (await response.json()) as ImportJob
+  }
+  await refuseFailures(path, response)
+  return (await response.json()) as ImportJob
 }

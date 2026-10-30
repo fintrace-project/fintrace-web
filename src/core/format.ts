@@ -31,3 +31,17 @@ export function displayName(user: UserProfile): string {
   const name = [user.firstName, user.lastName].filter(Boolean).join(' ')
   return name || user.username
 }
+
+const count = new Intl.NumberFormat()
+
+export const formatCount = (n: number) => count.format(n)
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) {
+    return `${bytes} B`
+  }
+  if (bytes < 1024 * 1024) {
+    return `${Math.round(bytes / 1024)} KB`
+  }
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+}
