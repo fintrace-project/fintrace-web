@@ -137,6 +137,18 @@ declare const messages: {
       readonly action: "Add account"
       readonly creating: "Adding…"
     }
+    readonly actions: "Actions for {{name}}"
+    readonly rename: {
+      readonly action: "Rename"
+      readonly title: "Rename {{name}}"
+    }
+    readonly archive: "Archive"
+    readonly archived: {
+      readonly title: "Archived"
+      readonly text: "Archived accounts keep their history and balance but take no new entries. Restore one to use it again."
+    }
+    readonly restore: "Restore"
+    readonly restoring: "Restoring…"
   }
   readonly operations: {
     readonly pending: "The operations feed arrives with 4.5."

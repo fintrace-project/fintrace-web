@@ -1,13 +1,14 @@
 import { useQuery } from '@tanstack/react-query'
 import { api, dataOf, type Account, type AccountBalance } from '@/core/api'
 
+// Archived accounts included, in this one query: the pages split them apart, and a write swaps its account in place
 export function useAccounts(workspaceId: string) {
   return useQuery({
     queryKey: ['workspaces', workspaceId, 'accounts'],
     queryFn: async ({ signal }) =>
       dataOf(
         await api.GET('/api/v1/workspaces/{workspaceId}/accounts', {
-          params: { path: { workspaceId } },
+          params: { path: { workspaceId }, query: { includeArchived: true } },
           signal,
         }),
       ),
@@ -21,7 +22,7 @@ export function useAccountBalances(workspaceId: string) {
     queryFn: async ({ signal }) =>
       dataOf(
         await api.GET('/api/v1/workspaces/{workspaceId}/statistics/balances/accounts', {
-          params: { path: { workspaceId } },
+          params: { path: { workspaceId }, query: { includeArchived: true } },
           signal,
         }),
       ),
@@ -33,15 +34,18 @@ export interface AccountRow {
   balance: AccountBalance | undefined
 }
 
-// Accounts and their balances, fetched in parallel and matched by id
+// Accounts and their balances, fetched in parallel and matched by id; the archived ones apart
 export function useAccountRows(workspaceId: string) {
   const accounts = useAccounts(workspaceId)
   const balances = useAccountBalances(workspaceId)
 
   let rows: AccountRow[] | undefined
+  let archived: AccountRow[] | undefined
   if (accounts.data && balances.data) {
     const balanceOf = new Map(balances.data.map((row) => [row.accountId, row]))
-    rows = accounts.data.map((account) => ({ account, balance: balanceOf.get(account.id) }))
+    const all = accounts.data.map((account) => ({ account, balance: balanceOf.get(account.id) }))
+    rows = all.filter((row) => !row.account.archived)
+    archived = all.filter((row) => row.account.archived)
   }
 
   return {
@@ -52,5 +56,6 @@ export function useAccountRows(workspaceId: string) {
       void balances.refetch()
     },
     rows,
+    archived,
   }
 }

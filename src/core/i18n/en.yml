@@ -136,6 +136,16 @@ accounts:
     initialBalanceHint: What the account holds now, negative for a debt. Leave it empty to start from zero.
     action: Add account
     creating: Adding…
+  actions: Actions for {{name}}
+  rename:
+    action: Rename
+    title: Rename {{name}}
+  archive: Archive
+  archived:
+    title: Archived
+    text: Archived accounts keep their history and balance but take no new entries. Restore one to use it again.
+  restore: Restore
+  restoring: Restoring…
 
 operations:
   pending: The operations feed arrives with 4.5.
