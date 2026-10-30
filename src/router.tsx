@@ -1,11 +1,13 @@
 import { createBrowserRouter } from 'react-router'
 import { AppShell } from '@/components/app-shell'
 import { WorkspaceLayout } from '@/components/workspace-layout'
+import { ChartsPage } from '@/pages/charts'
 import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { OperationsPage } from '@/pages/operations'
 import { OverviewPage } from '@/pages/overview'
 import { StartPage } from '@/pages/start'
+import { StatisticsPage } from '@/pages/statistics'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
 
 export const router = createBrowserRouter([
@@ -22,6 +24,8 @@ export const router = createBrowserRouter([
         children: [
           { index: true, Component: OverviewPage },
           { path: 'operations', Component: OperationsPage },
+          { path: 'statistics', Component: StatisticsPage },
+          { path: 'charts', Component: ChartsPage },
         ],
       },
       { path: '*', Component: NotFoundPage },
