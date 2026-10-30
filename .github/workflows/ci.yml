@@ -25,6 +25,11 @@ jobs:
 
       - run: npm ci
 
+      - name: API types match the pinned Core release
+        run: |
+          npm run generate:api
+          git diff --exit-code src/core/api/schema.d.ts
+
       - name: Format
         run: npm run format:check
 

@@ -27,7 +27,7 @@ Adding a library outside this list needs the owner's agreement first.
 
 ## Layers
 
-- `src/core/` — **framework-free**: the API client (generated, from 4.2b), formatting, dates,
+- `src/core/` — **framework-free**: the API client (`src/core/api/`, generated), formatting, dates,
   request and state logic. It must not import React or any UI code; `oxlint` enforces that. It is
   what a mobile app (M7) would reuse unchanged.
 - Everything else is the UI layer: `src/pages/` (one file per route), `src/components/` (app
@@ -38,7 +38,10 @@ Adding a library outside this list needs the owner's agreement first.
 - **No money arithmetic in the client, ever.** Core computes every balance, total and conversion;
   the client formats what it receives. An operation's amount is a magnitude plus a `kind` on the
   wire — show the sign from the kind, never compute it into a figure.
-- **The API client is generated from Core's `openapi.json`, never hand-written** (from 4.2b).
+- **The API client is generated from Core's `openapi.json`, never hand-written.** Call Core through
+  `api` from `@/core/api`; the types come from the Core release pinned as `coreApiVersion` in
+  `package.json`. `listWorkspaces` is the one exception until a Core release documents paging as
+  `page`, `size` and `sort`.
 - **Timestamps are floating local wall-clock values** (`YYYY-MM-DDTHH:mm`): never convert to UTC.
 - **No token in JavaScript.** The BFF holds the session; the browser has only a cookie.
 - **Mobile-first**: lay out for a phone first, widen from `md`. No hover-only controls; touch
@@ -56,7 +59,12 @@ Node runs in Docker only — `./run.sh` wraps `node:22` as the calling user:
 ./run.sh npm run format         # Prettier
 ./run.sh npm run lint           # oxlint, warnings fail
 ./run.sh npm run build          # type-check and production build
+./run.sh npm run generate:api   # src/core/api/schema.d.ts from the pinned Core release
 ```
+
+For an unreleased spec, copy it inside this repository first — `./run.sh` mounts only this
+directory — and name it: `cp ../fintrace-core/openapi.json core-openapi.json && ./run.sh npm run
+generate:api -- core-openapi.json`. `core-openapi.json` is git-ignored; CI regenerates from the pin.
 
 **Verify with `./run.sh npm run format:check && ./run.sh npm run lint && ./run.sh npm run build`** —
 CI runs the same three.
@@ -69,5 +77,5 @@ UI alone, with no session and no API.
 
 ## Not here yet
 
-The generated API client (4.2b), the production image and its release (4.2d), Playwright flows and
-the performance budget (4.2f).
+`listWorkspaces` on the generated client (4.2's last item, waiting for a Core release), the
+production image and its release (4.2d), Playwright flows and the performance budget (4.2f).
