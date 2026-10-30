@@ -1,4 +1,5 @@
 import { Settings } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet, useMatch } from 'react-router'
 import { AppSidebar } from '@/components/app-sidebar'
 import { UserMenu } from '@/components/user-menu'
@@ -19,6 +20,7 @@ export function AppShell() {
   const current = useWorkspace(workspaceId)
   const sections = workspaceId ? workspaceSections(workspaceId) : []
   const user = useCurrentUser()
+  const { t } = useTranslation()
 
   if (user.error instanceof ForbiddenError) {
     return <NoAccessPage />
@@ -38,7 +40,7 @@ export function AppShell() {
             {current && (
               <Link
                 to={workspaceSettings(current.id)}
-                aria-label="Workspace settings"
+                aria-label={t('shell.workspaceSettings')}
                 className={roundButton}
               >
                 <Settings className="size-[18px]" aria-hidden />
@@ -55,7 +57,7 @@ export function AppShell() {
 
       {sections.length > 0 && (
         <nav
-          aria-label="Workspace sections"
+          aria-label={t('shell.workspaceSections')}
           className="fixed inset-x-0 bottom-0 grid grid-cols-5 border-t bg-card px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
         >
           {sections.map((section) => (
@@ -71,7 +73,7 @@ export function AppShell() {
               }
             >
               <section.icon className="size-[22px]" aria-hidden />
-              {section.label}
+              {t(`sections.${section.key}`)}
             </NavLink>
           ))}
         </nav>

@@ -1,4 +1,5 @@
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { AccountAvatar, Pending, TotalsTiles } from '@/components/cards'
 import { LoadError } from '@/components/load-error'
@@ -10,28 +11,29 @@ export function AccountsPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
   const workspaceId = useParams().workspaceId!
   const { isPending, error, retry, rows } = useAccountRows(workspaceId)
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Accounts" />
+      <PageHeader title={t('sections.accounts')} />
       <TotalsTiles />
 
       {error ? (
-        <LoadError what="accounts" error={error} onRetry={retry} />
+        <LoadError title={t('errors.loadAccounts')} error={error} onRetry={retry} />
       ) : isPending || !rows ? (
-        <Pending>Loading…</Pending>
+        <Pending>{t('common.loading')}</Pending>
       ) : (
         <>
-          {rows.length === 0 && <Pending>No accounts yet.</Pending>}
-          <section aria-label="Accounts" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.length === 0 && <Pending>{t('accounts.empty')}</Pending>}
+          <section aria-label={t('sections.accounts')} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map((row) => (
               <AccountCard key={row.account.id} row={row} />
             ))}
             {/* Not a button until it does something: creating an account is 4.4 */}
             <div className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-input text-muted-foreground">
               <Plus className="size-6" aria-hidden />
-              <span className="text-[15px] font-semibold">Add account</span>
-              <span className="text-xs">Arrives with 4.4</span>
+              <span className="text-[15px] font-semibold">{t('accounts.add')}</span>
+              <span className="text-xs">{t('common.arrivesWith', { task: '4.4' })}</span>
             </div>
           </section>
         </>

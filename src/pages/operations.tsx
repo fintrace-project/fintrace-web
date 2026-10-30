@@ -1,10 +1,12 @@
+import { useTranslation } from 'react-i18next'
 import { PageHeader } from '@/components/page-header'
 
 export function OperationsPage() {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Operations" />
-      <p className="text-sm text-muted-foreground">The operations feed arrives with 4.5.</p>
+      <PageHeader title={t('sections.operations')} />
+      <p className="text-sm text-muted-foreground">{t('operations.pending')}</p>
     </div>
   )
 }

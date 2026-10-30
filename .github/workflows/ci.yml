@@ -30,6 +30,11 @@ jobs:
           npm run generate:api
           git diff --exit-code src/core/api/schema.d.ts
 
+      - name: Message types match en.yml
+        run: |
+          npm run generate:messages
+          git diff --exit-code src/core/i18n/en.d.yml.ts
+
       - name: Format
         run: npm run format:check
 

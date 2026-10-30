@@ -1,5 +1,6 @@
 import { Archive, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
 import { CurrencySelect } from '@/components/currency-select'
@@ -26,10 +27,11 @@ export function WorkspaceSettingsPage() {
   // WorkspaceLayout renders this page only for a workspace it has found
   const workspace = useWorkspace(useParams().workspaceId)!
   const edit = useEditWorkspace(workspace.id)
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Workspace settings" />
+      <PageHeader title={t('settings.title')} />
       {/* Keyed by version: a newer workspace, saved here or elsewhere, starts the form afresh */}
       <GeneralPanel key={workspace.version} workspace={workspace} edit={edit} />
       <StatusPanel workspace={workspace} />
@@ -46,6 +48,7 @@ function GeneralPanel({
   edit: ReturnType<typeof useEditWorkspace>
 }) {
   const reload = useReloadWorkspaces()
+  const { t } = useTranslation()
   const [name, setName] = useState(workspace.name)
   const [currency, setCurrency] = useState(workspace.defaultCurrency)
   const changed = name.trim() !== workspace.name || currency !== workspace.defaultCurrency
@@ -56,10 +59,10 @@ function GeneralPanel({
   }
 
   return (
-    <Panel title="General">
+    <Panel title={t('settings.general')}>
       <form onSubmit={submit} className="flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-[minmax(0,20rem)_auto]">
-          <Field id="workspace-name" label="Name" error={fieldError(edit.error, 'workspaceName')}>
+          <Field id="workspace-name" label={t('common.name')} error={fieldError(edit.error, 'workspaceName')}>
             <Input
               id="workspace-name"
               value={name}
@@ -71,7 +74,7 @@ function GeneralPanel({
           </Field>
           <Field
             id="workspace-currency"
-            label="Default currency"
+            label={t('common.defaultCurrency')}
             error={fieldError(edit.error, 'defaultCurrency')}
           >
             <CurrencySelect id="workspace-currency" value={currency} onChange={setCurrency} />
@@ -83,9 +86,9 @@ function GeneralPanel({
             disabled={!changed || edit.isPending}
             className="h-11 rounded-[10px] px-5 font-bold"
           >
-            {edit.isPending ? 'Saving…' : 'Save'}
+            {t(edit.isPending ? 'common.saving' : 'common.save')}
           </Button>
-          {edit.isSuccess && !changed && <span className="text-sm text-positive">Saved.</span>}
+          {edit.isSuccess && !changed && <span className="text-sm text-positive">{t('common.saved')}</span>}
           {edit.error && !hasFieldErrors(edit.error) && <Problem error={edit.error} onReload={reload} />}
         </div>
       </form>
@@ -95,15 +98,13 @@ function GeneralPanel({
 
 function StatusPanel({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const { t } = useTranslation()
 
   return (
-    <Panel title="Archive">
+    <Panel title={t('settings.archive.title')}>
       {workspace.status === 'ACTIVE' && (
         <>
-          <Pending>
-            An archived workspace is read-only: everything in it stays, nothing can be added or changed. You
-            can unarchive it at any time.
-          </Pending>
+          <Pending>{t('settings.archive.active')}</Pending>
           <div>
             <Button
               variant="outline"
@@ -112,44 +113,31 @@ function StatusPanel({ workspace }: { workspace: Workspace }) {
               className="h-11 rounded-[10px] px-4 font-semibold"
             >
               <Archive aria-hidden />
-              Archive workspace
+              {t('settings.archive.action')}
             </Button>
           </div>
         </>
       )}
-      {workspace.status === 'ARCHIVED' && (
-        <Pending>
-          This workspace is archived and read-only. Unarchive it from the notice at the top of the page.
-        </Pending>
-      )}
-      {workspace.status === 'NEW' && (
-        <Pending>
-          A new workspace has nothing to archive yet. It becomes active with its first entry or a successful
-          import.
-        </Pending>
-      )}
-      {workspace.status === 'IMPORTING' && (
-        <Pending>An import is running. The workspace can be archived once it has finished.</Pending>
-      )}
+      {workspace.status === 'ARCHIVED' && <Pending>{t('settings.archive.archived')}</Pending>}
+      {workspace.status === 'NEW' && <Pending>{t('settings.archive.new')}</Pending>}
+      {workspace.status === 'IMPORTING' && <Pending>{t('settings.archive.importing')}</Pending>}
       {setArchived.error && <Problem error={setArchived.error} />}
     </Panel>
   )
 }
 
 function DeletePanel({ workspace }: { workspace: Workspace }) {
+  const { t } = useTranslation()
   return (
     <section className="flex flex-col gap-3 rounded-2xl border border-destructive/30 bg-card p-5">
-      <h2 className="text-base font-bold text-destructive">Delete workspace</h2>
-      <Pending>
-        Deletion cannot be undone. The workspace and all its accounts, operations and history become
-        unreachable at once and cannot be restored. To keep it out of sight instead, archive it.
-      </Pending>
+      <h2 className="text-base font-bold text-destructive">{t('settings.delete.title')}</h2>
+      <Pending>{t('settings.delete.text')}</Pending>
       <Dialog>
         <div>
           <DialogTrigger asChild>
             <Button variant="destructive" className="h-11 rounded-[10px] px-4 font-semibold">
               <Trash2 aria-hidden />
-              Delete workspace…
+              {t('settings.delete.action')}
             </Button>
           </DialogTrigger>
         </div>
@@ -167,6 +155,7 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
   const reload = useReloadWorkspaces()
   const navigate = useNavigate()
   const [typed, setTyped] = useState('')
+  const { t } = useTranslation()
 
   // The typed name is a brake for the hand, not an authorisation: Core takes no confirmation (§4.1.1)
   const submit = (event: FormEvent) => {
@@ -177,18 +166,17 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <DialogHeader>
-        <DialogTitle>Delete “{workspace.name}”?</DialogTitle>
-        <DialogDescription>
-          This cannot be undone. Every account, operation and balance in this workspace becomes unreachable
-          immediately.
-        </DialogDescription>
+        <DialogTitle>{t('settings.delete.confirmTitle', { name: workspace.name })}</DialogTitle>
+        <DialogDescription>{t('settings.delete.confirmText')}</DialogDescription>
       </DialogHeader>
       <Field
         id="confirm-name"
         label={
-          <>
-            Type <b className="font-bold text-foreground">{workspace.name}</b> to confirm
-          </>
+          <Trans
+            i18nKey="settings.delete.typeToConfirm"
+            values={{ name: workspace.name }}
+            components={{ b: <b className="font-bold text-foreground" /> }}
+          />
         }
       >
         <Input
@@ -203,7 +191,7 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
       <DialogFooter>
         <DialogClose asChild>
           <Button type="button" variant="outline" className="h-11 md:h-9">
-            Cancel
+            {t('common.cancel')}
           </Button>
         </DialogClose>
         <Button
@@ -211,7 +199,7 @@ function DeleteConfirmation({ workspace }: { workspace: Workspace }) {
           disabled={typed !== workspace.name || remove.isPending}
           className="h-11 bg-destructive text-white hover:bg-destructive/90 md:h-9"
         >
-          {remove.isPending ? 'Deleting…' : 'Delete forever'}
+          {t(remove.isPending ? 'settings.delete.deleting' : 'settings.delete.confirm')}
         </Button>
       </DialogFooter>
     </form>

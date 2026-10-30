@@ -1,5 +1,6 @@
 import { Check, ChevronDown, Search } from 'lucide-react'
 import { useId, useState, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { currenciesWith, currencyLabel, matchesCurrency } from '@/core/currencies'
 import { cn } from '@/lib/utils'
@@ -17,6 +18,7 @@ export function CurrencySelect({
   className?: string
 }) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
   const list = currenciesWith(value)
   const selected = list.find((currency) => currency.code === value)
 
@@ -29,7 +31,7 @@ export function CurrencySelect({
           className,
         )}
       >
-        {selected ? currencyLabel(selected) : 'Currency'}
+        {selected ? currencyLabel(selected) : t('currency.placeholder')}
         <ChevronDown className="size-4 text-muted-foreground" aria-hidden />
       </PopoverTrigger>
       <PopoverContent align="start" className="w-72 gap-0 p-0">
@@ -48,6 +50,7 @@ export function CurrencySelect({
 // Mounted only while open, so the query and the highlighted row start fresh every time
 function CurrencySearch({ value, onPick }: { value: string; onPick: (code: string) => void }) {
   const listId = useId()
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [active, setActive] = useState(0)
   const found = currenciesWith(value).filter((currency) => matchesCurrency(currency, query))
@@ -81,8 +84,8 @@ function CurrencySearch({ value, onPick }: { value: string; onPick: (code: strin
           aria-expanded
           aria-controls={listId}
           aria-activedescendant={found[active] ? `${listId}-${active}` : undefined}
-          aria-label="Search currencies"
-          placeholder="Search by name or code"
+          aria-label={t('currency.search')}
+          placeholder={t('currency.searchPlaceholder')}
           value={query}
           onChange={(event) => {
             setQuery(event.target.value)
@@ -92,8 +95,8 @@ function CurrencySearch({ value, onPick }: { value: string; onPick: (code: strin
           className="h-11 w-full bg-transparent outline-none placeholder:text-muted-foreground"
         />
       </label>
-      <ul id={listId} role="listbox" aria-label="Currencies" className="max-h-72 overflow-y-auto p-1">
-        {found.length === 0 && <li className="px-2 py-3 text-muted-foreground">No currency matches.</li>}
+      <ul id={listId} role="listbox" aria-label={t('currency.list')} className="max-h-72 overflow-y-auto p-1">
+        {found.length === 0 && <li className="px-2 py-3 text-muted-foreground">{t('currency.none')}</li>}
         {found.map((currency, index) => (
           <li
             key={currency.code}

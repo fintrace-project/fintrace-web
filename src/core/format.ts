@@ -36,12 +36,13 @@ const count = new Intl.NumberFormat()
 
 export const formatCount = (n: number) => count.format(n)
 
+// Bytes, kilobytes or megabytes, the unit's name written by Intl in the user's language
 export function formatBytes(bytes: number): string {
-  if (bytes < 1024) {
-    return `${bytes} B`
-  }
-  if (bytes < 1024 * 1024) {
-    return `${Math.round(bytes / 1024)} KB`
-  }
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  const [value, unit] =
+    bytes < 1024
+      ? [bytes, 'byte']
+      : bytes < 1024 * 1024
+        ? [bytes / 1024, 'kilobyte']
+        : [bytes / (1024 * 1024), 'megabyte']
+  return new Intl.NumberFormat(undefined, { style: 'unit', unit, maximumFractionDigits: 1 }).format(value)
 }

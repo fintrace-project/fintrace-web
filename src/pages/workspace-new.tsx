@@ -1,5 +1,6 @@
 import { FileUp, Sparkles } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { Panel } from '@/components/cards'
 import { CurrencySelect } from '@/components/currency-select'
@@ -23,6 +24,7 @@ export function WorkspaceNewPage() {
   const [currency, setCurrency] = useState(() => latestCurrency(workspaces.data) ?? 'EUR')
   const [name, setName] = useState('')
   const [start, setStart] = useState<Start>('empty')
+  const { t } = useTranslation()
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -37,25 +39,29 @@ export function WorkspaceNewPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="New workspace" />
-      <Panel title="Workspace">
+      <PageHeader title={t('workspaceNew.title')} />
+      <Panel title={t('workspaceNew.panel')}>
         <form onSubmit={submit} className="flex flex-col gap-5">
           <div className="grid gap-4 sm:grid-cols-[minmax(0,20rem)_auto]">
-            <Field id="new-workspace-name" label="Name" error={fieldError(create.error, 'workspaceName')}>
+            <Field
+              id="new-workspace-name"
+              label={t('common.name')}
+              error={fieldError(create.error, 'workspaceName')}
+            >
               <Input
                 id="new-workspace-name"
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required
                 maxLength={30}
-                placeholder="Personal"
+                placeholder={t('workspaceNew.namePlaceholder')}
                 autoFocus
                 className="h-11 bg-card"
               />
             </Field>
             <Field
               id="new-workspace-currency"
-              label="Default currency"
+              label={t('common.defaultCurrency')}
               error={fieldError(create.error, 'defaultCurrency')}
             >
               <CurrencySelect id="new-workspace-currency" value={currency} onChange={setCurrency} />
@@ -63,25 +69,27 @@ export function WorkspaceNewPage() {
           </div>
 
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1.5 text-[13px] text-muted-foreground">How to start</legend>
+            <legend className="mb-1.5 text-[13px] text-muted-foreground">
+              {t('workspaceNew.howToStart')}
+            </legend>
             <div className="grid gap-3 sm:grid-cols-2">
               <StartOption
                 value="empty"
                 current={start}
                 onChange={setStart}
                 icon={<Sparkles />}
-                title="Start empty"
+                title={t('workspaceNew.empty.title')}
               >
-                Add accounts and operations yourself.
+                {t('workspaceNew.empty.text')}
               </StartOption>
               <StartOption
                 value="import"
                 current={start}
                 onChange={setStart}
                 icon={<FileUp />}
-                title="Import history"
+                title={t('workspaceNew.import.title')}
               >
-                Bring your records in from another app first. Possible only while the workspace is empty.
+                {t('workspaceNew.import.text')}
               </StartOption>
             </div>
           </fieldset>
@@ -92,7 +100,7 @@ export function WorkspaceNewPage() {
               disabled={!name.trim() || create.isPending}
               className="h-11 rounded-[10px] px-5 font-bold"
             >
-              {create.isPending ? 'Creating…' : 'Create workspace'}
+              {t(create.isPending ? 'workspaceNew.creating' : 'workspaceNew.create')}
             </Button>
             {create.error && !hasFieldErrors(create.error) && <Problem error={create.error} />}
           </div>

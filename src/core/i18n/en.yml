@@ -1,0 +1,256 @@
+# Every text the UI shows, in English. After an edit, run `npm run generate:messages` to refresh the
+# keys' type (en.d.yml.ts). {{name}} is a parameter; <b>…</b> marks emphasis rendered by <Trans>;
+# key_one / key_other are the plural forms i18next picks by {{count}}.
+
+app:
+  name: fintrace
+
+common:
+  loading: Loading…
+  tryAgain: Try again
+  reload: Reload
+  cancel: Cancel
+  close: Close
+  save: Save
+  saving: Saving…
+  saved: Saved.
+  current: Current
+  name: Name
+  defaultCurrency: Default currency
+  arrivesWith: Arrives with {{task}}
+
+errors:
+  signingIn: Signing in…
+  loadWorkspaces: Could not load workspaces.
+  loadAccounts: Could not load accounts.
+  changedElsewhere: This changed since the page loaded.
+  forbidden: You do not have access to do this.
+  serverAnswered: The server answered {{status}}.
+  network: Could not reach the server. Check your connection and try again.
+  unexpected: Something went wrong.
+  reference: 'Reference: <code>{{traceId}}</code>'
+
+shell:
+  workspaces: Workspaces
+  workspaceSections: Workspace sections
+  workspaceSettings: Workspace settings
+  chooseWorkspace: Choose a workspace
+  myWorkspaces: My workspaces
+  createWorkspace: Create workspace
+  allWorkspaces: All workspaces
+  manageWorkspaces: Manage workspaces
+
+sections:
+  overview: Overview
+  accounts: Accounts
+  operations: Operations
+  statistics: Statistics
+  charts: Charts
+
+account:
+  account: Account
+  settings: Account settings
+  signedInAs: Signed in as {{name}}
+  preferences: Preferences
+  signOut: Sign out
+
+workspaceStatus:
+  NEW: New
+  IMPORTING: Importing
+  ACTIVE: Active
+  ARCHIVED: Archived
+  DELETED: Deleted
+
+workspaceSummary: '{{currency}} · {{status}}'
+
+currency:
+  placeholder: Currency
+  search: Search currencies
+  searchPlaceholder: Search by name or code
+  list: Currencies
+  none: No currency matches.
+
+totals:
+  label: Totals
+  balance: Total balance
+  income: Income this month
+  expenses: Expenses this month
+
+archive:
+  archive: Archive
+  archiving: Archiving…
+  unarchive: Unarchive
+  unarchiving: Unarchiving…
+  banner: '<b>This workspace is archived.</b> It is read-only: everything in it stays, nothing can be added or changed.'
+
+newWorkspaceBanner:
+  text: '<b>This workspace is new and empty.</b> You can import your history from another app now. Anything you add yourself closes import for good.'
+  action: Import history
+
+home:
+  signIn: Sign in
+  headline: Know where your money went, and where it is.
+  lead: fintrace keeps your accounts, operations and transfers in one ledger, and works out every balance and total for you.
+  signInTo: Sign in to fintrace
+  features: Features
+  accounts:
+    title: Every account in one place
+    text: Balances computed from your own history, checked against the figures your bank shows.
+  transfers:
+    title: Transfers that add up
+    text: Move money between accounts and currencies without counting it twice as income or expense.
+  history:
+    title: Bring your history
+    text: Import an existing record into a fresh workspace and carry on from where you were.
+
+notFound:
+  title: Page not found
+  back: Back to the overview
+
+noAccess:
+  title: No access
+  text: You are signed in, but this account has not been given access to fintrace. Ask whoever runs it to grant access, or sign out and use another account.
+
+routeError:
+  title: Something went wrong
+  text: This page could not be shown. Reloading usually helps.
+  home: Go to your workspaces
+
+overview:
+  expensesByMonth: Expenses by month
+  chartPending: The cashflow chart arrives with 4.10.
+  recentOperations: Recent operations
+  feedPending: The operations feed arrives with 4.2h and 4.5.
+  allAccounts: All →
+
+accounts:
+  empty: No accounts yet.
+  add: Add account
+
+operations:
+  pending: The operations feed arrives with 4.5.
+
+statistics:
+  pending: The category breakdown arrives with 4.11.
+
+charts:
+  pending: Balance dynamics and cashflow arrive with 4.9 and 4.10.
+
+preferences:
+  title: Preferences
+  empty: Nothing to set yet.
+
+workspaces:
+  title: Your workspaces
+  hello: Hello, {{name}}
+  find: Find a workspace
+  new: New workspace
+  intro: A workspace holds one set of accounts, categories and operations. Create one to start.
+  createHint: Start empty, or import your history
+  archived: Archived
+  created: Created {{date}}
+  currency: Currency
+
+workspaceNew:
+  title: New workspace
+  panel: Workspace
+  namePlaceholder: Personal
+  howToStart: How to start
+  empty:
+    title: Start empty
+    text: Add accounts and operations yourself.
+  import:
+    title: Import history
+    text: Bring your records in from another app first. Possible only while the workspace is empty.
+  create: Create workspace
+  creating: Creating…
+
+settings:
+  title: Workspace settings
+  general: General
+  archive:
+    title: Archive
+    active: 'An archived workspace is read-only: everything in it stays, nothing can be added or changed. You can unarchive it at any time.'
+    action: Archive workspace
+    archived: This workspace is archived and read-only. Unarchive it from the notice at the top of the page.
+    new: A new workspace has nothing to archive yet. It becomes active with its first entry or a successful import.
+    importing: An import is running. The workspace can be archived once it has finished.
+  delete:
+    title: Delete workspace
+    text: Deletion cannot be undone. The workspace and all its accounts, operations and history become unreachable at once and cannot be restored. To keep it out of sight instead, archive it.
+    action: Delete workspace…
+    confirmTitle: Delete “{{name}}”?
+    confirmText: This cannot be undone. Every account, operation and balance in this workspace becomes unreachable immediately.
+    typeToConfirm: Type <b>{{name}}</b> to confirm
+    confirm: Delete forever
+    deleting: Deleting…
+
+import:
+  title: Import history
+  importing: Importing…
+  importingText: Reading the file and writing it into {{workspace}}. This can take a minute; keep this page open.
+  intro: 'Everything in the file arrives in one step: accounts, categories, operations, transfers and balances. If anything in it is refused, nothing is imported and the workspace stays empty.'
+  from: Import from
+  drop: '<desktop>Drop the file here, or </desktop><u>choose a file</u>'
+  fileHint: '{{file}}, up to {{size}}'
+  chosen: '{{size}} · choose another'
+  tooBig: This file is {{size}}; {{source}} imports accept up to {{max}}.
+  submit: Import
+  running:
+    title: An import is running
+    text: Another import into this workspace has not finished yet. Come back in a minute.
+  closed:
+    title: Import is closed
+    text: History can be imported only into a new, empty workspace, and {{workspace}} is no longer new. To import history, create a workspace for it.
+    action: New workspace
+  done: Imported into {{workspace}}
+  counts:
+    accounts: Accounts
+    categories: Categories
+    operations: Operations
+    transfers: Transfers
+    anchors: Balance anchors
+  open: Open the workspace
+  failed: Nothing was imported
+  refused: The file was refused.
+  stillEmpty: '{{workspace}} is still empty, so you can fix the file and try again.'
+  affected: '{{entities}} affected'
+  affectedField: '{{entities}} affected · field {{field}}'
+  more_one: And {{count, number}} more problem.
+  more_other: And {{count, number}} more problems.
+  retry: Choose another file
+  notes: Notes from the importer
+  error: Error
+  warning: Warning
+  diagnostic: '{{label}}: {{count, number}}'
+
+# What to export from each import source; the source's own name (MOK) is a product name and stays as it is
+importSources:
+  mok:
+    file: A .mok file exported from MOK
+
+importProblem:
+  WRONG_UUID_VERSION: Malformed identifier
+  DUPLICATED_ENTITY_ID_WITHIN_SECTION: Duplicate record
+  DUPLICATED_ENTITY_ID_ACROSS_SECTIONS: Duplicate record
+  UNRESOLVED_REFERENCE: Missing reference
+  CYCLIC_REFERENCES: Circular reference
+  REFUSED_BY_COMMAND: Refused by fintrace
+
+importDiagnostic:
+  UNSUPPORTED_RECORD: Records skipped as unsupported
+  UNKNOWN_CURRENCY: Records skipped for an unknown currency
+  UNRESOLVED_REFERENCE: Records with a missing reference
+  SOURCE_ANOMALY: Irregularities in the source
+
+entities:
+  OPERATION_one: '{{count, number}} operation'
+  OPERATION_other: '{{count, number}} operations'
+  ACCOUNT_one: '{{count, number}} account'
+  ACCOUNT_other: '{{count, number}} accounts'
+  CATEGORY_one: '{{count, number}} category'
+  CATEGORY_other: '{{count, number}} categories'
+  TRANSFER_one: '{{count, number}} transfer'
+  TRANSFER_other: '{{count, number}} transfers'
+  BALANCE_ANCHOR_one: '{{count, number}} balance anchor'
+  BALANCE_ANCHOR_other: '{{count, number}} balance anchors'

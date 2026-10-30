@@ -1,8 +1,10 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { I18nextProvider } from 'react-i18next'
 import { RouterProvider } from 'react-router'
 import { ApiError, ForbiddenError, UnauthorizedError } from '@/core/api'
+import { i18n } from '@/core/i18n'
 import './index.css'
 import { router } from './router'
 
@@ -31,8 +33,10 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
+    <I18nextProvider i18n={i18n}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </I18nextProvider>
   </StrictMode>,
 )

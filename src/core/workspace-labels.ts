@@ -1,14 +1,7 @@
 import type { Workspace } from '@/core/api'
+import { t } from '@/core/i18n'
 
-const statusLabels: Record<Workspace['status'], string> = {
-  NEW: 'New',
-  IMPORTING: 'Importing',
-  ACTIVE: 'Active',
-  ARCHIVED: 'Archived',
-  DELETED: 'Deleted',
-}
-
-export const workspaceStatus = (workspace: Workspace) => statusLabels[workspace.status]
+export const workspaceStatus = (workspace: Workspace) => t(`workspaceStatus.${workspace.status}`)
 
 export const workspaceSummary = (workspace: Workspace) =>
-  `${workspace.defaultCurrency} · ${workspaceStatus(workspace)}`
+  t('workspaceSummary', { currency: workspace.defaultCurrency, status: workspaceStatus(workspace) })

@@ -1,5 +1,6 @@
 import { CircleAlert, CircleCheck, FileUp, LoaderCircle, TriangleAlert } from 'lucide-react'
 import { useState, type DragEvent, type FormEvent } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
 import { PageHeader } from '@/components/page-header'
@@ -20,6 +21,7 @@ export function WorkspaceImportPage() {
   // WorkspaceLayout renders this page only for a workspace it has found
   const workspace = useWorkspace(useParams().workspaceId)!
   const importDump = useImportDump(workspace.id)
+  const { t } = useTranslation()
 
   // The result is checked first: a finished import has already moved the workspace out of NEW
   let body
@@ -36,9 +38,9 @@ export function WorkspaceImportPage() {
           strokeWidth={1.5}
           aria-hidden
         />
-        <h2 className="text-lg font-bold">Importing…</h2>
+        <h2 className="text-lg font-bold">{t('import.importing')}</h2>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Reading the file and writing it into {workspace.name}. This can take a minute; keep this page open.
+          {t('import.importingText', { workspace: workspace.name })}
         </p>
       </section>
     )
@@ -52,7 +54,7 @@ export function WorkspaceImportPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Import history" />
+      <PageHeader title={t('import.title')} />
       {body}
     </div>
   )
@@ -70,6 +72,7 @@ function DumpPicker({
   const [dragging, setDragging] = useState(false)
   const source = importSources.find((each) => each.id === sourceId)!
   const tooBig = file !== null && file.size > source.maxBytes
+  const { t } = useTranslation()
 
   const onDrop = (event: DragEvent) => {
     event.preventDefault()
@@ -89,13 +92,10 @@ function DumpPicker({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-5">
-      <Pending>
-        Everything in the file arrives in one step: accounts, categories, operations, transfers and balances.
-        If anything in it is refused, nothing is imported and the workspace stays empty.
-      </Pending>
+      <Pending>{t('import.intro')}</Pending>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1.5 text-[13px] text-muted-foreground">Import from</legend>
+        <legend className="mb-1.5 text-[13px] text-muted-foreground">{t('import.from')}</legend>
         <div className="flex flex-wrap gap-2">
           {importSources.map((each) => (
             <label
@@ -144,30 +144,41 @@ function DumpPicker({
           <>
             <span className="text-[15px] font-bold break-all">{file.name}</span>
             <span className="text-[13px] text-muted-foreground">
-              {formatBytes(file.size)} · choose another
+              {t('import.chosen', { size: formatBytes(file.size) })}
             </span>
           </>
         ) : (
           <>
             <span className="text-[15px] font-bold">
-              <span className="hidden md:inline">Drop the file here, or </span>
-              <span className="underline underline-offset-4">choose a file</span>
+              <Trans
+                i18nKey="import.drop"
+                components={{
+                  desktop: <span className="hidden md:inline" />,
+                  u: <span className="underline underline-offset-4" />,
+                }}
+              />
             </span>
             <span className="text-[13px] text-muted-foreground">
-              {source.file}, up to {formatBytes(source.maxBytes)}
+              {t('import.fileHint', {
+                file: t(`importSources.${source.id}.file`),
+                size: formatBytes(source.maxBytes),
+              })}
             </span>
           </>
         )}
       </label>
       {tooBig && (
         <p className="text-sm text-destructive">
-          This file is {formatBytes(file.size)}; {source.name} imports accept up to{' '}
-          {formatBytes(source.maxBytes)}.
+          {t('import.tooBig', {
+            size: formatBytes(file.size),
+            source: source.name,
+            max: formatBytes(source.maxBytes),
+          })}
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
         <Button type="submit" disabled={!file || tooBig} className="h-11 rounded-[10px] px-5 font-bold">
-          Import
+          {t('import.submit')}
         </Button>
         {error && <Problem error={error} />}
       </div>
@@ -176,22 +187,20 @@ function DumpPicker({
 }
 
 function ImportClosed({ workspace }: { workspace: Workspace }) {
+  const { t } = useTranslation()
   if (workspace.status === 'IMPORTING') {
     return (
-      <Panel title="An import is running">
-        <Pending>Another import into this workspace has not finished yet. Come back in a minute.</Pending>
+      <Panel title={t('import.running.title')}>
+        <Pending>{t('import.running.text')}</Pending>
       </Panel>
     )
   }
   return (
-    <Panel title="Import is closed">
-      <Pending>
-        History can be imported only into a new, empty workspace, and {workspace.name} is no longer new. To
-        import history, create a workspace for it.
-      </Pending>
+    <Panel title={t('import.closed.title')}>
+      <Pending>{t('import.closed.text', { workspace: workspace.name })}</Pending>
       <div>
         <Button asChild className="h-11 rounded-[10px] px-5 font-bold">
-          <Link to="/workspaces/new">New workspace</Link>
+          <Link to="/workspaces/new">{t('import.closed.action')}</Link>
         </Button>
       </div>
     </Panel>
@@ -207,32 +216,34 @@ function ImportResult({
   workspace: Workspace
   onRetry: () => void
 }) {
+  const { t } = useTranslation()
+
   if (job.status !== 'FAILED') {
-    const counts: [string, number][] = [
-      ['Accounts', job.accounts],
-      ['Categories', job.categories],
-      ['Operations', job.operations],
-      ['Transfers', job.transfers],
-      ['Balance anchors', job.anchors],
-    ]
+    const counts = [
+      ['accounts', job.accounts],
+      ['categories', job.categories],
+      ['operations', job.operations],
+      ['transfers', job.transfers],
+      ['anchors', job.anchors],
+    ] as const
     return (
       <div className="flex flex-col gap-4">
         <section className="flex flex-col gap-4 rounded-2xl border bg-card p-5">
           <h2 className="flex items-center gap-2 text-base font-bold">
             <CircleCheck className="size-5 text-positive" aria-hidden />
-            Imported into {workspace.name}
+            {t('import.done', { workspace: workspace.name })}
           </h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-            {counts.map(([label, n]) => (
-              <div key={label} className="flex flex-col gap-0.5 rounded-xl bg-muted px-3 py-2.5">
-                <dt className="text-xs text-muted-foreground">{label}</dt>
+            {counts.map(([key, n]) => (
+              <div key={key} className="flex flex-col gap-0.5 rounded-xl bg-muted px-3 py-2.5">
+                <dt className="text-xs text-muted-foreground">{t(`import.counts.${key}`)}</dt>
                 <dd className="text-xl font-extrabold">{formatCount(n)}</dd>
               </div>
             ))}
           </dl>
           <div>
             <Button asChild className="h-11 rounded-[10px] px-5 font-bold">
-              <Link to={`/w/${workspace.id}`}>Open the workspace</Link>
+              <Link to={`/w/${workspace.id}`}>{t('import.open')}</Link>
             </Button>
           </div>
         </section>
@@ -247,11 +258,10 @@ function ImportResult({
       <section className="flex flex-col gap-4 rounded-2xl border border-destructive/30 bg-card p-5">
         <h2 className="flex items-center gap-2 text-base font-bold text-destructive">
           <CircleAlert className="size-5" aria-hidden />
-          Nothing was imported
+          {t('import.failed')}
         </h2>
         <Pending>
-          {job.message ?? 'The file was refused.'} {workspace.name} is still empty, so you can fix the file
-          and try again.
+          {job.message ?? t('import.refused')} {t('import.stillEmpty', { workspace: workspace.name })}
         </Pending>
         {shown.length > 0 && (
           <ul className="flex flex-col">
@@ -260,8 +270,14 @@ function ImportResult({
                 <span className="text-sm font-semibold">{problemLabel(problem.code)}</span>
                 <span className="text-sm">{problem.message}</span>
                 <span className="text-xs text-muted-foreground">
-                  {entityCount(problem.aggregateType, problem.affectedCount)} affected
-                  {problem.field && ` · field ${problem.field}`}
+                  {problem.field
+                    ? t('import.affectedField', {
+                        entities: entityCount(problem.aggregateType, problem.affectedCount),
+                        field: problem.field,
+                      })
+                    : t('import.affected', {
+                        entities: entityCount(problem.aggregateType, problem.affectedCount),
+                      })}
                 </span>
               </li>
             ))}
@@ -269,12 +285,12 @@ function ImportResult({
         )}
         {job.problems.length > shown.length && (
           <p className="text-xs text-muted-foreground">
-            And {formatCount(job.problems.length - shown.length)} more problems.
+            {t('import.more', { count: job.problems.length - shown.length })}
           </p>
         )}
         <div>
           <Button onClick={onRetry} className="h-11 rounded-[10px] px-5 font-bold">
-            Choose another file
+            {t('import.retry')}
           </Button>
         </div>
       </section>
@@ -285,11 +301,12 @@ function ImportResult({
 
 // What the importer noticed in the source without refusing it: skipped records, anomalies
 function Diagnostics({ job }: { job: ImportJob }) {
+  const { t } = useTranslation()
   if (job.diagnostics.length === 0) {
     return null
   }
   return (
-    <Panel title="Notes from the importer">
+    <Panel title={t('import.notes')}>
       <ul className="flex flex-col">
         {job.diagnostics.map((diagnostic, index) => (
           <li key={index} className="flex gap-3 border-t py-2.5">
@@ -298,11 +315,11 @@ function Diagnostics({ job }: { job: ImportJob }) {
                 'mt-0.5 size-4 shrink-0',
                 diagnostic.severity === 'ERROR' ? 'text-destructive' : 'text-muted-foreground',
               )}
-              aria-label={diagnostic.severity === 'ERROR' ? 'Error' : 'Warning'}
+              aria-label={t(diagnostic.severity === 'ERROR' ? 'import.error' : 'import.warning')}
             />
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="text-sm font-semibold">
-                {diagnosticLabel(diagnostic.code)}: {formatCount(diagnostic.count)}
+                {t('import.diagnostic', { label: diagnosticLabel(diagnostic.code), count: diagnostic.count })}
               </span>
               {diagnostic.detail && (
                 <span className="text-xs text-muted-foreground">{diagnostic.detail}</span>

@@ -1,4 +1,5 @@
 import { Archive, ArchiveRestore } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import type { Workspace } from '@/core/api'
@@ -7,6 +8,7 @@ import { useSetArchived } from '@/hooks/use-workspace-mutations'
 // Archiving is reversible, so it takes one click and no confirmation (§4.1.1); the banner below is its undo
 export function ArchiveButton({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const { t } = useTranslation()
 
   if (workspace.status !== 'ACTIVE') {
     return null
@@ -20,7 +22,7 @@ export function ArchiveButton({ workspace }: { workspace: Workspace }) {
         className="h-11 rounded-[10px] bg-card px-4 font-semibold"
       >
         <Archive aria-hidden />
-        {setArchived.isPending ? 'Archiving…' : 'Archive'}
+        {t(setArchived.isPending ? 'archive.archiving' : 'archive.archive')}
       </Button>
       {setArchived.error && <Problem error={setArchived.error} />}
     </div>
@@ -30,6 +32,7 @@ export function ArchiveButton({ workspace }: { workspace: Workspace }) {
 // Every page of an archived workspace says so: it explains why nothing can be changed, and offers the way back
 export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const { t } = useTranslation()
 
   return (
     <div
@@ -38,8 +41,7 @@ export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
     >
       <Archive className="size-5 shrink-0 text-(--ws)" aria-hidden />
       <p className="min-w-0 flex-1 text-sm">
-        <b className="font-bold">This workspace is archived.</b> It is read-only: everything in it stays,
-        nothing can be added or changed.
+        <Trans i18nKey="archive.banner" components={{ b: <b className="font-bold" /> }} />
       </p>
       <Button
         disabled={setArchived.isPending}
@@ -47,7 +49,7 @@ export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
         className="h-11 rounded-[10px] px-4 font-bold md:h-9"
       >
         <ArchiveRestore aria-hidden />
-        {setArchived.isPending ? 'Unarchiving…' : 'Unarchive'}
+        {t(setArchived.isPending ? 'archive.unarchiving' : 'archive.unarchive')}
       </Button>
       {setArchived.error && (
         <div className="basis-full">

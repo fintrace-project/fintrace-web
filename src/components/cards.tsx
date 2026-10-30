@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { initials } from '@/core/format'
 import { cn } from '@/lib/utils'
 
@@ -27,24 +28,26 @@ export function Pending({ children }: { children: ReactNode }) {
 }
 
 function PendingTile({ label, task }: { label: string; task: string }) {
+  const { t } = useTranslation()
   return (
     <div className="flex flex-col gap-2 rounded-2xl border bg-card p-5">
       <span className="text-[13px] text-muted-foreground">{label}</span>
       <span aria-hidden className="text-[28px] font-extrabold tracking-tight text-muted-foreground/50">
         —
       </span>
-      <span className="text-xs text-muted-foreground">Arrives with {task}</span>
+      <span className="text-xs text-muted-foreground">{t('common.arrivesWith', { task })}</span>
     </div>
   )
 }
 
 // The workspace's headline figures; each waits for the Core task that computes it
 export function TotalsTiles() {
+  const { t } = useTranslation()
   return (
-    <section aria-label="Totals" className="grid gap-4 sm:grid-cols-3">
-      <PendingTile label="Total balance" task="4.13" />
-      <PendingTile label="Income this month" task="4.10" />
-      <PendingTile label="Expenses this month" task="4.10" />
+    <section aria-label={t('totals.label')} className="grid gap-4 sm:grid-cols-3">
+      <PendingTile label={t('totals.balance')} task="4.13" />
+      <PendingTile label={t('totals.income')} task="4.10" />
+      <PendingTile label={t('totals.expenses')} task="4.10" />
     </section>
   )
 }

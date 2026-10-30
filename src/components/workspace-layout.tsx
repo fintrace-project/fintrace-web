@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Outlet, useMatch, useParams } from 'react-router'
 import { ArchivedBanner } from '@/components/archive-controls'
 import { LoadError } from '@/components/load-error'
@@ -9,13 +10,20 @@ import { NotFoundPage } from '@/pages/not-found'
 export function WorkspaceLayout() {
   const { workspaceId } = useParams()
   const workspaces = useWorkspaces()
+  const { t } = useTranslation()
   const importing = useMatch('/w/:workspaceId/import') !== null
 
   if (workspaces.isPending) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>
+    return <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
   }
   if (workspaces.isError) {
-    return <LoadError what="workspaces" error={workspaces.error} onRetry={() => workspaces.refetch()} />
+    return (
+      <LoadError
+        title={t('errors.loadWorkspaces')}
+        error={workspaces.error}
+        onRetry={() => workspaces.refetch()}
+      />
+    )
   }
   const workspace = workspaces.data.find((each) => each.id === workspaceId)
   if (!workspace) {

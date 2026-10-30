@@ -1,4 +1,5 @@
 import { Settings } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 import { UserCard } from '@/components/user-menu'
 import { WorkspaceSwitcher } from '@/components/workspace-switcher'
@@ -11,12 +12,13 @@ const navItem =
 
 // Desktop only: the workspace switcher, the current workspace's sections, its settings and who is signed in at the foot.
 export function AppSidebar({ current, sections }: { current: Workspace | undefined; sections: Section[] }) {
+  const { t } = useTranslation()
   return (
     <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-5 border-r bg-sidebar px-3 py-4 md:flex">
       <WorkspaceSwitcher current={current} />
 
       {sections.length > 0 && (
-        <nav aria-label="Workspace sections" className="flex flex-col gap-0.5">
+        <nav aria-label={t('shell.workspaceSections')} className="flex flex-col gap-0.5">
           {sections.map((section) => (
             <NavLink
               key={section.to}
@@ -36,7 +38,7 @@ export function AppSidebar({ current, sections }: { current: Workspace | undefin
                     aria-hidden
                     className={cn('size-1.5 rounded-full bg-input', isActive && 'bg-(--ws)')}
                   />
-                  {section.label}
+                  {t(`sections.${section.key}`)}
                 </>
               )}
             </NavLink>
@@ -53,7 +55,7 @@ export function AppSidebar({ current, sections }: { current: Workspace | undefin
             }
           >
             <Settings className="size-4" aria-hidden />
-            Workspace settings
+            {t('shell.workspaceSettings')}
           </NavLink>
         )}
         <UserCard />

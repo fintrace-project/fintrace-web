@@ -1,5 +1,6 @@
 import { LogOut, SlidersHorizontal, User, UserCog } from 'lucide-react'
 import { useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ function AccountMenu({
   children: ReactNode
 }) {
   const signOut = useRef<HTMLFormElement>(null)
+  const { t } = useTranslation()
 
   return (
     <>
@@ -64,7 +66,7 @@ function AccountMenu({
           <DropdownMenuItem asChild className="min-h-11 gap-2.5 px-2 md:min-h-9">
             <Link to="/preferences">
               <SlidersHorizontal aria-hidden />
-              Preferences
+              {t('account.preferences')}
             </Link>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -73,7 +75,7 @@ function AccountMenu({
             className="min-h-11 gap-2.5 px-2 md:min-h-9"
           >
             <LogOut aria-hidden />
-            Sign out
+            {t('account.signOut')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -84,6 +86,7 @@ function AccountMenu({
 // Desktop, at the sidebar's foot: who is signed in, and the account menu beside it
 export function UserCard() {
   const user = useCurrentUser().data
+  const { t } = useTranslation()
 
   return (
     <div className="flex items-center gap-3 px-1 py-1.5">
@@ -96,8 +99,8 @@ export function UserCard() {
       </span>
       <AccountMenu user={user} align="end" side="top">
         <DropdownMenuTrigger
-          aria-label="Account settings"
-          title="Account settings"
+          aria-label={t('account.settings')}
+          title={t('account.settings')}
           className="flex size-11 items-center justify-center rounded-[10px] text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=open]:bg-accent data-[state=open]:text-foreground"
         >
           <UserCog className="size-5" aria-hidden />
@@ -110,11 +113,12 @@ export function UserCard() {
 // Phone, in the top bar: the avatar, opening the same account menu
 export function UserMenu() {
   const user = useCurrentUser().data
+  const { t } = useTranslation()
 
   return (
     <AccountMenu user={user} align="end" side="bottom">
       <DropdownMenuTrigger
-        aria-label={user ? `Signed in as ${displayName(user)}` : 'Account'}
+        aria-label={user ? t('account.signedInAs', { name: displayName(user) }) : t('account.account')}
         className="flex size-11 rounded-full outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <UserAvatar user={user} className="size-full text-sm" />

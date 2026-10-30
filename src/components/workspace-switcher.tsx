@@ -1,4 +1,5 @@
 import { Check, ChevronsUpDown, LayoutGrid, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import {
   DropdownMenu,
@@ -17,6 +18,7 @@ import { cn } from '@/lib/utils'
 // Desktop: the current workspace at the top of the sidebar, opening the list of the others.
 export function WorkspaceSwitcher({ current }: { current: Workspace | undefined }) {
   const workspaces = useWorkspaces()
+  const { t } = useTranslation()
 
   return (
     <DropdownMenu>
@@ -29,9 +31,9 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
           </span>
         )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[15px] font-bold">{current?.name ?? 'Workspaces'}</span>
+          <span className="truncate text-[15px] font-bold">{current?.name ?? t('shell.workspaces')}</span>
           <span className="truncate text-xs text-muted-foreground">
-            {current ? workspaceSummary(current) : 'Choose a workspace'}
+            {current ? workspaceSummary(current) : t('shell.chooseWorkspace')}
           </span>
         </span>
         <ChevronsUpDown className="size-4 shrink-0 text-muted-foreground" aria-hidden />
@@ -39,7 +41,7 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
 
       <DropdownMenuContent className="rounded-2xl p-2 shadow-[0_12px_32px_rgba(26,26,26,0.12)] ring-border">
         <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
-          My workspaces
+          {t('shell.myWorkspaces')}
         </DropdownMenuLabel>
         {workspaces.data
           ?.filter((workspace) => workspace.status !== 'ARCHIVED')
@@ -59,7 +61,7 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
                       {workspaceSummary(workspace)}
                     </span>
                   </span>
-                  {active && <Check className="size-4" strokeWidth={2.4} aria-label="Current" />}
+                  {active && <Check className="size-4" strokeWidth={2.4} aria-label={t('common.current')} />}
                 </Link>
               </DropdownMenuItem>
             )
@@ -68,13 +70,13 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
         <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-[10px] px-2 font-semibold">
           <Link to="/workspaces/new">
             <Plus aria-hidden />
-            Create workspace
+            {t('shell.createWorkspace')}
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-[10px] px-2 font-semibold">
           <Link to="/workspaces">
             <LayoutGrid aria-hidden />
-            All workspaces
+            {t('shell.allWorkspaces')}
           </Link>
         </DropdownMenuItem>
       </DropdownMenuContent>

@@ -1,4 +1,5 @@
 import { Check, ChevronDown, LayoutGrid, Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
@@ -12,6 +13,7 @@ import { accentOf } from '@/lib/accent'
 // Phone: the current workspace as a pill at the top, the list in a sheet rising from the bottom.
 export function WorkspaceSheet({ current }: { current: Workspace | undefined }) {
   const workspaces = useWorkspaces()
+  const { t } = useTranslation()
 
   return (
     <Sheet>
@@ -23,7 +25,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
             <LayoutGrid className="size-4 text-muted-foreground" aria-hidden />
           </span>
         )}
-        <span className="truncate text-[15px] font-bold">{current?.name ?? 'Workspaces'}</span>
+        <span className="truncate text-[15px] font-bold">{current?.name ?? t('shell.workspaces')}</span>
         <ChevronDown className="size-3.5 shrink-0" strokeWidth={2.4} aria-hidden />
       </SheetTrigger>
 
@@ -36,13 +38,13 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
       >
         <div aria-hidden className="mb-2.5 h-1.5 w-10 self-center rounded-full bg-input" />
         <SheetHeader className="flex-row items-center justify-between p-0 px-1 pb-2">
-          <SheetTitle className="text-xl font-extrabold">Workspaces</SheetTitle>
+          <SheetTitle className="text-xl font-extrabold">{t('shell.workspaces')}</SheetTitle>
           <SheetClose className="flex min-h-11 items-center text-sm font-semibold text-muted-foreground">
-            Close
+            {t('common.close')}
           </SheetClose>
         </SheetHeader>
 
-        <nav aria-label="Workspaces" className="flex flex-col gap-1.5 overflow-y-auto">
+        <nav aria-label={t('shell.workspaces')} className="flex flex-col gap-1.5 overflow-y-auto">
           {workspaces.data
             ?.filter((workspace) => workspace.status !== 'ARCHIVED')
             .map((workspace) => {
@@ -65,7 +67,11 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
                       </span>
                     </span>
                     {active && (
-                      <Check className="size-5 text-(--ws)" strokeWidth={2.4} aria-label="Current" />
+                      <Check
+                        className="size-5 text-(--ws)"
+                        strokeWidth={2.4}
+                        aria-label={t('common.current')}
+                      />
                     )}
                   </Link>
                 </SheetClose>
@@ -78,13 +84,13 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
           <Button asChild className="h-13 rounded-2xl text-[15px] font-bold">
             <Link to="/workspaces/new">
               <Plus aria-hidden />
-              Create workspace
+              {t('shell.createWorkspace')}
             </Link>
           </Button>
         </SheetClose>
         <SheetClose asChild>
           <Button asChild variant="ghost" className="h-12 font-semibold text-muted-foreground">
-            <Link to="/workspaces">Manage workspaces</Link>
+            <Link to="/workspaces">{t('shell.manageWorkspaces')}</Link>
           </Button>
         </SheetClose>
       </SheetContent>

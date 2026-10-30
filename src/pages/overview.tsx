@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { ArchiveButton } from '@/components/archive-controls'
 import { AccountAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
@@ -11,21 +12,22 @@ export function OverviewPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
   const workspaceId = useParams().workspaceId!
   const workspace = useWorkspace(workspaceId)!
+  const { t } = useTranslation()
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Overview" actions={<ArchiveButton workspace={workspace} />} />
+      <PageHeader title={t('sections.overview')} actions={<ArchiveButton workspace={workspace} />} />
       <TotalsTiles />
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Panel title="Expenses by month">
-          <Pending>The cashflow chart arrives with 4.10.</Pending>
+        <Panel title={t('overview.expensesByMonth')}>
+          <Pending>{t('overview.chartPending')}</Pending>
         </Panel>
         <AccountsPanel workspaceId={workspaceId} />
       </section>
 
-      <Panel title="Recent operations">
-        <Pending>The operations feed arrives with 4.2h and 4.5.</Pending>
+      <Panel title={t('overview.recentOperations')}>
+        <Pending>{t('overview.feedPending')}</Pending>
       </Panel>
     </div>
   )
@@ -33,24 +35,25 @@ export function OverviewPage() {
 
 function AccountsPanel({ workspaceId }: { workspaceId: string }) {
   const { isPending, error, retry, rows } = useAccountRows(workspaceId)
+  const { t } = useTranslation()
 
   const action = (
     <Link
       to={`/w/${workspaceId}/accounts`}
       className="flex min-h-11 items-center px-1 text-[13px] font-semibold text-muted-foreground"
     >
-      All →
+      {t('overview.allAccounts')}
     </Link>
   )
 
   return (
-    <Panel title="Accounts" action={action}>
+    <Panel title={t('sections.accounts')} action={action}>
       {error ? (
-        <LoadError what="accounts" error={error} onRetry={retry} />
+        <LoadError title={t('errors.loadAccounts')} error={error} onRetry={retry} />
       ) : isPending || !rows ? (
-        <Pending>Loading…</Pending>
+        <Pending>{t('common.loading')}</Pending>
       ) : rows.length === 0 ? (
-        <Pending>No accounts yet.</Pending>
+        <Pending>{t('accounts.empty')}</Pending>
       ) : (
         <ul className="flex flex-col">
           {rows.map(({ account, balance }) => (
