@@ -1,4 +1,4 @@
-import { Archive, ArchiveRestore, Trash2 } from 'lucide-react'
+import { Archive, Trash2 } from 'lucide-react'
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
@@ -118,19 +118,9 @@ function StatusPanel({ workspace }: { workspace: Workspace }) {
         </>
       )}
       {workspace.status === 'ARCHIVED' && (
-        <>
-          <Pending>This workspace is archived and read-only. Unarchive it to make changes again.</Pending>
-          <div>
-            <Button
-              disabled={setArchived.isPending}
-              onClick={() => setArchived.mutate(false)}
-              className="h-11 rounded-[10px] px-4 font-bold"
-            >
-              <ArchiveRestore aria-hidden />
-              Unarchive workspace
-            </Button>
-          </div>
-        </>
+        <Pending>
+          This workspace is archived and read-only. Unarchive it from the notice at the top of the page.
+        </Pending>
       )}
       {workspace.status === 'NEW' && (
         <Pending>

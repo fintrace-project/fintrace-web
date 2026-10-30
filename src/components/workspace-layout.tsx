@@ -1,4 +1,5 @@
 import { Outlet, useParams } from 'react-router'
+import { ArchivedBanner } from '@/components/archive-controls'
 import { LoadError } from '@/components/load-error'
 import { useWorkspaces } from '@/hooks/use-workspaces'
 import { NotFoundPage } from '@/pages/not-found'
@@ -14,8 +15,14 @@ export function WorkspaceLayout() {
   if (workspaces.isError) {
     return <LoadError what="workspaces" error={workspaces.error} onRetry={() => workspaces.refetch()} />
   }
-  if (!workspaces.data.some((workspace) => workspace.id === workspaceId)) {
+  const workspace = workspaces.data.find((each) => each.id === workspaceId)
+  if (!workspace) {
     return <NotFoundPage />
   }
-  return <Outlet />
+  return (
+    <div className="flex flex-col gap-5">
+      {workspace.status === 'ARCHIVED' && <ArchivedBanner workspace={workspace} />}
+      <Outlet />
+    </div>
+  )
 }

@@ -43,31 +43,34 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
         </SheetHeader>
 
         <nav aria-label="Workspaces" className="flex flex-col gap-1.5 overflow-y-auto">
-          {workspaces.data?.map((workspace) => {
-            const active = workspace.id === current?.id
-            return (
-              <SheetClose key={workspace.id} asChild>
-                <Link
-                  to={`/w/${workspace.id}`}
-                  aria-current={active ? 'page' : undefined}
-                  className={cn(
-                    'flex min-h-16 items-center gap-3 rounded-2xl px-2.5 py-2',
-                    active && 'bg-(--ws-soft)',
-                    workspace.status === 'ARCHIVED' && 'opacity-60',
-                  )}
-                >
-                  <WorkspaceAvatar workspace={workspace} />
-                  <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-[15px] font-bold">{workspace.name}</span>
-                    <span className="truncate text-xs text-muted-foreground">
-                      {workspaceSummary(workspace)}
+          {workspaces.data
+            ?.filter((workspace) => workspace.status !== 'ARCHIVED')
+            .map((workspace) => {
+              const active = workspace.id === current?.id
+              return (
+                <SheetClose key={workspace.id} asChild>
+                  <Link
+                    to={`/w/${workspace.id}`}
+                    aria-current={active ? 'page' : undefined}
+                    className={cn(
+                      'flex min-h-16 items-center gap-3 rounded-2xl px-2.5 py-2',
+                      active && 'bg-(--ws-soft)',
+                    )}
+                  >
+                    <WorkspaceAvatar workspace={workspace} />
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span className="truncate text-[15px] font-bold">{workspace.name}</span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {workspaceSummary(workspace)}
+                      </span>
                     </span>
-                  </span>
-                  {active && <Check className="size-5 text-(--ws)" strokeWidth={2.4} aria-label="Current" />}
-                </Link>
-              </SheetClose>
-            )
-          })}
+                    {active && (
+                      <Check className="size-5 text-(--ws)" strokeWidth={2.4} aria-label="Current" />
+                    )}
+                  </Link>
+                </SheetClose>
+              )
+            })}
         </nav>
 
         <div className="my-2 h-px bg-border" />

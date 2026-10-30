@@ -1,17 +1,20 @@
 import { Link, useParams } from 'react-router'
+import { ArchiveButton } from '@/components/archive-controls'
 import { AccountAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
 import { formatBalance } from '@/core/format'
 import { useAccountRows } from '@/hooks/use-accounts'
+import { useWorkspace } from '@/hooks/use-workspaces'
 
 export function OverviewPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
   const workspaceId = useParams().workspaceId!
+  const workspace = useWorkspace(workspaceId)!
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title="Overview" />
+      <PageHeader title="Overview" actions={<ArchiveButton workspace={workspace} />} />
       <TotalsTiles />
 
       <section className="grid gap-4 lg:grid-cols-2">

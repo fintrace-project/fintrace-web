@@ -41,31 +41,29 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
         <DropdownMenuLabel className="px-2 py-1.5 text-[11px] font-bold tracking-wider text-muted-foreground uppercase">
           My workspaces
         </DropdownMenuLabel>
-        {workspaces.data?.map((workspace) => {
-          const active = workspace.id === current?.id
-          return (
-            <DropdownMenuItem
-              key={workspace.id}
-              asChild
-              className={cn(
-                'min-h-12 gap-2.5 rounded-[10px] px-2',
-                active && 'bg-accent',
-                workspace.status === 'ARCHIVED' && 'opacity-60',
-              )}
-            >
-              <Link to={`/w/${workspace.id}`}>
-                <WorkspaceAvatar workspace={workspace} className="size-7 rounded-lg text-xs" />
-                <span className="flex min-w-0 flex-1 flex-col">
-                  <span className="truncate font-semibold">{workspace.name}</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    {workspaceSummary(workspace)}
+        {workspaces.data
+          ?.filter((workspace) => workspace.status !== 'ARCHIVED')
+          .map((workspace) => {
+            const active = workspace.id === current?.id
+            return (
+              <DropdownMenuItem
+                key={workspace.id}
+                asChild
+                className={cn('min-h-12 gap-2.5 rounded-[10px] px-2', active && 'bg-accent')}
+              >
+                <Link to={`/w/${workspace.id}`}>
+                  <WorkspaceAvatar workspace={workspace} className="size-7 rounded-lg text-xs" />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="truncate font-semibold">{workspace.name}</span>
+                    <span className="truncate text-xs text-muted-foreground">
+                      {workspaceSummary(workspace)}
+                    </span>
                   </span>
-                </span>
-                {active && <Check className="size-4" strokeWidth={2.4} aria-label="Current" />}
-              </Link>
-            </DropdownMenuItem>
-          )
-        })}
+                  {active && <Check className="size-4" strokeWidth={2.4} aria-label="Current" />}
+                </Link>
+              </DropdownMenuItem>
+            )
+          })}
         <DropdownMenuSeparator className="mx-0" />
         <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-[10px] px-2 font-semibold">
           <Link to="/workspaces/new">

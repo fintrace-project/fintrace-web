@@ -59,30 +59,54 @@ export function WorkspacesPage() {
       ) : workspaces.isError ? (
         <LoadError what="workspaces" error={workspaces.error} onRetry={() => workspaces.refetch()} />
       ) : (
-        <>
-          {workspaces.data.length === 0 && (
-            <p className="max-w-xl text-sm text-muted-foreground">
-              A workspace holds one set of accounts, categories and operations. Create one to start.
-            </p>
-          )}
-          <section aria-label="Workspaces" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
-            {workspaces.data
-              .filter((workspace) => workspace.name.toLowerCase().includes(query.trim().toLowerCase()))
-              .map((workspace) => (
-                <WorkspaceCard key={workspace.id} workspace={workspace} />
-              ))}
-            <Link
-              to="/workspaces/new"
-              className="flex min-h-44 flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed border-input text-muted-foreground hover:bg-card"
-            >
-              <Plus className="size-7" aria-hidden />
-              <span className="text-[15px] font-bold text-foreground">Create workspace</span>
-              <span className="text-[13px]">Start empty, or import your history</span>
-            </Link>
-          </section>
-        </>
+        <WorkspaceGroups workspaces={workspaces.data} query={query} />
       )}
     </div>
+  )
+}
+
+// Archived workspaces are kept for reference, so they sit apart, under the ones in use
+function WorkspaceGroups({ workspaces, query }: { workspaces: Workspace[]; query: string }) {
+  const found = workspaces.filter((workspace) =>
+    workspace.name.toLowerCase().includes(query.trim().toLowerCase()),
+  )
+  const inUse = found.filter((workspace) => workspace.status !== 'ARCHIVED')
+  const archived = found.filter((workspace) => workspace.status === 'ARCHIVED')
+
+  return (
+    <>
+      {workspaces.length === 0 && (
+        <p className="max-w-xl text-sm text-muted-foreground">
+          A workspace holds one set of accounts, categories and operations. Create one to start.
+        </p>
+      )}
+      <section aria-label="Workspaces" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+        {inUse.map((workspace) => (
+          <WorkspaceCard key={workspace.id} workspace={workspace} />
+        ))}
+        <Link
+          to="/workspaces/new"
+          className="flex min-h-44 flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed border-input text-muted-foreground hover:bg-card"
+        >
+          <Plus className="size-7" aria-hidden />
+          <span className="text-[15px] font-bold text-foreground">Create workspace</span>
+          <span className="text-[13px]">Start empty, or import your history</span>
+        </Link>
+      </section>
+
+      {archived.length > 0 && (
+        <section aria-labelledby="archived-heading" className="flex flex-col gap-4 border-t pt-6">
+          <h2 id="archived-heading" className="text-base font-bold">
+            Archived
+          </h2>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-5">
+            {archived.map((workspace) => (
+              <WorkspaceCard key={workspace.id} workspace={workspace} />
+            ))}
+          </div>
+        </section>
+      )}
+    </>
   )
 }
 
