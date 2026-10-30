@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router'
+import { createBrowserRouter, redirect } from 'react-router'
 import { AppShell } from '@/components/app-shell'
 import { WorkspaceLayout } from '@/components/workspace-layout'
 import { ChartsPage } from '@/pages/charts'
@@ -6,9 +6,9 @@ import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
 import { OperationsPage } from '@/pages/operations'
 import { OverviewPage } from '@/pages/overview'
-import { StartPage } from '@/pages/start'
 import { StatisticsPage } from '@/pages/statistics'
 import { WorkspaceNewPage } from '@/pages/workspace-new'
+import { WorkspacesPage } from '@/pages/workspaces'
 
 export const router = createBrowserRouter([
   { path: '/welcome', Component: HomePage },
@@ -16,7 +16,9 @@ export const router = createBrowserRouter([
     path: '/',
     Component: AppShell,
     children: [
-      { index: true, Component: StartPage },
+      // Sign-in returns to `/` (the BFF's callback), so this is where every session starts
+      { index: true, loader: () => redirect('/workspaces') },
+      { path: 'workspaces', Component: WorkspacesPage },
       { path: 'workspaces/new', Component: WorkspaceNewPage },
       {
         path: 'w/:workspaceId',
