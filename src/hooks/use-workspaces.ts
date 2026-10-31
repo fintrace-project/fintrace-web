@@ -9,6 +9,8 @@ export function useWorkspaces() {
     queryKey: ['workspaces'],
     queryFn: ({ signal }) => listWorkspaces(signal),
     select: visible,
+    // The shell mounts this on every page, so its 401 on a return to the tab is the session check (§7.4)
+    refetchOnWindowFocus: 'always',
   })
 }
 

@@ -10,6 +10,9 @@ export type CoreProblem = components['schemas']['CoreProblem']
 export type UserProfile = components['schemas']['UserProfileResponse']
 export type ImportJob = components['schemas']['ImportJobResponse']
 
+// The BFF's own answer, outside Core's spec (§7.4)
+export type Session = { userId: string; expiresAt: string }
+
 export class UnauthorizedError extends Error {
   constructor() {
     super('Not signed in')
@@ -90,6 +93,14 @@ export async function listWorkspaces(signal?: AbortSignal): Promise<Workspace[]>
   const response = await fetch('/api/v1/workspaces', { headers: { Accept: 'application/json' }, signal })
   await refuseFailures('/api/v1/workspaces', response)
   return (await response.json()) as Workspace[]
+}
+
+// The BFF answers from its session store without calling Core, never extending the session; no session
+// is a 401, so a caller that only asks must catch the UnauthorizedError.
+export async function getSession(signal?: AbortSignal): Promise<Session> {
+  const response = await fetch('/auth/session', { headers: { Accept: 'application/json' }, signal })
+  await refuseFailures('/auth/session', response)
+  return (await response.json()) as Session
 }
 
 // Uploads go to an importer, not Core, and the generated paths leave `/import` out, so this call is

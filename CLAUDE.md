@@ -50,9 +50,10 @@ Adding a library outside this list needs the owner's agreement first.
   wire — show the sign from the kind, never compute it into a figure.
 - **The API client is generated from Core's `openapi.json`, never hand-written.** Call Core through
   `api` from `@/core/api`; the types come from the Core release pinned as `coreApiVersion` in
-  `package.json`. Two calls are written by hand, on the generated types: `listWorkspaces`, until a
-  Core release documents paging as `page`, `size` and `sort`; and `importDump`, the upload to an
-  importer — outside Core's spec — whose 422 carries the failed job as the result to show. A new
+  `package.json`. Three calls are written by hand: `listWorkspaces`, until a Core release documents
+  paging as `page`, `size` and `sort`; `importDump`, the upload to an importer — outside Core's
+  spec — whose 422 carries the failed job as the result to show; and `getSession`, the BFF's own
+  `/auth/session`, asked once on entry to send a visitor with no session to `/welcome`. A new
   import source is an entry in `src/core/import-sources.ts` and a route in the BFF.
 - **Timestamps are floating local wall-clock values** (`YYYY-MM-DDTHH:mm`): never convert to UTC.
 - **No token in JavaScript.** The BFF holds the session; the browser has only a cookie.
