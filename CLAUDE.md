@@ -112,4 +112,4 @@ UI alone, with no session and no API.
 
 `listWorkspaces` on the generated client (4.2's last item, waiting for a Core release); whether a
 session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the last of
-4.2e); the sign-in flow through the BFF (4.2f's last item, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.
+4.2e); browser flows through the running stack, signing in first (4.6, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.
