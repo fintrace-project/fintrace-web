@@ -84,6 +84,11 @@ declare const messages: {
     readonly text: "<b>This workspace is new and empty.</b> You can import your history from another app now. Anything you add yourself closes import for good."
     readonly action: "Import history"
   }
+  readonly cookieNotice: {
+    readonly label: "Cookies"
+    readonly text: "This website uses only strictly necessary cookies, such as those that keep you signed in. They hold no personal details, are not shared with third parties and are not used for analytics, advertising or tracking."
+    readonly dismiss: "Accept"
+  }
   readonly home: {
     readonly signIn: "Sign in"
     readonly headline: "Know where your money went, and where it is."

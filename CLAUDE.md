@@ -25,6 +25,7 @@ comments. One task at a time; no running ahead.
 - **ECharts** for charts (from 4.9), loaded only on the screens that show them.
 - **lucide-react** for icons.
 - **i18next** for messages, read through **react-i18next** in the UI (agreed 2026-10-30).
+- **react-cookie-consent** for the cookie notice, its own styles off (agreed 2026-10-31).
 
 Adding a library outside this list needs the owner's agreement first.
 
