@@ -22,6 +22,23 @@ const refused = (error: Error) =>
   error instanceof ForbiddenError ||
   (error instanceof ApiError && error.status < 500)
 
+// A tab open across a release asks for chunks the new build no longer has: reload onto the new
+// index.html, but not again within a minute, so a broken release shows the route's error page
+// instead of looping
+window.addEventListener('vite:preloadError', (event) => {
+  const key = 'fintrace:chunk-reload-at'
+  try {
+    if (Date.now() - Number(sessionStorage.getItem(key)) < 60_000) {
+      return
+    }
+    sessionStorage.setItem(key, String(Date.now()))
+  } catch {
+    return
+  }
+  event.preventDefault()
+  window.location.reload()
+})
+
 const queryClient = new QueryClient({
   queryCache: new QueryCache({ onError: toSignIn }),
   mutationCache: new MutationCache({ onError: toSignIn }),

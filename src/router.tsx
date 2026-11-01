@@ -2,19 +2,8 @@ import { createBrowserRouter, Navigate, redirect, type LoaderFunctionArgs } from
 import { AppShell } from '@/components/app-shell'
 import { WorkspaceLayout } from '@/components/workspace-layout'
 import { getSession, UnauthorizedError } from '@/core/api'
-import { AccountsPage } from '@/pages/accounts'
-import { ChartsPage } from '@/pages/charts'
-import { HomePage } from '@/pages/home'
 import { NotFoundPage } from '@/pages/not-found'
-import { OperationsPage } from '@/pages/operations'
-import { OverviewPage } from '@/pages/overview'
-import { PreferencesPage } from '@/pages/preferences'
 import { RouteErrorPage } from '@/pages/route-error'
-import { StatisticsPage } from '@/pages/statistics'
-import { WorkspaceImportPage } from '@/pages/workspace-import'
-import { WorkspaceNewPage } from '@/pages/workspace-new'
-import { WorkspaceSettingsPage } from '@/pages/workspace-settings'
-import { WorkspacesPage } from '@/pages/workspaces'
 
 // Asked once on entry, outside TanStack Query, so a 401 here routes to the welcome page rather than
 // through the QueryCache's redirect to sign-in
@@ -34,10 +23,12 @@ async function signedIn({ request }: LoaderFunctionArgs) {
 // router reads as no fallback and warns about
 const blank = <></>
 
+// Each page is its own chunk, fetched on first visit alongside the route's loader. The shell, the
+// workspace layout and the error pages stay in the first load: an error page must not need a chunk.
 export const router = createBrowserRouter([
   {
     path: '/welcome',
-    Component: HomePage,
+    lazy: { Component: () => import('@/pages/home').then((m) => m.HomePage) },
     ErrorBoundary: RouteErrorPage,
     hydrateFallbackElement: blank,
     loader: async (args) => ((await signedIn(args)) ? redirect('/workspaces') : null),
@@ -54,20 +45,54 @@ export const router = createBrowserRouter([
       // Sign-in returns to `/` (the BFF's callback), so this is where every session starts. Rendered
       // rather than a loader: the deepest loader's redirect wins, and it would overtake the shell's.
       { index: true, element: <Navigate to="/workspaces" replace /> },
-      { path: 'workspaces', Component: WorkspacesPage },
-      { path: 'workspaces/new', Component: WorkspaceNewPage },
-      { path: 'preferences', Component: PreferencesPage },
+      {
+        path: 'workspaces',
+        lazy: { Component: () => import('@/pages/workspaces').then((m) => m.WorkspacesPage) },
+      },
+      {
+        path: 'workspaces/new',
+        lazy: { Component: () => import('@/pages/workspace-new').then((m) => m.WorkspaceNewPage) },
+      },
+      {
+        path: 'preferences',
+        lazy: { Component: () => import('@/pages/preferences').then((m) => m.PreferencesPage) },
+      },
       {
         path: 'w/:workspaceId',
         Component: WorkspaceLayout,
         children: [
-          { index: true, Component: OverviewPage },
-          { path: 'accounts', Component: AccountsPage },
-          { path: 'operations', Component: OperationsPage },
-          { path: 'statistics', Component: StatisticsPage },
-          { path: 'charts', Component: ChartsPage },
-          { path: 'settings', Component: WorkspaceSettingsPage },
-          { path: 'import', Component: WorkspaceImportPage },
+          {
+            index: true,
+            lazy: { Component: () => import('@/pages/overview').then((m) => m.OverviewPage) },
+          },
+          {
+            path: 'accounts',
+            lazy: { Component: () => import('@/pages/accounts').then((m) => m.AccountsPage) },
+          },
+          {
+            path: 'operations',
+            lazy: { Component: () => import('@/pages/operations').then((m) => m.OperationsPage) },
+          },
+          {
+            path: 'statistics',
+            lazy: { Component: () => import('@/pages/statistics').then((m) => m.StatisticsPage) },
+          },
+          {
+            path: 'charts',
+            lazy: { Component: () => import('@/pages/charts').then((m) => m.ChartsPage) },
+          },
+          {
+            path: 'settings',
+            lazy: {
+              Component: () => import('@/pages/workspace-settings').then((m) => m.WorkspaceSettingsPage),
+            },
+          },
+          {
+            path: 'import',
+            lazy: {
+              Component: () => import('@/pages/workspace-import').then((m) => m.WorkspaceImportPage),
+            },
+          },
         ],
       },
       { path: '*', Component: NotFoundPage },
