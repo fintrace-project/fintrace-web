@@ -9,7 +9,7 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
-# Format, lint, type-check, build, the bundle's sizes and the image. No first-paint check yet (4.2f).
+# Format, lint, type-check, build, the bundle limits — sizes, and first paint on the image as released.
 jobs:
   build:
     name: fintrace-web
@@ -54,5 +54,14 @@ jobs:
         with:
           context: .
           push: false
+          load: true
+          tags: fintrace-web:ci
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: First paint
+        run: |
+          docker run -d --rm -p 8080:8080 fintrace-web:ci
+          npx playwright install --with-deps chromium
+          curl -sf --retry 10 --retry-connrefused http://localhost:8080/ > /dev/null
+          npm run check:first-paint

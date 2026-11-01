@@ -26,6 +26,7 @@ comments. One task at a time; no running ahead.
 - **lucide-react** for icons.
 - **i18next** for messages, read through **react-i18next** in the UI (agreed 2026-10-30).
 - **react-cookie-consent** for the cookie notice, its own styles off (agreed 2026-10-31).
+- **Playwright** (`@playwright/test`, a dev dependency) for the checks with no backend (agreed 2026-11-01).
 
 Adding a library outside this list needs the owner's agreement first.
 
@@ -81,8 +82,25 @@ For an unreleased spec, copy it inside this repository first — `./run.sh` moun
 directory — and name it: `cp ../fintrace-core/openapi.json core-openapi.json && ./run.sh npm run
 generate:api -- core-openapi.json`. `core-openapi.json` is git-ignored; CI regenerates from the pin.
 
-**Verify with `./run.sh npm run format:check && ./run.sh npm run lint && ./run.sh npm run build`** —
-CI runs the same three.
+**Verify with `./run.sh npm run format:check && ./run.sh npm run lint && ./run.sh npm run build &&
+./run.sh npm run check:bundle-limits`** — CI runs the same four.
+
+**The bundle limits** (§3.6): about 200 kB of gzipped JavaScript in the first load, about 50 kB for
+what each lazy chunk adds, and a first paint within 2.5 s on the phone profile. **Every page, the
+shell and the workspace layout are lazy routes in `router.tsx`**, so the welcome page never loads the
+shell; a new page is added the same way, and named in `scripts/check-bundle-limits.ts`'s `INSIDE`
+with the layouts it renders in. First paint is measured on the production image, by Playwright in its
+own image — CI does the same:
+
+```bash
+docker build -t fintrace-web:prod . && docker run -d --rm --name fw-prod -p 8180:8080 fintrace-web:prod
+docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -e WEB_URL=http://localhost:8180 \
+  -v "$PWD":/w -w /w mcr.microsoft.com/playwright:v1.64.1-noble npm run check:first-paint
+docker stop fw-prod
+```
+
+The Playwright image's version follows `@playwright/test` in `package.json`. Only checks with no
+backend live here (`perf/`); flows through the running stack live in `fintrace-tests` (§3.6).
 
 **The dev loop is the BFF's origin**: from the workspace root, `./run-local.sh core bff web -d`
 builds the `Dockerfile`'s `dev` stage — Vite over this working tree — and serves the app at
@@ -94,7 +112,4 @@ UI alone, with no session and no API.
 
 `listWorkspaces` on the generated client (4.2's last item, waiting for a Core release); whether a
 session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the last of
-4.2e); Playwright flows and
-the bundle limits (4.2f: first paint within 2.5 s failing the build, about 200 kB of gzipped
-initial JavaScript, about 50 kB per lazy route, §3.6). Every page is already
-a lazy route in `router.tsx`; a new page is added the same way. A second language is post-MVP: a second YAML file beside `en.yml`.
+4.2e); the sign-in flow through the BFF (4.2f's last item, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.node.json",
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.perf.tsbuildinfo",
+    // Playwright runs in Node, but what page.evaluate is handed runs in the browser
+    "lib": ["ES2023", "DOM"]
+  },
+  "include": ["playwright.config.ts", "perf"]
+}
