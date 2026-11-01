@@ -1,6 +1,4 @@
 import { createBrowserRouter, Navigate, redirect, type LoaderFunctionArgs } from 'react-router'
-import { AppShell } from '@/components/app-shell'
-import { WorkspaceLayout } from '@/components/workspace-layout'
 import { getSession, UnauthorizedError } from '@/core/api'
 import { NotFoundPage } from '@/pages/not-found'
 import { RouteErrorPage } from '@/pages/route-error'
@@ -23,8 +21,9 @@ async function signedIn({ request }: LoaderFunctionArgs) {
 // router reads as no fallback and warns about
 const blank = <></>
 
-// Each page is its own chunk, fetched on first visit alongside the route's loader. The shell, the
-// workspace layout and the error pages stay in the first load: an error page must not need a chunk.
+// Each page, the shell and the workspace layout are chunks of their own, fetched on first visit
+// alongside the route's loader, so the welcome page never loads the shell. Only the error pages stay
+// in the first load: an error page must not need a chunk.
 export const router = createBrowserRouter([
   {
     path: '/welcome',
@@ -35,7 +34,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/',
-    Component: AppShell,
+    lazy: { Component: () => import('@/components/app-shell').then((m) => m.AppShell) },
     ErrorBoundary: RouteErrorPage,
     hydrateFallbackElement: blank,
     loader: async (args) => ((await signedIn(args)) ? null : redirect('/welcome')),
@@ -59,7 +58,9 @@ export const router = createBrowserRouter([
       },
       {
         path: 'w/:workspaceId',
-        Component: WorkspaceLayout,
+        lazy: {
+          Component: () => import('@/components/workspace-layout').then((m) => m.WorkspaceLayout),
+        },
         children: [
           {
             index: true,

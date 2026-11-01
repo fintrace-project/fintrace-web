@@ -8,6 +8,28 @@ const DIST = 'dist'
 const INITIAL_LIMIT = 200_000
 const LAZY_LIMIT = 50_000
 
+// The layouts router.tsx renders a lazy chunk inside, already loaded when it is reached. A chunk left
+// out is measured on the first load alone, which is stricter, so a forgotten one fails rather than passes.
+const SHELL = 'src/components/app-shell.tsx'
+const WORKSPACE = 'src/components/workspace-layout.tsx'
+const INSIDE: Record<string, string[]> = {
+  [WORKSPACE]: [SHELL],
+  ...Object.fromEntries(
+    ['workspaces', 'workspace-new', 'preferences'].map((page) => [`src/pages/${page}.tsx`, [SHELL]]),
+  ),
+  ...Object.fromEntries(
+    [
+      'overview',
+      'accounts',
+      'operations',
+      'statistics',
+      'charts',
+      'workspace-settings',
+      'workspace-import',
+    ].map((page) => [`src/pages/${page}.tsx`, [SHELL, WORKSPACE]]),
+  ),
+}
+
 type Chunk = { file: string; isEntry?: boolean; isDynamicEntry?: boolean; imports?: string[] }
 const manifest = JSON.parse(readFileSync(`${DIST}/.vite/manifest.json`, 'utf8')) as Record<string, Chunk>
 
@@ -39,7 +61,9 @@ if (initialSize > INITIAL_LIMIT) {
 }
 
 for (const key of Object.keys(manifest).filter((key) => manifest[key].isDynamicEntry)) {
-  const added = [...closure(key)].filter((chunk) => !initial.has(chunk))
+  const loaded = new Set(initial)
+  INSIDE[key]?.forEach((layout) => closure(layout, loaded))
+  const added = [...closure(key)].filter((chunk) => !loaded.has(chunk))
   const size = sizeOf(added)
   console.log(`${key.padEnd(40)} ${kB(size).padStart(10)}  of ${kB(LAZY_LIMIT)}`)
   if (size > LAZY_LIMIT) {
