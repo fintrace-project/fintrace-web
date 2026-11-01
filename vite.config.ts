@@ -23,6 +23,10 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  // Read by scripts/check-bundle-limits.ts; the image leaves it out
+  build: {
+    manifest: true,
+  },
   // In the local stack the BFF proxies here with the upstream's own Host, which Vite refuses unless listed.
   server: {
     allowedHosts: ['fintrace-web'],

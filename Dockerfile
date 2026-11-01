@@ -10,6 +10,7 @@ CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "8080", "--strict
 
 FROM dev AS build
 RUN npm run build \
+ && rm -r dist/.vite \
  && find dist -type f \( -name '*.js' -o -name '*.css' -o -name '*.html' -o -name '*.svg' \) -exec gzip -9 -k {} +
 
 # Unprivileged: runs as a non-root user and listens on 8080, the port BFF_WEB_URL names

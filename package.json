@@ -12,6 +12,7 @@
     "generate:messages": "node scripts/generate-messages.ts",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "check:bundle-limits": "node scripts/check-bundle-limits.ts",
     "typecheck": "tsc -b",
     "lint": "oxlint --deny-warnings",
     "format": "prettier --write .",
