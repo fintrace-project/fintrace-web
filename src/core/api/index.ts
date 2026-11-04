@@ -87,12 +87,14 @@ export function dataOf<T>(result: { data?: T }): T {
   return result.data
 }
 
-// Core v0.0.5 documents its paging as a required `page` object; until a release lists page, size and
-// sort as query parameters, this call stays outside the typed client.
+// Archived ones too: every workspace is found in this list, so a hidden one could not be opened or
+// unarchived. The selector filters them out itself.
 export async function listWorkspaces(signal?: AbortSignal): Promise<Workspace[]> {
-  const response = await fetch('/api/v1/workspaces', { headers: { Accept: 'application/json' }, signal })
-  await refuseFailures('/api/v1/workspaces', response)
-  return (await response.json()) as Workspace[]
+  const result = await api.GET('/api/v1/workspaces', {
+    params: { query: { includeArchived: true } },
+    signal,
+  })
+  return dataOf(result).items
 }
 
 // The BFF answers from its session store without calling Core, never extending the session; no session

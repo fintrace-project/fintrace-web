@@ -274,6 +274,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Feed of workspace's operations, across all accounts */
+        get: operations["getWorkspaceFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/accounts/{accountId}/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Feed of an account's operations, transfers and balance anchors */
+        get: operations["getAccountFeed"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/accounts/{accountId}/balance-anchors/{anchorId}": {
         parameters: {
             query?: never;
@@ -643,24 +677,135 @@ export interface components {
             /** Format: uuid */
             accountId: string;
             value: number;
-            difference: number;
+            difference?: number | null;
             /** Format: date-time */
             occurredAt: string;
             /** Format: date-time */
             recordedAt: string;
         };
-        Pageable: {
-            /** Format: int32 */
-            page?: number;
-            /** Format: int32 */
-            size?: number;
-            sort?: string[];
+        ListResponseWorkspaceResponse: {
+            items: components["schemas"]["WorkspaceResponse"][];
         };
         AccountBalanceResponse: {
             /** Format: uuid */
             accountId: string;
             currency: string;
             balance: number;
+        };
+        /** @enum {string} */
+        FeedItemType: "OPERATION" | "TRANSFER" | "BALANCE_ANCHOR" | "DIFFERENCE";
+        OperationFeedItemDTO: {
+            cursor: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            accountId: string;
+            currency: string;
+            /** Format: uuid */
+            categoryId: string;
+            kind: components["schemas"]["OperationKind"];
+            amount: number;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: date-time */
+            recordedAt: string;
+            comment?: string | null;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "OPERATION";
+        };
+        PageCursors: {
+            older?: string | null;
+            newer?: string | null;
+        };
+        PagedListResponseWorkspaceFeedItemDTO: {
+            items: components["schemas"]["WorkspaceFeedItemDTO"][];
+            page: components["schemas"]["PageCursors"];
+        };
+        WorkspaceFeedItemDTO: {
+            type?: components["schemas"]["FeedItemType"];
+            cursor?: string;
+        } & (components["schemas"]["OperationFeedItemDTO"] | components["schemas"]["WorkspaceTransferFeedItemDTO"]);
+        WorkspaceTransferFeedItemDTO: {
+            cursor: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: date-time */
+            recordedAt: string;
+            comment?: string | null;
+            source: components["schemas"]["TransferLegResponse"];
+            target: components["schemas"]["TransferLegResponse"];
+            rate: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "TRANSFER";
+        };
+        AccountFeedItemDTO: {
+            type?: components["schemas"]["FeedItemType"];
+            cursor?: string;
+        } & (components["schemas"]["OperationFeedItemDTO"] | components["schemas"]["AccountTransferFeedItemDTO"] | components["schemas"]["BalanceAnchorFeedItemDTO"] | components["schemas"]["DifferenceFeedItemDTO"]);
+        AccountTransferFeedItemDTO: {
+            cursor: string;
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: date-time */
+            recordedAt: string;
+            comment?: string | null;
+            source: components["schemas"]["TransferLegResponse"];
+            target: components["schemas"]["TransferLegResponse"];
+            rate: number;
+            side: components["schemas"]["TransferSide"];
+            amount: number;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "TRANSFER";
+        };
+        BalanceAnchorFeedItemDTO: {
+            cursor: string;
+            /** Format: uuid */
+            id: string;
+            value: number;
+            /** Format: date-time */
+            occurredAt: string;
+            /** Format: date-time */
+            recordedAt: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "BALANCE_ANCHOR";
+        };
+        DifferenceFeedItemDTO: {
+            cursor: string;
+            /** Format: uuid */
+            anchorId: string;
+            amount: number;
+            /** Format: date-time */
+            occurredAt: string;
+            /**
+             * @description discriminator enum property added by openapi-typescript
+             * @enum {string}
+             */
+            type: "DIFFERENCE";
+        };
+        PagedListResponseAccountFeedItemDTO: {
+            items: components["schemas"]["AccountFeedItemDTO"][];
+            page: components["schemas"]["PageCursors"];
+        };
+        /** @enum {string} */
+        TransferSide: "SOURCE" | "TARGET";
+        ListResponseBalanceAnchorResponse: {
+            items: components["schemas"]["BalanceAnchorResponse"][];
         };
         UserProfileResponse: {
             /** Format: uuid */
@@ -1517,8 +1662,8 @@ export interface operations {
     };
     getWorkspaces: {
         parameters: {
-            query: {
-                page: components["schemas"]["Pageable"];
+            query?: {
+                includeArchived?: boolean;
             };
             header?: never;
             path?: never;
@@ -1532,7 +1677,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["WorkspaceResponse"][];
+                    "*/*": components["schemas"]["ListResponseWorkspaceResponse"];
                 };
             };
             /** @description Sort requested on an unsupported field */
@@ -2160,7 +2305,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["BalanceAnchorResponse"][];
+                    "*/*": components["schemas"]["ListResponseBalanceAnchorResponse"];
                 };
             };
             /** @description Not authenticated */
@@ -2303,6 +2448,138 @@ export interface operations {
                 content?: never;
             };
             /** @description No such workspace for this caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getWorkspaceFeed: {
+        parameters: {
+            query?: {
+                size?: number;
+                /** @description Page after this cursor; at most one of `older`, `newer`, `at` */
+                older?: string;
+                /** @description Page before this cursor; at most one of `older`, `newer`, `at` */
+                newer?: string;
+                /** @description Page opening at this cursor; at most one of `older`, `newer`, `at` */
+                at?: string;
+                from?: string;
+                to?: string;
+                /** @description `OPERATION` and `TRANSFER` only */
+                kinds?: components["schemas"]["FeedItemType"][];
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagedListResponseWorkspaceFeedItemDTO"];
+                };
+            };
+            /** @description Malformed cursor, more than one cursor, `size` out of range, `from` not before `to`, or a kind this feed never has */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getAccountFeed: {
+        parameters: {
+            query?: {
+                size?: number;
+                /** @description Page after this cursor; at most one of `older`, `newer`, `at` */
+                older?: string;
+                /** @description Page before this cursor; at most one of `older`, `newer`, `at` */
+                newer?: string;
+                /** @description Page opening at this cursor; at most one of `older`, `newer`, `at` */
+                at?: string;
+                from?: string;
+                to?: string;
+                kinds?: components["schemas"]["FeedItemType"][];
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+                accountId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagedListResponseAccountFeedItemDTO"];
+                };
+            };
+            /** @description Malformed cursor, more than one cursor, `size` out of range, or `from` not before `to` */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such account in this workspace */
             404: {
                 headers: {
                     [name: string]: unknown;

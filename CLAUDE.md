@@ -52,8 +52,7 @@ Adding a library outside this list needs the owner's agreement first.
   wire — show the sign from the kind, never compute it into a figure.
 - **The API client is generated from Core's `openapi.json`, never hand-written.** Call Core through
   `api` from `@/core/api`; the types come from the Core release pinned as `coreApiVersion` in
-  `package.json`. Three calls are written by hand: `listWorkspaces`, until a Core release documents
-  paging as `page`, `size` and `sort`; `importDump`, the upload to an importer — outside Core's
+  `package.json`. Two calls are written by hand: `importDump`, the upload to an importer — outside Core's
   spec — whose 422 carries the failed job as the result to show; and `getSession`, the BFF's own
   `/auth/session`, asked once on entry to send a visitor with no session to `/welcome`. A new
   import source is an entry in `src/core/import-sources.ts` and a route in the BFF.
@@ -110,6 +109,5 @@ UI alone, with no session and no API.
 
 ## Not here yet
 
-`listWorkspaces` on the generated client (4.2's last item, waiting for a Core release); whether a
-session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the last of
-4.2e); browser flows through the running stack, signing in first (4.6, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.
+Whether a session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the
+last of 4.2e); browser flows through the running stack, signing in first (4.6, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.

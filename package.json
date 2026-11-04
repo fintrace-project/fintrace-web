@@ -6,7 +6,7 @@
   "engines": {
     "node": ">=22.18"
   },
-  "coreApiVersion": "0.0.5",
+  "coreApiVersion": "0.0.6",
   "scripts": {
     "generate:api": "node scripts/generate-api.ts",
     "generate:messages": "node scripts/generate-messages.ts",
