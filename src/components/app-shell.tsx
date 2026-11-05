@@ -29,12 +29,17 @@ export function AppShell() {
   return (
     <div
       style={current && accentOf(current.id)}
-      className={cn('min-h-dvh md:flex md:pb-0', sections.length > 0 && 'pb-20')}
+      className={cn('min-h-dvh md:flex md:pb-0', sections.length > 0 && 'pb-20', current && 'bg-(--ws-soft)')}
     >
       <AppSidebar current={current} sections={sections} />
 
       <div className="min-w-0 flex-1">
-        <header className="flex items-center justify-between gap-3 px-4 pt-5 md:hidden">
+        <header
+          className={cn(
+            'sticky top-0 z-20 flex items-center justify-between gap-3 bg-background px-4 py-3 md:hidden',
+            current && 'bg-(--ws-soft)',
+          )}
+        >
           <WorkspaceSheet current={current} />
           <div className="flex gap-2">
             {current && (
@@ -50,7 +55,7 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-5 md:px-8 md:pt-7 md:pb-12">
+        <main className="mx-auto max-w-6xl px-4 pt-2 pb-5 md:px-8 md:pt-7 md:pb-12">
           <Outlet />
         </main>
       </div>
@@ -64,7 +69,7 @@ export function AppShell() {
             <NavLink
               key={section.to}
               to={section.to}
-              end
+              end={section.key === 'overview'}
               className={({ isActive }) =>
                 cn(
                   'flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground',

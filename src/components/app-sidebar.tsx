@@ -23,7 +23,7 @@ export function AppSidebar({ current, sections }: { current: Workspace | undefin
             <NavLink
               key={section.to}
               to={section.to}
-              end
+              end={section.key === 'overview'}
               className={({ isActive }) =>
                 cn(
                   navItem,
