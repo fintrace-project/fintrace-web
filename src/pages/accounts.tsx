@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { AccountMenu, RestoreButton } from '@/components/account-actions'
-import { InitialsAvatar, Pending, TotalsTiles } from '@/components/cards'
+import { InitialsAvatar, Pending } from '@/components/cards'
 import { CreateAccountDialog } from '@/components/create-account-dialog'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
@@ -23,7 +23,6 @@ export function AccountsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t('sections.accounts')} />
-      <TotalsTiles />
 
       {error ? (
         <LoadError title={t('errors.loadAccounts')} error={error} onRetry={retry} />

@@ -124,10 +124,12 @@ routeError:
   home: Go to your workspaces
 
 overview:
+  summary: Summary
+  whereMoneyWent: Where the money went
+  breakdownPending: The category breakdown arrives with 4.11.
+  allStatistics: All statistics →
   expensesByMonth: Expenses by month
   chartPending: The cashflow chart arrives with 4.10.
-  recentOperations: Recent operations
-  feedPending: The operations feed arrives with 4.2h and 4.5.
   allAccounts: All →
 
 accounts:

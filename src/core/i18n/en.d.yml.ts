@@ -124,10 +124,12 @@ declare const messages: {
     readonly home: "Go to your workspaces"
   }
   readonly overview: {
+    readonly summary: "Summary"
+    readonly whereMoneyWent: "Where the money went"
+    readonly breakdownPending: "The category breakdown arrives with 4.11."
+    readonly allStatistics: "All statistics →"
     readonly expensesByMonth: "Expenses by month"
     readonly chartPending: "The cashflow chart arrives with 4.10."
-    readonly recentOperations: "Recent operations"
-    readonly feedPending: "The operations feed arrives with 4.2h and 4.5."
     readonly allAccounts: "All →"
   }
   readonly accounts: {

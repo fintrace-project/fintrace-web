@@ -19,30 +19,32 @@ export function AppSidebar({ current, sections }: { current: Workspace | undefin
 
       {sections.length > 0 && (
         <nav aria-label={t('shell.workspaceSections')} className="flex flex-col gap-0.5">
-          {sections.map((section) => (
-            <NavLink
-              key={section.to}
-              to={section.to}
-              end={section.key === 'overview'}
-              className={({ isActive }) =>
-                cn(
-                  navItem,
-                  'font-medium',
-                  isActive && 'bg-(--ws-soft) font-bold text-foreground hover:bg-(--ws-soft)',
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    aria-hidden
-                    className={cn('size-1.5 rounded-full bg-input', isActive && 'bg-(--ws)')}
-                  />
-                  {t(`sections.${section.key}`)}
-                </>
-              )}
-            </NavLink>
-          ))}
+          {sections
+            .filter((section) => !section.phoneOnly)
+            .map((section) => (
+              <NavLink
+                key={section.to}
+                to={section.to}
+                end={section.key === 'overview'}
+                className={({ isActive }) =>
+                  cn(
+                    navItem,
+                    'font-medium',
+                    isActive && 'bg-(--ws-soft) font-bold text-foreground hover:bg-(--ws-soft)',
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <span
+                      aria-hidden
+                      className={cn('size-1.5 rounded-full bg-input', isActive && 'bg-(--ws)')}
+                    />
+                    {t(`sections.${section.key}`)}
+                  </>
+                )}
+              </NavLink>
+            ))}
         </nav>
       )}
 
