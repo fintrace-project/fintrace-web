@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { ArchiveButton } from '@/components/archive-controls'
-import { AccountAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
+import { InitialsAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
 import { formatBalance } from '@/core/format'
@@ -58,7 +58,7 @@ function AccountsPanel({ workspaceId }: { workspaceId: string }) {
         <ul className="flex flex-col">
           {rows.map(({ account, balance }) => (
             <li key={account.id} className="flex items-center gap-3 border-t py-2.5">
-              <AccountAvatar name={account.name} />
+              <InitialsAvatar name={account.name} colorId={account.id} />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate text-sm font-semibold">{account.name}</span>
                 <span className="text-xs text-muted-foreground">{account.currency}</span>

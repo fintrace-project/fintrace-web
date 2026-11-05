@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
 import { AccountMenu, RestoreButton } from '@/components/account-actions'
-import { AccountAvatar, Pending, TotalsTiles } from '@/components/cards'
+import { InitialsAvatar, Pending, TotalsTiles } from '@/components/cards'
 import { CreateAccountDialog } from '@/components/create-account-dialog'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
@@ -74,8 +74,9 @@ function AccountCard({
   return (
     <div className={cn('flex flex-col gap-3.5 rounded-2xl border bg-card p-5', muted && 'bg-card/50')}>
       <div className="flex items-start justify-between gap-2">
-        <AccountAvatar
+        <InitialsAvatar
           name={account.name}
+          colorId={account.id}
           className={cn('size-10 rounded-xl text-sm', muted && 'grayscale')}
         />
         {!muted && children}

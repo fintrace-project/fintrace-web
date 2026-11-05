@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { initials } from '@/core/format'
+import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
 
 export function Panel({
@@ -52,10 +53,20 @@ export function TotalsTiles() {
   )
 }
 
-export function AccountAvatar({ name, className }: { name: string; className?: string }) {
+// An account's or a category's own colour, picked by its id; the workspace's accent stays with the page around it
+export function InitialsAvatar({
+  name,
+  colorId,
+  className,
+}: {
+  name: string
+  colorId: string
+  className?: string
+}) {
   return (
     <span
       aria-hidden
+      style={accentOf(colorId)}
       className={cn(
         'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--ws-soft) text-[13px] font-extrabold text-(--ws)',
         className,
