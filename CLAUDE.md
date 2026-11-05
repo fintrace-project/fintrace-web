@@ -47,8 +47,9 @@ Adding a library outside this list needs the owner's agreement first.
   sentences, never fragments to concatenate. After editing the YAML, run `npm run generate:messages`:
   it rewrites `en.d.yml.ts`, the keys' type, and CI fails on a stale one. Server text (Core's
   `detail`, the importer's messages) and what `Intl` formats are not ours to translate.
-- **No money arithmetic in the client, ever.** Core computes every balance, total and conversion;
-  the client formats what it receives. An operation's amount is a magnitude plus a `kind` on the
+- **No money arithmetic in the client,** with one exception: a collapsed run's and a day's total in the feeds,
+  summed from what is on screen for showing only, never sent anywhere (agreed 2026-11-05). Core computes every
+  other balance, total and conversion; the client formats what it receives. An operation's amount is a magnitude plus a `kind` on the
   wire — show the sign from the kind, never compute it into a figure.
 - **The API client is generated from Core's `openapi.json`, never hand-written.** Call Core through
   `api` from `@/core/api`; the types come from the Core release pinned as `coreApiVersion` in

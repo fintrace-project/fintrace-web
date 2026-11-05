@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams } from 'react-router'
+import { Link, useParams } from 'react-router'
 import { AccountMenu, RestoreButton } from '@/components/account-actions'
 import { InitialsAvatar, Pending, TotalsTiles } from '@/components/cards'
 import { CreateAccountDialog } from '@/components/create-account-dialog'
@@ -72,23 +72,31 @@ function AccountCard({
   children?: ReactNode
 }) {
   return (
-    <div className={cn('flex flex-col gap-3.5 rounded-2xl border bg-card p-5', muted && 'bg-card/50')}>
+    <div
+      className={cn('relative flex flex-col gap-3.5 rounded-2xl border bg-card p-5', muted && 'bg-card/50')}
+    >
       <div className="flex items-start justify-between gap-2">
         <InitialsAvatar
           name={account.name}
           colorId={account.id}
           className={cn('size-10 rounded-xl text-sm', muted && 'grayscale')}
         />
-        {!muted && children}
+        {!muted && <div className="relative z-10">{children}</div>}
       </div>
       <span className="flex min-w-0 flex-col gap-0.5">
-        <span className="truncate text-[15px] font-bold">{account.name}</span>
+        {/* The link's area stretches over the card; the card's controls sit above it */}
+        <Link
+          to={`/w/${account.workspaceId}/accounts/${account.id}`}
+          className="truncate text-[15px] font-bold after:absolute after:inset-0 after:rounded-2xl"
+        >
+          {account.name}
+        </Link>
         <span className="text-xs text-muted-foreground">{account.currency}</span>
       </span>
       <span className={cn('text-2xl font-extrabold tracking-tight', muted && 'text-muted-foreground')}>
         {formatBalance(balance)}
       </span>
-      {muted && children}
+      {muted && <div className="relative z-10">{children}</div>}
     </div>
   )
 }

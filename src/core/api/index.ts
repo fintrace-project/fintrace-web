@@ -9,6 +9,11 @@ export type AccountBalance = components['schemas']['AccountBalanceResponse']
 export type CoreProblem = components['schemas']['CoreProblem']
 export type UserProfile = components['schemas']['UserProfileResponse']
 export type ImportJob = components['schemas']['ImportJobResponse']
+export type WorkspaceFeedItem = components['schemas']['WorkspaceFeedItemDTO']
+export type AccountFeedItem = components['schemas']['AccountFeedItemDTO']
+export type OperationFeedItem = components['schemas']['OperationFeedItemDTO']
+export type TransferLeg = components['schemas']['TransferLegResponse']
+export type PageCursors = components['schemas']['PageCursors']
 
 // The BFF's own answer, outside Core's spec (§7.4)
 export type Session = { userId: string; expiresAt: string }

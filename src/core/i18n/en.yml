@@ -23,6 +23,8 @@ errors:
   signingIn: Signing in…
   loadWorkspaces: Could not load workspaces.
   loadAccounts: Could not load accounts.
+  loadFeed: Could not load the operations.
+  loadCategories: Could not load categories.
   changedElsewhere: This changed since the page loaded.
   forbidden: You do not have access to do this.
   serverAnswered: The server answered {{status}}.
@@ -152,8 +154,22 @@ accounts:
   restore: Restore
   restoring: Restoring…
 
-operations:
-  pending: The operations feed arrives with 4.5.
+feed:
+  empty: No operations yet.
+  fromTo: '{{source}} → {{target}}'
+  rate: Rate {{rate}}
+  balance: Balance {{amount}}
+  run_one: '{{count}} operation'
+  run_other: '{{count}} operations'
+  runInAccount_one: '{{count}} operation · {{account}}'
+  runInAccount_other: '{{count}} operations · {{account}}'
+  toNewest: Back to the newest
+  accountAndComment: '{{account}} · {{comment}}'
+  anchor: Balance recorded
+  difference: '{{amount}} unrecorded'
+  differences: Issues
+  newerDifference: Newer difference
+  olderDifference: Older difference
 
 statistics:
   pending: The category breakdown arrives with 4.11.

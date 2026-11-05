@@ -21,6 +21,8 @@ declare const messages: {
     readonly signingIn: "Signing in…"
     readonly loadWorkspaces: "Could not load workspaces."
     readonly loadAccounts: "Could not load accounts."
+    readonly loadFeed: "Could not load the operations."
+    readonly loadCategories: "Could not load categories."
     readonly changedElsewhere: "This changed since the page loaded."
     readonly forbidden: "You do not have access to do this."
     readonly serverAnswered: "The server answered {{status}}."
@@ -155,8 +157,22 @@ declare const messages: {
     readonly restore: "Restore"
     readonly restoring: "Restoring…"
   }
-  readonly operations: {
-    readonly pending: "The operations feed arrives with 4.5."
+  readonly feed: {
+    readonly empty: "No operations yet."
+    readonly fromTo: "{{source}} → {{target}}"
+    readonly rate: "Rate {{rate}}"
+    readonly balance: "Balance {{amount}}"
+    readonly run_one: "{{count}} operation"
+    readonly run_other: "{{count}} operations"
+    readonly runInAccount_one: "{{count}} operation · {{account}}"
+    readonly runInAccount_other: "{{count}} operations · {{account}}"
+    readonly toNewest: "Back to the newest"
+    readonly accountAndComment: "{{account}} · {{comment}}"
+    readonly anchor: "Balance recorded"
+    readonly difference: "{{amount}} unrecorded"
+    readonly differences: "Issues"
+    readonly newerDifference: "Newer difference"
+    readonly olderDifference: "Older difference"
   }
   readonly statistics: {
     readonly pending: "The category breakdown arrives with 4.11."

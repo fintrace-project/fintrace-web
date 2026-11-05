@@ -1,4 +1,4 @@
-import type { AccountBalance, UserProfile } from '@/core/api'
+import type { AccountBalance, OperationFeedItem, UserProfile } from '@/core/api'
 
 // Display only: every figure comes from Core, the client never computes money.
 const money = new Map<string, Intl.NumberFormat>()
@@ -15,9 +15,29 @@ export function formatMoney(amount: number, currency: string): string {
 export const formatBalance = (balance: AccountBalance | undefined) =>
   balance ? formatMoney(balance.balance, balance.currency) : '—'
 
+// The wire's amount is a magnitude: the sign is written from what the caller knows, the figure left as Core sent it
+export const formatSignedMagnitude = (amount: number, currency: string, positive: boolean) =>
+  `${positive ? '+' : '−'}${formatMoney(amount, currency)}`
+
+export const formatOperationAmount = ({ amount, currency, kind }: OperationFeedItem) =>
+  formatSignedMagnitude(amount, currency, kind === 'INCOME')
+
+const rate = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 })
+
+export const formatRate = (value: number) => rate.format(value)
+
 const shortDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
 export const formatShortDate = (iso: string) => shortDate.format(new Date(`${iso.slice(0, 10)}T00:00`))
+
+const feedDay = new Intl.DateTimeFormat(undefined, {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+})
+
+export const formatFeedDay = (iso: string) => feedDay.format(new Date(`${iso.slice(0, 10)}T00:00`))
 
 // Up to two letters: the first of each of the first two words, or the first two of a single word.
 export function initials(name: string): string {
