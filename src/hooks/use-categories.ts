@@ -11,6 +11,6 @@ export function useCategories(workspaceId: string) {
           params: { path: { workspaceId }, query: { includeArchived: true } },
           signal,
         }),
-      ),
+      ).items,
   })
 }

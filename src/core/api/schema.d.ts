@@ -746,6 +746,12 @@ export interface components {
              */
             type: "TRANSFER";
         };
+        ListResponseCategoryResponse: {
+            items: components["schemas"]["CategoryResponse"][];
+        };
+        ListResponseAccountResponse: {
+            items: components["schemas"]["AccountResponse"][];
+        };
         AccountFeedItemDTO: {
             type?: components["schemas"]["FeedItemType"];
             cursor?: string;
@@ -1671,22 +1677,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Sortable by name, status, createdAt */
+            /** @description Whole, never paged; in use before archived, then newest first. Archived excluded unless `includeArchived` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "*/*": components["schemas"]["ListResponseWorkspaceResponse"];
-                };
-            };
-            /** @description Sort requested on an unsupported field */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["CoreProblem"];
                 };
             };
             /** @description Not authenticated */
@@ -1881,13 +1878,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Flat; build the tree from `parentId`. Archived excluded unless `includeArchived` */
+            /** @description The whole tree, never paged; flat, so build it from `parentId`. Archived excluded unless `includeArchived` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["CategoryResponse"][];
+                    "*/*": components["schemas"]["ListResponseCategoryResponse"];
                 };
             };
             /** @description Not authenticated */
@@ -2030,7 +2027,9 @@ export interface operations {
     };
     archiveWorkspace: {
         parameters: {
-            query?: never;
+            query: {
+                version: number;
+            };
             header?: never;
             path: {
                 workspaceId: string;
@@ -2039,13 +2038,22 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Archived, or already archived */
+            /** @description Archived, or already archived whatever `version` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "*/*": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+            /** @description `version` missing */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
                 };
             };
             /** @description Not authenticated */
@@ -2071,7 +2079,7 @@ export interface operations {
                     "application/problem+json": components["schemas"]["CoreProblem"];
                 };
             };
-            /** @description Not ACTIVE */
+            /** @description Not ACTIVE, or `version` is stale */
             409: {
                 headers: {
                     [name: string]: unknown;
@@ -2084,7 +2092,9 @@ export interface operations {
     };
     unarchiveWorkspace: {
         parameters: {
-            query?: never;
+            query: {
+                version: number;
+            };
             header?: never;
             path: {
                 workspaceId: string;
@@ -2093,13 +2103,22 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Active, or already active */
+            /** @description Active, or already active whatever `version` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "*/*": components["schemas"]["WorkspaceResponse"];
+                };
+            };
+            /** @description `version` missing */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
                 };
             };
             /** @description Not authenticated */
@@ -2118,6 +2137,15 @@ export interface operations {
             };
             /** @description No such workspace for this caller */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Neither ARCHIVED nor ACTIVE, or `version` is stale */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2140,13 +2168,13 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Archived accounts excluded unless `includeArchived` */
+            /** @description Every account, never paged. Archived excluded unless `includeArchived` */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AccountResponse"][];
+                    "*/*": components["schemas"]["ListResponseAccountResponse"];
                 };
             };
             /** @description Not authenticated */

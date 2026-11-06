@@ -166,6 +166,7 @@ feed:
   runInAccount_one: '{{count}} operation · {{account}}'
   runInAccount_other: '{{count}} operations · {{account}}'
   toNewest: Back to the newest
+  pendingName: …
   accountAndComment: '{{account}} · {{comment}}'
   anchor: Balance recorded
   difference: '{{amount}} unrecorded'

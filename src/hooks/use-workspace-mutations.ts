@@ -21,8 +21,8 @@ export function useEditWorkspace(workspaceId: string) {
 export function useSetArchived(workspaceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (archived: boolean) => {
-      const options = { params: { path: { workspaceId } } }
+    mutationFn: async ({ archived, version }: { archived: boolean; version: number }) => {
+      const options = { params: { path: { workspaceId }, query: { version } } }
       return dataOf(
         archived
           ? await api.POST('/api/v1/workspaces/{workspaceId}/archive', options)

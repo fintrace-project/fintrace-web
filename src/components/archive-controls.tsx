@@ -4,10 +4,12 @@ import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import type { Workspace } from '@/core/api'
 import { useSetArchived } from '@/hooks/use-workspace-mutations'
+import { useReloadWorkspaces } from '@/hooks/use-workspaces'
 
 // Archiving is reversible, so it takes one click and no confirmation (§4.1.1); the banner below is its undo
 export function ArchiveButton({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const reload = useReloadWorkspaces()
   const { t } = useTranslation()
 
   if (workspace.status !== 'ACTIVE') {
@@ -18,13 +20,13 @@ export function ArchiveButton({ workspace }: { workspace: Workspace }) {
       <Button
         variant="outline"
         disabled={setArchived.isPending}
-        onClick={() => setArchived.mutate(true)}
+        onClick={() => setArchived.mutate({ archived: true, version: workspace.version })}
         className="h-11 rounded-[10px] bg-card px-4 font-semibold"
       >
         <Archive aria-hidden />
         {t(setArchived.isPending ? 'archive.archiving' : 'archive.archive')}
       </Button>
-      {setArchived.error && <Problem error={setArchived.error} />}
+      {setArchived.error && <Problem error={setArchived.error} onReload={reload} />}
     </div>
   )
 }
@@ -32,6 +34,7 @@ export function ArchiveButton({ workspace }: { workspace: Workspace }) {
 // Every page of an archived workspace says so: it explains why nothing can be changed, and offers the way back
 export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const reload = useReloadWorkspaces()
   const { t } = useTranslation()
 
   return (
@@ -45,7 +48,7 @@ export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
       </p>
       <Button
         disabled={setArchived.isPending}
-        onClick={() => setArchived.mutate(false)}
+        onClick={() => setArchived.mutate({ archived: false, version: workspace.version })}
         className="h-11 rounded-[10px] px-4 font-bold md:h-9"
       >
         <ArchiveRestore aria-hidden />
@@ -53,7 +56,7 @@ export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
       </Button>
       {setArchived.error && (
         <div className="basis-full">
-          <Problem error={setArchived.error} />
+          <Problem error={setArchived.error} onReload={reload} />
         </div>
       )}
     </div>

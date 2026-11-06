@@ -169,6 +169,7 @@ declare const messages: {
     readonly runInAccount_one: "{{count}} operation · {{account}}"
     readonly runInAccount_other: "{{count}} operations · {{account}}"
     readonly toNewest: "Back to the newest"
+    readonly pendingName: "…"
     readonly accountAndComment: "{{account}} · {{comment}}"
     readonly anchor: "Balance recorded"
     readonly difference: "{{amount}} unrecorded"

@@ -98,6 +98,7 @@ function GeneralPanel({
 
 function StatusPanel({ workspace }: { workspace: Workspace }) {
   const setArchived = useSetArchived(workspace.id)
+  const reload = useReloadWorkspaces()
   const { t } = useTranslation()
 
   return (
@@ -109,7 +110,7 @@ function StatusPanel({ workspace }: { workspace: Workspace }) {
             <Button
               variant="outline"
               disabled={setArchived.isPending}
-              onClick={() => setArchived.mutate(true)}
+              onClick={() => setArchived.mutate({ archived: true, version: workspace.version })}
               className="h-11 rounded-[10px] px-4 font-semibold"
             >
               <Archive aria-hidden />
@@ -121,7 +122,7 @@ function StatusPanel({ workspace }: { workspace: Workspace }) {
       {workspace.status === 'ARCHIVED' && <Pending>{t('settings.archive.archived')}</Pending>}
       {workspace.status === 'NEW' && <Pending>{t('settings.archive.new')}</Pending>}
       {workspace.status === 'IMPORTING' && <Pending>{t('settings.archive.importing')}</Pending>}
-      {setArchived.error && <Problem error={setArchived.error} />}
+      {setArchived.error && <Problem error={setArchived.error} onReload={reload} />}
     </Panel>
   )
 }

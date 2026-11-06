@@ -25,6 +25,18 @@ type TransferItem = Extract<FeedItem, { type: 'TRANSFER' }>
 type AccountName = (accountId: string) => string
 type CategoryName = (categoryId: string) => string
 
+// The accounts an item names on screen; an anchor and a difference sit in their own account's feed
+function accountIdsOf(item: FeedItem): string[] {
+  switch (item.type) {
+    case 'OPERATION':
+      return [item.accountId]
+    case 'TRANSFER':
+      return [item.source.accountId, item.target.accountId]
+    default:
+      return []
+  }
+}
+
 // An account's small icon, on an operation's corner and in a transfer's pair alike
 const accountBadge = 'absolute size-[22px] rounded-md border-2 border-card text-[8px]'
 
@@ -570,6 +582,26 @@ export function Feed({
   const categories = useCategories(workspaceId)
   const { t } = useTranslation()
 
+  const items = feed.data ? feed.data.pages.flatMap((page) => page.items) : []
+  const accountNames = new Map(accounts.data?.map((each) => [each.id, each.name]))
+  const categoryNames = new Map(categories.data?.map((each) => [each.id, each.name]))
+  const accountMissing =
+    accounts.data !== undefined &&
+    items.some((item) => accountIdsOf(item).some((id) => !accountNames.has(id)))
+  const categoryMissing =
+    categories.data !== undefined &&
+    items.some((item) => item.type === 'OPERATION' && !categoryNames.has(item.categoryId))
+
+  // One made in another tab can reach the feed before its list; neither is ever deleted, so one re-read finds it
+  const refetchAccounts = accounts.refetch
+  const refetchCategories = categories.refetch
+  useEffect(() => {
+    if (accountMissing) void refetchAccounts()
+  }, [accountMissing, refetchAccounts])
+  useEffect(() => {
+    if (categoryMissing) void refetchCategories()
+  }, [categoryMissing, refetchCategories])
+
   // Once a page is on screen, a failure elsewhere must not replace it: FeedEdge reports a later page's
   if (accounts.error && !accounts.data) {
     return (
@@ -592,18 +624,12 @@ export function Feed({
     return <Pending>{t('common.loading')}</Pending>
   }
 
-  const items = feed.data.pages.flatMap((page) => page.items)
   if (items.length === 0) {
     return <Pending>{t('feed.empty')}</Pending>
   }
 
-  const names = new Map(accounts.data.map((each) => [each.id, each.name]))
-  // An account made elsewhere can reach the feed before the account list
-  const accountName = (accountId: string) => names.get(accountId) ?? accountId
-
-  const categoryNames = new Map(categories.data.map((each) => [each.id, each.name]))
-  // Likewise a category
-  const categoryName = (categoryId: string) => categoryNames.get(categoryId) ?? categoryId
+  const accountName = (accountId: string) => accountNames.get(accountId) ?? t('feed.pendingName')
+  const categoryName = (categoryId: string) => categoryNames.get(categoryId) ?? t('feed.pendingName')
 
   return (
     <FeedList
