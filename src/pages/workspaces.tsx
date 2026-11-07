@@ -21,7 +21,7 @@ export function WorkspacesPage() {
   const { t } = useTranslation()
 
   const search = (
-    <label className="flex min-h-11 items-center gap-2 rounded-[10px] border bg-card px-3.5 text-sm text-muted-foreground">
+    <label className="flex min-h-11 min-w-40 flex-1 items-center gap-2 rounded-[10px] border bg-card px-3.5 text-sm text-muted-foreground sm:flex-none">
       <Search className="size-4" aria-hidden />
       <input
         type="search"
@@ -35,10 +35,10 @@ export function WorkspacesPage() {
   )
 
   const create = (
-    <Button asChild className="h-11 rounded-[10px] px-4.5 font-bold">
+    <Button asChild className="size-11 rounded-[10px] px-0 font-bold sm:w-auto sm:px-4.5">
       <Link to="/workspaces/new">
         <Plus aria-hidden />
-        {t('workspaces.new')}
+        <span className="max-sm:sr-only">{t('workspaces.new')}</span>
       </Link>
     </Button>
   )

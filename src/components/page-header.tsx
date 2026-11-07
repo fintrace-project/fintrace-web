@@ -43,7 +43,7 @@ export function PageHeader({
           </h1>
           {subtitle && <span className="text-sm text-muted-foreground">{subtitle}</span>}
         </div>
-        {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+        {actions && <div className="flex flex-wrap justify-end gap-2 max-sm:grow">{actions}</div>}
       </header>
       {controls}
     </div>
