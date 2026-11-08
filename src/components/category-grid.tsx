@@ -1,7 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { Fragment, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { CardHeader, EntityTile, MoreTile, TileRow, type Ring } from '@/components/entity-tile'
+import { CardHeader, EntityTile, MoreTile, TileGroup, type Ring } from '@/components/entity-tile'
 import type { Category, CategoryKind } from '@/core/api'
 import { categoryOptions, categoryPath, childrenOf, lineage, topLevelCategories } from '@/core/categories'
 import { recentCategoryIds, withChosen } from '@/core/recent'
@@ -13,8 +13,8 @@ const TILES = 7
 const RECENT = 50
 
 // Everything in place, on one white card: the branch's top level as tiles, the recently used first; More
-// opens the whole top level, the search beside the heading finds any depth; under the grid, one row of
-// children for each level on the way down to the chosen category
+// opens the whole top level, the search beside the heading finds any depth; under the grid, after a divider,
+// a group of children for each level on the way down to the chosen category
 export function CategoryGrid({
   workspaceId,
   categories,
@@ -49,7 +49,7 @@ export function CategoryGrid({
         .map(({ category }) => ({ category, path: categoryPath(categories, category.id) }))
         .filter(({ path }) => path.join(' ').toLocaleLowerCase().includes(query))
     : []
-  // The search keeps the tree's shape: top-level matches as the grid's tiles, deeper ones in a row per parent
+  // The search keeps the tree's shape: top-level matches as the grid's tiles, deeper ones in a group per parent
   const foundTop = found.filter(({ path }) => path.length === 1).map(({ category }) => category)
   const foundBelow = new Map<string, { path: string[]; matches: Category[] }>()
   for (const { category, path } of found) {
@@ -102,7 +102,7 @@ export function CategoryGrid({
         {!query && <MoreTile expanded={expanded} onToggle={toggle} />}
       </div>
       {[...foundBelow].map(([parentId, { path, matches }], index) => (
-        <TileRow
+        <TileGroup
           key={parentId}
           divided={foundTop.length > 0 || index > 0}
           caption={
@@ -119,21 +119,20 @@ export function CategoryGrid({
               key={category.id}
               entity={category}
               ring={ringOf(category)}
-              small
               onClick={() => choose(category.id)}
             />
           ))}
-        </TileRow>
+        </TileGroup>
       ))}
       {query && found.length === 0 && (
         <p className="py-2 text-center text-sm text-muted-foreground">{t('operations.form.noCategory')}</p>
       )}
 
-      {/* Folded, the way down: each level on the chosen path that has children gets a row of them */}
+      {/* Folded, the way down: each level on the chosen path that has children gets a group of them */}
       {!expanded &&
         !query &&
         levels.map((parent) => (
-          <TileRow
+          <TileGroup
             key={parent.id}
             divided
             caption={
@@ -148,11 +147,10 @@ export function CategoryGrid({
                 key={child.id}
                 entity={child}
                 ring={ringOf(child)}
-                small
                 onClick={() => onChange(child.id)}
               />
             ))}
-          </TileRow>
+          </TileGroup>
         ))}
     </div>
   )

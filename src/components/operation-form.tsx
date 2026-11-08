@@ -1,4 +1,4 @@
-import { Pencil, X } from 'lucide-react'
+import { Pencil, Trash2, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -23,6 +23,7 @@ import {
   type Account,
   type Category,
   type CategoryKind,
+  type OperationFeedItem,
   type Workspace,
 } from '@/core/api'
 import { othersOf } from '@/core/categories'
@@ -31,12 +32,16 @@ import { amountPattern, isTypingAmount, toDecimal, withLeadingZero } from '@/cor
 import { currencySymbol } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
-import { useCreateOperation } from '@/hooks/use-operation-mutations'
+import { useCancelOperation, useCreateOperation, useReviseOperation } from '@/hooks/use-operation-mutations'
 import { cn } from '@/lib/utils'
 
 export interface FormProps {
   workspace: Workspace
   accountId: string | undefined
+  // The one to edit, as the feed has it; adding when absent
+  operation: OperationFeedItem | undefined
+  // Adding, filled from this one but dated now: a repeat of it
+  template: OperationFeedItem | undefined
   onDone: () => void
 }
 
@@ -92,21 +97,35 @@ function NoAccounts({ workspaceId }: { workspaceId: string }) {
 function OperationForm({
   workspace,
   accountId,
+  operation,
+  template,
   onDone,
   accounts,
   categories,
 }: FormProps & { accounts: Account[]; categories: Category[] }) {
   const create = useCreateOperation(workspace.id)
+  const revise = useReviseOperation(workspace.id)
+  const cancel = useCancelOperation(workspace.id)
+  const save = operation ? revise : create
   const { t } = useTranslation()
-  const [kind, setKind] = useState<CategoryKind>('EXPENSE')
-  const [amount, setAmount] = useState('')
-  const [account, setAccount] = useState(accounts.find((each) => each.id === accountId) ?? accounts[0]!)
-  const [categoryId, setCategoryId] = useState(othersOf(categories, 'EXPENSE')?.id ?? '')
-  const [occurredAt, setOccurredAt] = useState(nowLocal)
-  const [comment, setComment] = useState('')
+  // Editing starts from the operation as the feed shows it, a repeat from its template but dated now; the feed
+  // never offers a transfer leg here
+  const source = operation ?? template
+  const [kind, setKind] = useState<CategoryKind>(source?.kind === 'INCOME' ? 'INCOME' : 'EXPENSE')
+  const [amount, setAmount] = useState(source ? String(source.amount) : '')
+  const [account, setAccount] = useState(
+    accounts.find((each) => each.id === (source?.accountId ?? accountId)) ?? accounts[0]!,
+  )
+  const [categoryId, setCategoryId] = useState(
+    source?.categoryId ?? othersOf(categories, 'EXPENSE')?.id ?? '',
+  )
+  const [occurredAt, setOccurredAt] = useState(() => operation?.occurredAt.slice(0, 16) ?? nowLocal())
+  const [comment, setComment] = useState(source?.comment ?? '')
   const [accountsOpen, setAccountsOpen] = useState(false)
+  // Delete asks once more in the button row itself, rather than in a second dialog over this one
+  const [confirming, setConfirming] = useState(false)
 
-  const errorOf = (field: string) => fieldError(create.error, field)
+  const errorOf = (field: string) => fieldError(save.error, field)
   const fixedAccount = account.id === accountId
   // The amount and the pills carry no message of their own; Core's for them is listed under the pills
   const rowErrors = ['amount', 'accountId', 'occurredAt'].flatMap((field) => errorOf(field) ?? [])
@@ -118,24 +137,29 @@ function OperationForm({
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
-    create.mutate(
-      {
-        amount: toDecimal(amount) ?? 0,
-        kind,
-        accountId: account.id,
-        categoryId: categoryId || null,
-        occurredAt,
-        comment: comment.trim() || null,
-      },
-      { onSuccess: onDone },
-    )
+    const body = {
+      amount: toDecimal(amount) ?? 0,
+      kind,
+      accountId: account.id,
+      occurredAt,
+      comment: comment.trim() || null,
+    }
+    if (operation) {
+      revise.mutate({ operationId: operation.id, body: { ...body, categoryId } }, { onSuccess: onDone })
+    } else {
+      create.mutate({ ...body, categoryId: categoryId || null }, { onSuccess: onDone })
+    }
   }
+
+  const failure = save.error ?? cancel.error
 
   return (
     // min-w-0: a grid or flex item is otherwise as wide as its widest content. flex-1 with the button's mt-auto
     // keeps the button at the bottom of a phone's full-screen dialog.
     <form onSubmit={submit} className="flex min-w-0 flex-1 flex-col gap-5">
-      <DialogTitle className="sr-only">{t('operations.form.title')}</DialogTitle>
+      <DialogTitle className="sr-only">
+        {t(operation ? 'operations.form.editTitle' : 'operations.form.title')}
+      </DialogTitle>
 
       <div className="flex items-center justify-between gap-3">
         <KindToggle value={kind} onChange={changeKind} />
@@ -153,6 +177,9 @@ function OperationForm({
       <div className="flex flex-col gap-3">
         <AmountInput
           value={amount}
+          // Adding starts with the figure, a repeat too since amounts differ from time to time; opening one to
+          // look at it should not raise the phone's keyboard
+          autoFocus={!operation}
           onChange={setAmount}
           income={kind === 'INCOME'}
           currency={account.currency}
@@ -226,18 +253,57 @@ function OperationForm({
         {errorOf('comment') && <span className="text-xs text-destructive">{errorOf('comment')}</span>}
       </div>
 
-      {create.error && !hasFieldErrors(create.error) && <Problem error={create.error} />}
-      {/* Pinned to the bottom when the form scrolls */}
-      {/* Reaches the dialog's edges and holds its bottom padding, so the form scrolls behind it and never
-          shows beneath; the fade above says there is more under it */}
+      {failure && !hasFieldErrors(failure) && <Problem error={failure} />}
+      {/* Pinned to the bottom when the form scrolls. Reaches the dialog's edges and holds its bottom padding,
+          so the form scrolls behind it and never shows beneath; the fade above says there is more under it */}
       <div className="sticky bottom-0 -mx-4 mt-auto bg-(--ws-soft) px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-linear-to-t before:from-(--ws-soft) before:to-transparent">
-        <Button
-          type="submit"
-          disabled={create.isPending}
-          className="h-12 w-full bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
-        >
-          {create.isPending ? t('operations.form.adding') : t(`operations.form.submit.${kind}`)}
-        </Button>
+        {operation && confirming ? (
+          <div className="flex items-center gap-2">
+            <span className="min-w-0 flex-1 text-sm font-semibold">{t('operations.form.deleteConfirm')}</span>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setConfirming(false)}
+              className="h-12 rounded-xl border-transparent bg-card px-4"
+            >
+              {t('operations.form.keep')}
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={cancel.isPending}
+              onClick={() => cancel.mutate(operation.id, { onSuccess: onDone })}
+              className="h-12 rounded-xl px-4 font-bold"
+            >
+              {t(cancel.isPending ? 'operations.form.deleting' : 'operations.form.delete')}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex gap-2">
+            {operation && (
+              <Button
+                type="button"
+                variant="outline"
+                aria-label={t('operations.form.delete')}
+                onClick={() => setConfirming(true)}
+                className="size-12 shrink-0 rounded-xl border-transparent bg-card text-destructive"
+              >
+                <Trash2 aria-hidden />
+              </Button>
+            )}
+            <Button
+              type="submit"
+              disabled={save.isPending}
+              className="h-12 min-w-0 flex-1 bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
+            >
+              {operation
+                ? t(save.isPending ? 'operations.form.saving' : 'operations.form.save')
+                : save.isPending
+                  ? t('operations.form.adding')
+                  : t(`operations.form.submit.${kind}`)}
+            </Button>
+          </div>
+        )}
       </div>
     </form>
   )
@@ -273,12 +339,14 @@ function KindToggle({ value, onChange }: { value: CategoryKind; onChange: (kind:
 // wire carries a magnitude.
 function AmountInput({
   value,
+  autoFocus,
   onChange,
   income,
   currency,
   invalid,
 }: {
   value: string
+  autoFocus: boolean
   onChange: (value: string) => void
   income: boolean
   currency: string
@@ -297,14 +365,14 @@ function AmountInput({
         income && 'text-positive',
       )}
     >
-      {/* The sign in the placeholder's shade, either kind: present, but quieter than the figure */}
-      <span aria-hidden className="text-muted-foreground/40">
+      {/* The sign goes with the figure: the placeholder's shade while there is none, the figure's colour
+          once typed, so "−0.00" and "−333" each read as one */}
+      <span aria-hidden className={cn(!value && 'text-muted-foreground/40')}>
         {income ? '+' : '−'}
       </span>
       <input
         aria-label={t('operations.form.amount')}
-        // Straight to the amount: on a phone its keyboard opens with the form
-        autoFocus
+        autoFocus={autoFocus}
         aria-invalid={invalid}
         value={value}
         // A keystroke that would make it anything but a decimal is dropped, so the field never holds one

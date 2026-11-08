@@ -1,8 +1,10 @@
-import { ArrowRight, ArrowUp, ChevronDown, Pen, type LucideIcon } from 'lucide-react'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { ArrowRight, ArrowUp, ChevronDown, Pen, Repeat2, Trash2, type LucideIcon } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InitialsAvatar, Pending } from '@/components/cards'
 import { LoadError } from '@/components/load-error'
+import { OperationDialog } from '@/components/operation-dialog'
+import { SwipeRow } from '@/components/swipe-row'
 import { Button } from '@/components/ui/button'
 import type { Account, AccountFeedItem, TransferLeg, WorkspaceFeedItem } from '@/core/api'
 import { dayTotals, feedRows, runTotal, type DifferenceItem, type OperationItem } from '@/core/feed-rows'
@@ -16,11 +18,70 @@ import {
 } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
+import { useCancelOperation } from '@/hooks/use-operation-mutations'
+import { useWorkspace } from '@/hooks/use-workspaces'
+import { isWritable } from '@/core/workspaces'
 import { useScrollAnchor } from '@/hooks/use-scroll-anchor'
 import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
 
 type FeedItem = WorkspaceFeedItem | AccountFeedItem
+
+const rowLayout = 'flex min-h-14 w-full items-center gap-3 py-2.5'
+// A row that opens its operation reaches the card's edges, so the tint under the pointer and the red strip a
+// swipe uncovers do too; the row's own padding puts its content back in line
+const bleed = '-mx-4 w-[calc(100%+2rem)] md:-mx-5 md:w-[calc(100%+2.5rem)]'
+const editableRow = 'px-4 text-left outline-none hover:bg-(--ws-soft)/60 focus-visible:bg-(--ws-soft) md:px-5'
+
+// The swipe's delete, held by the feed: a refused one brings its row back with Core's word under it
+interface Swipe {
+  remove: (item: OperationItem) => void
+  repeat: (item: OperationItem) => void
+  failure: { id: string; message: string } | undefined
+}
+
+// An operation that opens in the form on a tap; on a phone, a swipe left deletes it and a swipe right opens a
+// new one made from it
+function EditableRow({
+  item,
+  onEdit,
+  swipe,
+  className,
+  children,
+}: {
+  item: OperationItem
+  onEdit: () => void
+  swipe: Swipe
+  className: string
+  children: ReactNode
+}) {
+  const { t } = useTranslation()
+  const failure = swipe.failure?.id === item.id ? swipe.failure : undefined
+  return (
+    <>
+      <SwipeRow
+        toLeft={{
+          label: t('operations.form.delete'),
+          icon: <Trash2 aria-hidden />,
+          onSwipe: () => swipe.remove(item),
+        }}
+        toRight={{
+          label: t('operations.form.repeat'),
+          icon: <Repeat2 aria-hidden />,
+          onSwipe: () => swipe.repeat(item),
+        }}
+        failed={failure !== undefined}
+        className={bleed}
+      >
+        <button type="button" onClick={onEdit} className={cn(editableRow, className)}>
+          {children}
+        </button>
+      </SwipeRow>
+      {failure && <p className="pb-2 text-xs text-destructive">{failure.message}</p>}
+    </>
+  )
+}
+
 type TransferItem = Extract<FeedItem, { type: 'TRANSFER' }>
 type AccountName = (accountId: string) => string
 type CategoryName = (categoryId: string) => string
@@ -278,6 +339,8 @@ function RunRows({
   inOwnAccount,
   expanded,
   onToggle,
+  edit,
+  swipe,
 }: {
   items: OperationItem[]
   categoryName: string
@@ -285,6 +348,8 @@ function RunRows({
   inOwnAccount: boolean
   expanded: boolean
   onToggle: () => void
+  edit: (item: OperationItem) => (() => void) | undefined
+  swipe: Swipe
 }) {
   const { t } = useTranslation()
   const first = items[0]!
@@ -327,18 +392,40 @@ function RunRows({
         </button>
       </li>
       {expanded &&
-        items.map((item) => (
-          <li
-            key={item.cursor}
-            data-cursor={members.includes(item) ? item.cursor : undefined}
-            className="flex min-h-10 items-center gap-3 py-1.5 pl-12"
-          >
-            <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{item.comment}</span>
-            <span className={cn('text-sm font-semibold whitespace-nowrap', income && 'text-positive')}>
-              {formatOperationAmount(item)}
-            </span>
-          </li>
-        ))}
+        items.map((item) => {
+          const onEdit = edit(item)
+          const layout = 'flex min-h-10 w-full items-center gap-3 py-1.5 pl-12'
+          const content = (
+            <>
+              <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{item.comment}</span>
+              <span className={cn('text-sm font-semibold whitespace-nowrap', income && 'text-positive')}>
+                {formatOperationAmount(item)}
+              </span>
+            </>
+          )
+          return (
+            <li
+              key={item.cursor}
+              data-cursor={members.includes(item) ? item.cursor : undefined}
+              // A column only for an editable row, whose refusal message goes under it
+              className={onEdit ? 'flex flex-col' : layout}
+            >
+              {onEdit ? (
+                // The run's own indent, kept inside the row that reaches the card's edges
+                <EditableRow
+                  item={item}
+                  onEdit={onEdit}
+                  swipe={swipe}
+                  className={cn(layout, 'pl-16 md:pl-17')}
+                >
+                  {content}
+                </EditableRow>
+              ) : (
+                content
+              )}
+            </li>
+          )
+        })}
     </>
   )
 }
@@ -444,6 +531,8 @@ function FeedList({
   categoryName,
   focus,
   toHead,
+  edit,
+  swipe,
 }: {
   feed: FeedQuery
   items: FeedItem[]
@@ -452,6 +541,9 @@ function FeedList({
   categoryName: CategoryName
   focus: string | undefined
   toHead: () => void
+  // Opens the operation in the form; undefined for one that cannot be edited
+  edit: (item: OperationItem) => (() => void) | undefined
+  swipe: Swipe
 }) {
   const { list, direction, setDirection } = useScrollAnchor(!feed.hasPreviousPage, focus)
   // Which runs are open, by every cursor in them, so a refetch or a new item joining leaves one open
@@ -527,25 +619,41 @@ function FeedList({
                     inOwnAccount={account !== undefined}
                     expanded={expanded}
                     onToggle={() => toggle(row.items, expanded)}
+                    edit={edit}
+                    swipe={swipe}
                   />
                 )
               }
               const { item, difference } = row
               const current = focus !== undefined && (item.cursor === focus || difference?.cursor === focus)
+              const onEdit = item.type === 'OPERATION' ? edit(item) : undefined
+              const content = (
+                <FeedRow
+                  item={item}
+                  difference={difference}
+                  account={account}
+                  accountName={accountName}
+                  categoryName={categoryName}
+                />
+              )
               return (
                 <li
                   key={item.cursor}
                   data-cursor={item.cursor}
                   aria-current={current || undefined}
-                  className="group flex min-h-14 items-center gap-3 py-2.5 aria-[current=true]:-mx-4 aria-[current=true]:px-4 motion-safe:aria-[current=true]:animate-arrive-row md:aria-[current=true]:-mx-5 md:aria-[current=true]:px-5"
+                  className={cn(
+                    'group aria-[current=true]:-mx-4 aria-[current=true]:px-4 motion-safe:aria-[current=true]:animate-arrive-row md:aria-[current=true]:-mx-5 md:aria-[current=true]:px-5',
+                    // A column only for an editable row, whose refusal message goes under it
+                    onEdit ? 'flex flex-col' : rowLayout,
+                  )}
                 >
-                  <FeedRow
-                    item={item}
-                    difference={difference}
-                    account={account}
-                    accountName={accountName}
-                    categoryName={categoryName}
-                  />
+                  {item.type === 'OPERATION' && onEdit ? (
+                    <EditableRow item={item} onEdit={onEdit} swipe={swipe} className={rowLayout}>
+                      {content}
+                    </EditableRow>
+                  ) : (
+                    content
+                  )}
                 </li>
               )
             })}
@@ -580,7 +688,22 @@ export function Feed({
 }) {
   const accounts = useAccounts(workspaceId)
   const categories = useCategories(workspaceId)
+  const workspace = useWorkspace(workspaceId)
   const { t } = useTranslation()
+  // The operation open in the form, if any: to edit it, or to make a new one from it
+  const [inForm, setInForm] = useState<{ item: OperationItem; repeat: boolean }>()
+  // A swipe's delete: a refused one brings its row back with Core's word under it. A new swipe clears the last
+  // refusal first, in the same update that slides its row away, or that row would come straight back.
+  const cancel = useCancelOperation(workspaceId)
+  const [failure, setFailure] = useState<Swipe['failure']>()
+  const swipe: Swipe = {
+    remove: (item) => {
+      setFailure(undefined)
+      cancel.mutate(item.id, { onError: (error) => setFailure({ id: item.id, message: error.message }) })
+    },
+    repeat: (item) => setInForm({ item, repeat: true }),
+    failure,
+  }
 
   const items = feed.data ? feed.data.pages.flatMap((page) => page.items) : []
   const accountNames = new Map(accounts.data?.map((each) => [each.id, each.name]))
@@ -631,15 +754,40 @@ export function Feed({
   const accountName = (accountId: string) => accountNames.get(accountId) ?? t('feed.pendingName')
   const categoryName = (categoryId: string) => categoryNames.get(categoryId) ?? t('feed.pendingName')
 
+  // Core takes no write to a read-only workspace nor to an archived account, so neither offers its rows.
+  // Transfer legs are not operations here: they are edited as a pair, by the transfer form (4.7).
+  const archived = new Set(accounts.data.filter((each) => each.archived).map((each) => each.id))
+  const edit = (item: OperationItem) =>
+    workspace && isWritable(workspace) && !archived.has(item.accountId)
+      ? () => setInForm({ item, repeat: false })
+      : undefined
+
   return (
-    <FeedList
-      feed={feed}
-      items={items}
-      account={account}
-      accountName={accountName}
-      categoryName={categoryName}
-      focus={focus}
-      toHead={toHead}
-    />
+    <>
+      <FeedList
+        feed={feed}
+        items={items}
+        account={account}
+        accountName={accountName}
+        categoryName={categoryName}
+        focus={focus}
+        toHead={toHead}
+        edit={edit}
+        swipe={swipe}
+      />
+      {/* One dialog for the feed, not one per row; keyed by the operation and the mode, so each opening starts
+          its form afresh */}
+      {workspace && inForm && (
+        <OperationDialog
+          key={`${inForm.item.id}-${inForm.repeat}`}
+          workspace={workspace}
+          accountId={account?.id}
+          operation={inForm.repeat ? undefined : inForm.item}
+          template={inForm.repeat ? inForm.item : undefined}
+          open
+          onClose={() => setInForm(undefined)}
+        />
+      )}
+    </>
   )
 }

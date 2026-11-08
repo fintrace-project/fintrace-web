@@ -192,6 +192,14 @@ declare const messages: {
         readonly INCOME: "Add income"
       }
       readonly adding: "Adding…"
+      readonly editTitle: "Edit operation"
+      readonly save: "Save"
+      readonly saving: "Saving…"
+      readonly delete: "Delete"
+      readonly deleting: "Deleting…"
+      readonly deleteConfirm: "Delete this operation?"
+      readonly keep: "Keep"
+      readonly repeat: "Repeat"
     }
   }
   readonly feed: {

@@ -187,6 +187,14 @@ operations:
       EXPENSE: Add expense
       INCOME: Add income
     adding: Adding…
+    editTitle: Edit operation
+    save: Save
+    saving: Saving…
+    delete: Delete
+    deleting: Deleting…
+    deleteConfirm: Delete this operation?
+    keep: Keep
+    repeat: Repeat
 
 feed:
   empty: No operations yet.

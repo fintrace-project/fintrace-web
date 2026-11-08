@@ -22,10 +22,12 @@ export function useCreateOperation(workspaceId: string) {
   })
 }
 
-export function useReviseOperation(workspaceId: string, operationId: string) {
+// The operation's id goes with each call rather than into the hook, so one form can hold the hook whether it
+// adds or edits
+export function useReviseOperation(workspaceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async (body: UpdateOperationRequest) =>
+    mutationFn: async ({ operationId, body }: { operationId: string; body: UpdateOperationRequest }) =>
       dataOf(
         await api.PUT('/api/v1/workspaces/{workspaceId}/operations/{operationId}', {
           params: { path: { workspaceId, operationId } },
@@ -37,10 +39,10 @@ export function useReviseOperation(workspaceId: string, operationId: string) {
 }
 
 // Cancels it (§10.2): gone from the feeds and every figure, never shown struck through
-export function useCancelOperation(workspaceId: string, operationId: string) {
+export function useCancelOperation(workspaceId: string) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async () => {
+    mutationFn: async (operationId: string) => {
       await api.DELETE('/api/v1/workspaces/{workspaceId}/operations/{operationId}', {
         params: { path: { workspaceId, operationId } },
       })

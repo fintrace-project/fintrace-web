@@ -11,28 +11,20 @@ export const tileClass =
 // Chosen, a full ring; on the way to the chosen one (its parent, say), a soft one
 export type Ring = 'full' | 'soft' | 'none'
 
-// A round icon with the name below in up to two lines, and an optional line under it; `small` for a row
-// that scrolls sideways
+// A round icon with the name below in up to two lines, and an optional line under it
 export function EntityTile({
   entity,
   ring,
-  small,
   sub,
   onClick,
 }: {
   entity: Iconed
   ring: Ring
-  small?: boolean
   sub?: ReactNode
   onClick: () => void
 }) {
   return (
-    <button
-      type="button"
-      aria-pressed={ring === 'full'}
-      onClick={onClick}
-      className={cn(tileClass, small && 'w-20 shrink-0')}
-    >
+    <button type="button" aria-pressed={ring === 'full'} onClick={onClick} className={tileClass}>
       {/* The ring is the wrapper's: the icon sets its own colour as --ws, the wrapper still sees the
           workspace's, which marks a choice everywhere in the form */}
       <span
@@ -42,10 +34,7 @@ export function EntityTile({
           ring === 'soft' && 'ring-(--ws)/35',
         )}
       >
-        <EntityIcon
-          entity={entity}
-          className={cn('rounded-full', small ? 'size-10 text-xs' : 'size-13 text-sm')}
-        />
+        <EntityIcon entity={entity} className="size-13 rounded-full text-sm" />
       </span>
       <TileName selected={ring !== 'none'}>{entity.name}</TileName>
       {sub && (
@@ -129,9 +118,9 @@ export function TileName({ selected, children }: { selected?: boolean; children:
   )
 }
 
-// A row of small tiles scrolling sideways, its caption above; the edges reach the card's. `divided` when it
-// follows something else in the same card.
-export function TileRow({
+// A grid of tiles laid out as the card's own, under a caption; `divided` when it follows something else in the
+// same card
+export function TileGroup({
   caption,
   divided,
   children,
@@ -145,7 +134,7 @@ export function TileRow({
       <span className="flex min-w-0 items-center gap-0.5 px-1 text-xs font-medium text-muted-foreground">
         {caption}
       </span>
-      <div className="-mx-3 flex gap-1 overflow-x-auto px-3 [scrollbar-width:none]">{children}</div>
+      <div className="grid grid-cols-4 gap-x-2 gap-y-2">{children}</div>
     </div>
   )
 }
