@@ -111,4 +111,4 @@ UI alone, with no session and no API.
 ## Not here yet
 
 Whether a session exists, without being sent to sign-in, and its expiry (5.2h's `/auth/session`, the
-last of 4.2e); browser flows through the running stack, signing in first (4.6, in `fintrace-tests`). A second language is post-MVP: a second YAML file beside `en.yml`.
+last of 4.2e). A second language is post-MVP: a second YAML file beside `en.yml`.
