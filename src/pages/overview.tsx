@@ -5,6 +5,7 @@ import { ArchiveButton } from '@/components/archive-controls'
 import { InitialsAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'
+import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
 import { formatBalance } from '@/core/format'
 import { useAccountRows } from '@/hooks/use-accounts'
@@ -23,7 +24,15 @@ export function OverviewPage() {
 
   return (
     <div className="flex flex-col gap-5">
-      <PageHeader title={t('sections.overview')} actions={<ArchiveButton workspace={workspace} />} />
+      <PageHeader
+        title={t('sections.overview')}
+        actions={
+          <>
+            <ArchiveButton workspace={workspace} />
+            <AddOperationButton workspace={workspace} />
+          </>
+        }
+      />
       <TotalsTiles />
 
       {/* Between md and lg the side column comes first: below a feed that keeps loading it could never be reached */}

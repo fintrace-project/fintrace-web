@@ -39,6 +39,29 @@ const feedDay = new Intl.DateTimeFormat(undefined, {
 
 export const formatFeedDay = (iso: string) => feedDay.format(new Date(`${iso.slice(0, 10)}T00:00`))
 
+const pickerDay = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
+const pickerDayOfYear = new Intl.DateTimeFormat(undefined, {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
+
+// The locale's first day of the week, 1 Monday … 7 Sunday; Monday where the browser cannot tell (Firefox)
+export function firstDayOfWeek(): number {
+  const locale = new Intl.Locale(new Intl.DateTimeFormat().resolvedOptions().locale) as Intl.Locale & {
+    getWeekInfo?: () => { firstDay: number }
+    weekInfo?: { firstDay: number }
+  }
+  return locale.getWeekInfo?.().firstDay ?? locale.weekInfo?.firstDay ?? 1
+}
+
+// "Thu 5 Nov", the year added only when it is not today's
+export const formatPickerDay = (iso: string, today: string) =>
+  (iso.slice(0, 4) === today.slice(0, 4) ? pickerDay : pickerDayOfYear).format(
+    new Date(`${iso.slice(0, 10)}T00:00`),
+  )
+
 // Up to two letters: the first of each of the first two words, or the first two of a single word.
 export function initials(name: string): string {
   const [first = '', second] = name.match(/[\p{L}\p{N}]+/gu) ?? []

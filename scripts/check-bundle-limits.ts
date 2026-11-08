@@ -29,6 +29,8 @@ const INSIDE: Record<string, string[]> = {
       'workspace-import',
     ].map((page) => [`src/pages/${page}.tsx`, [SHELL, WORKSPACE]]),
   ),
+  // Opened from a page inside the workspace; measured over the layouts alone, the stricter of the two
+  'src/components/operation-form.tsx': [SHELL, WORKSPACE],
 }
 
 type Chunk = { file: string; isEntry?: boolean; isDynamicEntry?: boolean; imports?: string[] }

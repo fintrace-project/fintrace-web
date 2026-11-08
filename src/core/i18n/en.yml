@@ -156,6 +156,34 @@ accounts:
   restore: Restore
   restoring: Restoring…
 
+operations:
+  add: Add operation
+  kind:
+    EXPENSE: Expense
+    INCOME: Income
+  form:
+    title: New operation
+    noAccounts: An operation is recorded on an account, and this workspace has none open. Add one first.
+    toAccounts: Go to accounts
+    kind: Kind
+    amount: Amount
+    account: Account
+    category: Category
+    all: All…
+    searchCategories: Search categories
+    noCategory: No category found.
+    searchAccounts: Search accounts
+    noAccount: No account found.
+    occurredAt: Date and time
+    time: Time
+    now: Now
+    today: Today
+    yesterday: Yesterday
+    comment: Comment (optional)
+    commentPlaceholder: Comment
+    action: Add operation
+    adding: Adding…
+
 feed:
   empty: No operations yet.
   fromTo: '{{source}} → {{target}}'

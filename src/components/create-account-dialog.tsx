@@ -17,6 +17,7 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { fieldError, hasFieldErrors, type Workspace } from '@/core/api'
+import { toDecimal } from '@/core/decimal'
 import { useCreateAccount } from '@/hooks/use-account-mutations'
 
 // The dashed tile closing the accounts grid, opening the form
@@ -36,9 +37,6 @@ export function CreateAccountDialog({ workspace }: { workspace: Workspace }) {
     </Dialog>
   )
 }
-
-// A decimal as typed, a comma accepted for the point; anything else is left to the pattern to refuse
-const toDecimal = (typed: string) => (typed.trim() === '' ? null : Number(typed.trim().replace(',', '.')))
 
 // Mounted only while the dialog is open, so every opening starts from an empty form
 function CreateAccountForm({ workspace, onCreated }: { workspace: Workspace; onCreated: () => void }) {
@@ -68,6 +66,7 @@ function CreateAccountForm({ workspace, onCreated }: { workspace: Workspace; onC
         <Field id="account-name" label={t('common.name')} error={fieldError(create.error, 'name')}>
           <Input
             id="account-name"
+            aria-invalid={!!fieldError(create.error, 'name')}
             value={name}
             onChange={(event) => setName(event.target.value)}
             placeholder={t('accounts.create.namePlaceholder')}
@@ -92,6 +91,7 @@ function CreateAccountForm({ workspace, onCreated }: { workspace: Workspace; onC
         {/* No decimal inputMode: a phone's decimal pad has no minus, and a card's balance can be negative */}
         <Input
           id="account-initial-balance"
+          aria-invalid={!!fieldError(create.error, 'initialBalance')}
           value={initialBalance}
           onChange={(event) => setInitialBalance(event.target.value)}
           pattern="-?\d+([.,]\d+)?"

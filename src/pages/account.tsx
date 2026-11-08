@@ -4,17 +4,20 @@ import { Pending } from '@/components/cards'
 import { DifferenceArrows } from '@/components/difference-arrows'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'
+import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
 import type { Account } from '@/core/api'
 import { formatBalance } from '@/core/format'
 import { useAccountBalances, useAccounts } from '@/hooks/use-accounts'
 import { useAccountFeed, useResetFeed } from '@/hooks/use-feed'
+import { useWorkspace } from '@/hooks/use-workspaces'
 import { NotFoundPage } from '@/pages/not-found'
 
 export function AccountPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
   const workspaceId = useParams().workspaceId!
   const { accountId } = useParams()
+  const workspace = useWorkspace(workspaceId)!
   const accounts = useAccounts(workspaceId)
   const balances = useAccountBalances(workspaceId)
   const [searchParams] = useSearchParams()
@@ -42,6 +45,7 @@ export function AccountPage() {
       <PageHeader
         title={account.name}
         subtitle={balance && t('feed.balance', { amount: formatBalance(balance) })}
+        actions={!account.archived && <AddOperationButton workspace={workspace} accountId={account.id} />}
         controls={<DifferenceArrows workspaceId={workspaceId} accountId={account.id} at={at} />}
       />
       <AccountFeed account={account} at={at} />

@@ -159,6 +159,36 @@ declare const messages: {
     readonly restore: "Restore"
     readonly restoring: "Restoring…"
   }
+  readonly operations: {
+    readonly add: "Add operation"
+    readonly kind: {
+      readonly EXPENSE: "Expense"
+      readonly INCOME: "Income"
+    }
+    readonly form: {
+      readonly title: "New operation"
+      readonly noAccounts: "An operation is recorded on an account, and this workspace has none open. Add one first."
+      readonly toAccounts: "Go to accounts"
+      readonly kind: "Kind"
+      readonly amount: "Amount"
+      readonly account: "Account"
+      readonly category: "Category"
+      readonly all: "All…"
+      readonly searchCategories: "Search categories"
+      readonly noCategory: "No category found."
+      readonly searchAccounts: "Search accounts"
+      readonly noAccount: "No account found."
+      readonly occurredAt: "Date and time"
+      readonly time: "Time"
+      readonly now: "Now"
+      readonly today: "Today"
+      readonly yesterday: "Yesterday"
+      readonly comment: "Comment (optional)"
+      readonly commentPlaceholder: "Comment"
+      readonly action: "Add operation"
+      readonly adding: "Adding…"
+    }
+  }
   readonly feed: {
     readonly empty: "No operations yet."
     readonly fromTo: "{{source}} → {{target}}"
