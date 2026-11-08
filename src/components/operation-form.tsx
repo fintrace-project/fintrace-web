@@ -2,7 +2,7 @@ import { Pencil, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { AccountPicker } from '@/components/account-picker'
+import { AccountGrid, AccountPill } from '@/components/account-grid'
 import { Pending } from '@/components/cards'
 import { CategoryGrid } from '@/components/category-grid'
 import { DateTimePicker } from '@/components/date-time-picker'
@@ -73,7 +73,8 @@ export function OperationLoader(props: FormProps) {
 function NoAccounts({ workspaceId }: { workspaceId: string }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col gap-4">
+    // Its own bottom padding: the dialog leaves that to the form's pinned button strip
+    <div className="flex flex-col gap-4 pb-4">
       <DialogHeader>
         <DialogTitle>{t('operations.form.title')}</DialogTitle>
         <DialogDescription>{t('operations.form.noAccounts')}</DialogDescription>
@@ -103,10 +104,11 @@ function OperationForm({
   const [categoryId, setCategoryId] = useState(othersOf(categories, 'EXPENSE')?.id ?? '')
   const [occurredAt, setOccurredAt] = useState(nowLocal)
   const [comment, setComment] = useState('')
+  const [accountsOpen, setAccountsOpen] = useState(false)
 
   const errorOf = (field: string) => fieldError(create.error, field)
   const fixedAccount = account.id === accountId
-  // The pills carry no message of their own; Core's for them is listed under the row
+  // The amount and the pills carry no message of their own; Core's for them is listed under the pills
   const rowErrors = ['amount', 'accountId', 'occurredAt'].flatMap((field) => errorOf(field) ?? [])
 
   const changeKind = (next: CategoryKind) => {
@@ -159,11 +161,10 @@ function OperationForm({
         <div className="flex flex-wrap items-center gap-2">
           {/* Opened from an account's page, the operation is that account's, so there is nothing to choose */}
           {!fixedAccount && (
-            <AccountPicker
-              workspaceId={workspace.id}
-              accounts={accounts}
-              value={account.id}
-              onChange={(id) => setAccount(accounts.find((each) => each.id === id)!)}
+            <AccountPill
+              account={account}
+              open={accountsOpen}
+              onToggle={() => setAccountsOpen(!accountsOpen)}
               invalid={!!errorOf('accountId')}
             />
           )}
@@ -180,6 +181,19 @@ function OperationForm({
           </span>
         ))}
       </div>
+
+      {/* Folded into its pill by default; opened, the card takes its place in the form until one is chosen */}
+      {accountsOpen && (
+        <AccountGrid
+          workspaceId={workspace.id}
+          accounts={accounts}
+          value={account.id}
+          onChange={(id) => {
+            setAccount(accounts.find((each) => each.id === id)!)
+            setAccountsOpen(false)
+          }}
+        />
+      )}
 
       <div className="flex flex-col gap-2">
         <CategoryGrid
@@ -214,7 +228,9 @@ function OperationForm({
 
       {create.error && !hasFieldErrors(create.error) && <Problem error={create.error} />}
       {/* Pinned to the bottom when the form scrolls */}
-      <div className="sticky bottom-0 mt-auto bg-(--ws-soft) pt-2">
+      {/* Reaches the dialog's edges and holds its bottom padding, so the form scrolls behind it and never
+          shows beneath; the fade above says there is more under it */}
+      <div className="sticky bottom-0 -mx-4 mt-auto bg-(--ws-soft) px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-linear-to-t before:from-(--ws-soft) before:to-transparent">
         <Button
           type="submit"
           disabled={create.isPending}

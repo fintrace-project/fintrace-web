@@ -48,8 +48,9 @@ export function AddOperationButton({ workspace, accountId }: { workspace: Worksp
         onOpenAutoFocus={(event) => event.preventDefault()}
         style={accentOf(workspace.id)}
         // Full screen on a phone, the form's button pinned at the bottom; from md up, the centred dialog. On the
-        // workspace's tint with white controls, as the pages are.
-        className="top-0 right-0 bottom-0 left-0 flex bg-(--ws-soft) max-h-none max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none pb-[max(1rem,env(safe-area-inset-bottom))] sm:max-w-none md:top-1/2 md:right-auto md:bottom-auto md:left-1/2 md:max-h-[calc(100dvh-2rem)] md:max-w-sm md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl"
+        // workspace's tint with white controls, as the pages are, and a thin scrollbar in its colour. No bottom
+        // padding: the pinned strip holds it, so nothing scrolls past beneath the button.
+        className="top-0 right-0 bottom-0 left-0 flex bg-(--ws-soft) max-h-none max-w-none translate-x-0 translate-y-0 flex-col gap-0 rounded-none pb-0 [scrollbar-color:color-mix(in_srgb,var(--ws)_35%,transparent)_transparent] [scrollbar-width:thin] sm:max-w-none md:top-1/2 md:right-auto md:bottom-auto md:left-1/2 md:max-h-[calc(100dvh-2rem)] md:max-w-sm md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl"
       >
         <Suspense fallback={<Pending>{t('common.loading')}</Pending>}>
           <OperationLoader workspace={workspace} accountId={accountId} onDone={() => setOpen(false)} />

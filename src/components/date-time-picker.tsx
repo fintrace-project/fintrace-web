@@ -1,7 +1,6 @@
 import { ChevronDown } from 'lucide-react'
 import { useId, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { pill } from '@/components/entity-picker'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Input } from '@/components/ui/input'
@@ -10,6 +9,7 @@ import { addDays, isoDate, localDate, nowLocal } from '@/core/dates'
 import { firstDayOfWeek, formatPickerDay } from '@/core/format'
 import { useMediaQuery, WIDE } from '@/hooks/use-media-query'
 import { accentOf } from '@/lib/accent'
+import { pill } from '@/lib/pill'
 import { cn } from '@/lib/utils'
 
 // A floating `YYYY-MM-DDTHH:mm`, nothing after now: Core refuses an operation dated in the future (4.18

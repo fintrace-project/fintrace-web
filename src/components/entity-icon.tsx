@@ -4,7 +4,7 @@ import { ENTITY_ICONS } from '@/lib/entity-icons'
 import { cn } from '@/lib/utils'
 
 // What an account and a category have in common for showing one
-interface Iconed {
+export interface Iconed {
   id: string
   name: string
   icon?: string | null

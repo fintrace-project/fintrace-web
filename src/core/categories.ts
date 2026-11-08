@@ -21,28 +21,16 @@ const readingOrder = (a: Category, b: Category) => isOthers(a) - isOthers(b) || 
 export const childrenOf = (categories: Category[], parentId: string) =>
   categories.filter((each) => each.parentId === parentId && !each.archived).sort(readingOrder)
 
-// The category directly under its branch's root that this one sits in: itself when it is one
-export function topLevelOf(categories: Category[], id: string): Category | undefined {
+// The categories from below the branch's root down to this one, the top level first; empty for a root
+export function lineage(categories: Category[], id: string): Category[] {
   const byId = new Map(categories.map((each) => [each.id, each]))
+  const chain: Category[] = []
   let category = byId.get(id)
   while (category?.parentId) {
-    const parent = byId.get(category.parentId)
-    if (!parent?.parentId) {
-      return category
-    }
-    category = parent
+    chain.unshift(category)
+    category = byId.get(category.parentId)
   }
-  return undefined
-}
-
-// The category directly under `ancestorId` on the way down to `id`; undefined when `id` is not below it
-export function childOnPath(categories: Category[], ancestorId: string, id: string): Category | undefined {
-  const byId = new Map(categories.map((each) => [each.id, each]))
-  let category = byId.get(id)
-  while (category && category.parentId !== ancestorId) {
-    category = category.parentId ? byId.get(category.parentId) : undefined
-  }
-  return category
+  return chain
 }
 
 // The branch's top level, the ones holding the recently used categories first, then the rest in reading order
@@ -55,7 +43,7 @@ export function topLevelCategories(
   if (!root) {
     return []
   }
-  const recent = [...new Set(recentIds.map((id) => topLevelOf(categories, id)?.id))]
+  const recent = [...new Set(recentIds.map((id) => lineage(categories, id)[0]?.id))]
   const rank = (category: Category) => {
     const at = recent.indexOf(category.id)
     return at < 0 ? recent.length : at
@@ -83,13 +71,5 @@ export function categoryOptions(categories: Category[], kind: CategoryKind): Cat
 }
 
 // The names from below the branch's root down to the category: ["Food and drink", "Cafes"]
-export function categoryPath(categories: Category[], id: string): string[] {
-  const byId = new Map(categories.map((each) => [each.id, each]))
-  const names: string[] = []
-  let category = byId.get(id)
-  while (category?.parentId) {
-    names.unshift(category.name)
-    category = byId.get(category.parentId)
-  }
-  return names
-}
+export const categoryPath = (categories: Category[], id: string) =>
+  lineage(categories, id).map((category) => category.name)

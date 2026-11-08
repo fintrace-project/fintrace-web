@@ -170,6 +170,8 @@ operations:
     account: Account
     category: Category
     more: More
+    less: Less
+    search: Search
     searchCategories: Search categories
     noCategory: No category found.
     searchAccounts: Search accounts

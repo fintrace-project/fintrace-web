@@ -174,6 +174,8 @@ declare const messages: {
       readonly account: "Account"
       readonly category: "Category"
       readonly more: "More"
+      readonly less: "Less"
+      readonly search: "Search"
       readonly searchCategories: "Search categories"
       readonly noCategory: "No category found."
       readonly searchAccounts: "Search accounts"
