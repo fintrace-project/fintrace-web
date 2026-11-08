@@ -173,7 +173,7 @@ declare const messages: {
       readonly amount: "Amount"
       readonly account: "Account"
       readonly category: "Category"
-      readonly all: "All…"
+      readonly more: "More"
       readonly searchCategories: "Search categories"
       readonly noCategory: "No category found."
       readonly searchAccounts: "Search accounts"
@@ -185,7 +185,10 @@ declare const messages: {
       readonly yesterday: "Yesterday"
       readonly comment: "Comment (optional)"
       readonly commentPlaceholder: "Comment"
-      readonly action: "Add operation"
+      readonly submit: {
+        readonly EXPENSE: "Add expense"
+        readonly INCOME: "Add income"
+      }
       readonly adding: "Adding…"
     }
   }

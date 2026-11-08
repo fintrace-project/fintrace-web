@@ -1,15 +1,21 @@
+import { Pencil, X } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AccountPicker } from '@/components/account-picker'
 import { Pending } from '@/components/cards'
-import { CategoryPicker } from '@/components/category-picker'
+import { CategoryGrid } from '@/components/category-grid'
 import { DateTimePicker } from '@/components/date-time-picker'
-import { Field } from '@/components/field'
 import { LoadError } from '@/components/load-error'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
-import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import {
+  DialogClose,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import {
   fieldError,
@@ -22,12 +28,11 @@ import {
 import { othersOf } from '@/core/categories'
 import { nowLocal } from '@/core/dates'
 import { amountPattern, isTypingAmount, toDecimal, withLeadingZero } from '@/core/decimal'
+import { currencySymbol } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
 import { useCreateOperation } from '@/hooks/use-operation-mutations'
 import { cn } from '@/lib/utils'
-
-const AMOUNT_ID = 'operation-amount'
 
 export interface FormProps {
   workspace: Workspace
@@ -101,6 +106,8 @@ function OperationForm({
 
   const errorOf = (field: string) => fieldError(create.error, field)
   const fixedAccount = account.id === accountId
+  // The pills carry no message of their own; Core's for them is listed under the row
+  const rowErrors = ['amount', 'accountId', 'occurredAt'].flatMap((field) => errorOf(field) ?? [])
 
   const changeKind = (next: CategoryKind) => {
     setKind(next)
@@ -123,71 +130,99 @@ function OperationForm({
   }
 
   return (
-    // min-w-0: a grid item is otherwise as wide as its widest content, and the chips' row would widen the dialog
-    // Compact enough for one phone screen: the switch takes the title's row, and every field shows what it
-    // is by its icon or placeholder, its label kept for screen readers only
-    <form onSubmit={submit} className="flex min-w-0 flex-col gap-3">
+    // min-w-0: a grid or flex item is otherwise as wide as its widest content. flex-1 with the button's mt-auto
+    // keeps the button at the bottom of a phone's full-screen dialog.
+    <form onSubmit={submit} className="flex min-w-0 flex-1 flex-col gap-5">
       <DialogTitle className="sr-only">{t('operations.form.title')}</DialogTitle>
 
-      <KindToggle value={kind} onChange={changeKind} />
-
-      {/* The form's main figure gets a little more room than the rows around it */}
-      <div className="py-1.5">
-        <Field id={AMOUNT_ID} label={t('operations.form.amount')} error={errorOf('amount')} hideLabel>
-          <AmountInput
-            value={amount}
-            onChange={setAmount}
-            income={kind === 'INCOME'}
-            currency={account.currency}
-            invalid={!!errorOf('amount')}
-          />
-        </Field>
+      <div className="flex items-center justify-between gap-3">
+        <KindToggle value={kind} onChange={changeKind} />
+        <DialogClose asChild>
+          <button
+            type="button"
+            aria-label={t('common.close')}
+            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          >
+            <X aria-hidden className="size-4" />
+          </button>
+        </DialogClose>
       </div>
 
-      {/* Opened from an account's page, the operation is that account's, so there is nothing to choose */}
-      {!fixedAccount && (
-        <AccountPicker
+      <div className="flex flex-col gap-3">
+        <AmountInput
+          value={amount}
+          onChange={setAmount}
+          income={kind === 'INCOME'}
+          currency={account.currency}
+          invalid={!!errorOf('amount')}
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Opened from an account's page, the operation is that account's, so there is nothing to choose */}
+          {!fixedAccount && (
+            <AccountPicker
+              workspaceId={workspace.id}
+              accounts={accounts}
+              value={account.id}
+              onChange={(id) => setAccount(accounts.find((each) => each.id === id)!)}
+              invalid={!!errorOf('accountId')}
+            />
+          )}
+          <DateTimePicker
+            workspaceId={workspace.id}
+            value={occurredAt}
+            onChange={setOccurredAt}
+            invalid={!!errorOf('occurredAt')}
+          />
+        </div>
+        {rowErrors.map((error) => (
+          <span key={error} className="text-xs text-destructive">
+            {error}
+          </span>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <CategoryGrid
           workspaceId={workspace.id}
-          accounts={accounts}
-          value={account.id}
-          onChange={(id) => setAccount(accounts.find((each) => each.id === id)!)}
-          error={errorOf('accountId')}
+          categories={categories}
+          kind={kind}
+          value={categoryId}
+          onChange={setCategoryId}
         />
-      )}
+        {errorOf('categoryId') && <span className="text-xs text-destructive">{errorOf('categoryId')}</span>}
+      </div>
 
-      <CategoryPicker
-        workspaceId={workspace.id}
-        categories={categories}
-        kind={kind}
-        value={categoryId}
-        onChange={setCategoryId}
-        error={errorOf('categoryId')}
-      />
-
-      <DateTimePicker value={occurredAt} onChange={setOccurredAt} error={errorOf('occurredAt')} />
-
-      <Field id="operation-comment" label={t('operations.form.comment')} error={errorOf('comment')} hideLabel>
-        <Input
-          id="operation-comment"
-          aria-invalid={!!errorOf('comment')}
-          value={comment}
-          onChange={(event) => setComment(event.target.value)}
-          placeholder={t('operations.form.commentPlaceholder')}
-          maxLength={255}
-          autoComplete="off"
-          className="h-11"
-        />
-      </Field>
+      <div className="flex flex-col gap-2">
+        <div className="relative">
+          <Pencil
+            aria-hidden
+            className="pointer-events-none absolute top-1/2 left-3.5 size-3.5 -translate-y-1/2 text-muted-foreground"
+          />
+          <Input
+            aria-label={t('operations.form.comment')}
+            aria-invalid={!!errorOf('comment')}
+            value={comment}
+            onChange={(event) => setComment(event.target.value)}
+            placeholder={t('operations.form.commentPlaceholder')}
+            maxLength={255}
+            autoComplete="off"
+            className="h-10 rounded-full border-transparent bg-card pl-9"
+          />
+        </div>
+        {errorOf('comment') && <span className="text-xs text-destructive">{errorOf('comment')}</span>}
+      </div>
 
       {create.error && !hasFieldErrors(create.error) && <Problem error={create.error} />}
-      {/* No Cancel: the close button, a tap outside and the back gesture all close the dialog */}
-      <Button
-        type="submit"
-        disabled={create.isPending}
-        className="h-12 w-full bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
-      >
-        {t(create.isPending ? 'operations.form.adding' : 'operations.form.action')}
-      </Button>
+      {/* Pinned to the bottom when the form scrolls */}
+      <div className="sticky bottom-0 mt-auto bg-(--ws-soft) pt-2">
+        <Button
+          type="submit"
+          disabled={create.isPending}
+          className="h-12 w-full bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
+        >
+          {create.isPending ? t('operations.form.adding') : t(`operations.form.submit.${kind}`)}
+        </Button>
+      </div>
     </form>
   )
 }
@@ -196,12 +231,12 @@ function OperationForm({
 function KindToggle({ value, onChange }: { value: CategoryKind; onChange: (kind: CategoryKind) => void }) {
   const { t } = useTranslation()
   return (
-    <fieldset className="grid grid-cols-2 gap-1 rounded-xl bg-muted p-1">
+    <fieldset className="inline-grid grid-cols-2 gap-1 rounded-xl bg-card p-1">
       <legend className="sr-only">{t('operations.form.kind')}</legend>
       {(['EXPENSE', 'INCOME'] as const).map((kind) => (
         <label
           key={kind}
-          className="flex h-10 cursor-pointer items-center justify-center rounded-lg text-sm font-semibold text-muted-foreground has-checked:bg-card has-checked:text-foreground has-checked:shadow-sm has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+          className="flex h-9 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground has-checked:bg-(--ws) has-checked:text-white has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
         >
           <input
             type="radio"
@@ -218,7 +253,8 @@ function KindToggle({ value, onChange }: { value: CategoryKind; onChange: (kind:
   )
 }
 
-// The form's one large figure. The sign is drawn from the kind, never typed: the wire carries a magnitude.
+// The form's one large figure, in a white field on the tint. The sign is drawn from the kind, never typed: the
+// wire carries a magnitude.
 function AmountInput({
   value,
   onChange,
@@ -232,23 +268,25 @@ function AmountInput({
   currency: string
   invalid: boolean
 }) {
+  const { t } = useTranslation()
   return (
-    // The frame is the wrapper's, so it turns red by what the input inside reports
-    <span
+    // A white card like the categories' below, borderless; its ring is the wrapper's, so it turns red by what
+    // the input inside reports
+    <div
       className={cn(
-        'flex items-center gap-1 rounded-xl border border-input bg-card px-3 focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50',
-        'has-aria-invalid:border-destructive has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/20',
-        'has-user-invalid:border-destructive has-user-invalid:ring-3 has-user-invalid:ring-destructive/20',
+        'flex min-w-0 items-center gap-2 rounded-2xl bg-card px-4 py-2 text-4xl font-extrabold tracking-tight tabular-nums',
+        'focus-within:ring-3 focus-within:ring-ring/30',
+        'has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/40',
+        'has-user-invalid:ring-3 has-user-invalid:ring-destructive/40',
+        income && 'text-positive',
       )}
     >
-      <span
-        aria-hidden
-        className={cn('text-2xl font-extrabold', income ? 'text-positive' : 'text-muted-foreground')}
-      >
+      {/* The sign in the placeholder's shade, either kind: present, but quieter than the figure */}
+      <span aria-hidden className="text-muted-foreground/40">
         {income ? '+' : '−'}
       </span>
       <input
-        id={AMOUNT_ID}
+        aria-label={t('operations.form.amount')}
         // Straight to the amount: on a phone its keyboard opens with the form
         autoFocus
         aria-invalid={invalid}
@@ -261,12 +299,11 @@ function AmountInput({
         required
         autoComplete="off"
         placeholder="0.00"
-        className={cn(
-          'h-14 w-full min-w-0 bg-transparent text-2xl font-extrabold tabular-nums outline-none placeholder:text-muted-foreground/50',
-          income && 'text-positive',
-        )}
+        className="h-14 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/40"
       />
-      <span className="text-base font-semibold text-muted-foreground">{currency}</span>
-    </span>
+      <span className="shrink-0 text-2xl font-semibold text-muted-foreground">
+        {currencySymbol(currency)}
+      </span>
+    </div>
   )
 }

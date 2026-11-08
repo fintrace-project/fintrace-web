@@ -15,9 +15,3 @@ export const recentCategoryIds = (items: WorkspaceFeedItem[], kind: CategoryKind
     latestEntered(items, (item) => item.kind === kind).map((item) => item.categoryId),
     limit,
   )
-
-export const recentAccountIds = (items: WorkspaceFeedItem[], limit: number) =>
-  distinct(
-    latestEntered(items, () => true).map((item) => item.accountId),
-    limit,
-  )

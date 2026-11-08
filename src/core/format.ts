@@ -12,6 +12,12 @@ export function formatMoney(amount: number, currency: string): string {
   return format.format(amount)
 }
 
+// "€" for EUR, "$" for USD: the currency's narrow sign, as Intl writes it beside a figure
+export const currencySymbol = (currency: string) =>
+  new Intl.NumberFormat(undefined, { style: 'currency', currency, currencyDisplay: 'narrowSymbol' })
+    .formatToParts(0)
+    .find((part) => part.type === 'currency')?.value ?? currency
+
 export const formatBalance = (balance: AccountBalance | undefined) =>
   balance ? formatMoney(balance.balance, balance.currency) : '—'
 

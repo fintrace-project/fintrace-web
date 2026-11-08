@@ -169,7 +169,7 @@ operations:
     amount: Amount
     account: Account
     category: Category
-    all: All…
+    more: More
     searchCategories: Search categories
     noCategory: No category found.
     searchAccounts: Search accounts
@@ -181,7 +181,9 @@ operations:
     yesterday: Yesterday
     comment: Comment (optional)
     commentPlaceholder: Comment
-    action: Add operation
+    submit:
+      EXPENSE: Add expense
+      INCOME: Add income
     adding: Adding…
 
 feed:
