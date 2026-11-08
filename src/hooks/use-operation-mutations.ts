@@ -3,7 +3,7 @@ import { api, dataOf, type CreateOperationRequest, type UpdateOperationRequest }
 
 // A refetch, not a cache edit: an operation moves balances and both feeds, all Core's to compute, and the
 // first write moves a NEW workspace to ACTIVE
-function refetchWorkspace(queryClient: QueryClient, workspaceId: string) {
+export function refetchWorkspace(queryClient: QueryClient, workspaceId: string) {
   void queryClient.invalidateQueries({ queryKey: ['workspaces', workspaceId] })
   void queryClient.invalidateQueries({ queryKey: ['workspaces'], exact: true })
 }

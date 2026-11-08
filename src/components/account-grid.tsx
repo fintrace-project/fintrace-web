@@ -16,20 +16,21 @@ const RECENT = 50
 
 // Folded, the account is a pill beside the date; it opens the card below in place
 export function AccountPill({
+  label,
   account,
   open,
   onToggle,
   invalid,
 }: {
+  label: string
   account: Account
   open: boolean
   onToggle: () => void
   invalid: boolean
 }) {
-  const { t } = useTranslation()
   return (
     <button type="button" aria-expanded={open} aria-invalid={invalid} onClick={onToggle} className={pill}>
-      <span className="sr-only">{t('operations.form.account')}</span>
+      <span className="sr-only">{label}</span>
       <span className="truncate">{account.name}</span>
       <ChevronDown aria-hidden className={cn(open && 'rotate-180')} />
     </button>

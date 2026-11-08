@@ -6,7 +6,7 @@ import { LoadError } from '@/components/load-error'
 import { OperationDialog } from '@/components/operation-dialog'
 import { SwipeRow } from '@/components/swipe-row'
 import { Button } from '@/components/ui/button'
-import type { Account, AccountFeedItem, TransferLeg, WorkspaceFeedItem } from '@/core/api'
+import type { Account, AccountFeedItem, TransferFeedItem, TransferLeg, WorkspaceFeedItem } from '@/core/api'
 import { dayTotals, feedRows, runTotal, type DifferenceItem, type OperationItem } from '@/core/feed-rows'
 import {
   formatMoney,
@@ -19,6 +19,7 @@ import {
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
 import { useCancelOperation } from '@/hooks/use-operation-mutations'
+import { useCancelTransfer } from '@/hooks/use-transfer-mutations'
 import { useWorkspace } from '@/hooks/use-workspaces'
 import { isWritable } from '@/core/workspaces'
 import { useScrollAnchor } from '@/hooks/use-scroll-anchor'
@@ -35,13 +36,13 @@ const editableRow = 'px-4 text-left outline-none hover:bg-(--ws-soft)/60 focus-v
 
 // The swipe's delete, held by the feed: a refused one brings its row back with Core's word under it
 interface Swipe {
-  remove: (item: OperationItem) => void
-  repeat: (item: OperationItem) => void
+  remove: (item: OperationItem | TransferFeedItem) => void
+  repeat: (item: OperationItem | TransferFeedItem) => void
   failure: { id: string; message: string } | undefined
 }
 
-// An operation that opens in the form on a tap; on a phone, a swipe left deletes it and a swipe right opens a
-// new one made from it
+// An operation or a transfer that opens in its form on a tap; on a phone, a swipe left deletes it, a transfer's
+// both legs at once, and a swipe right opens a new one made from it
 function EditableRow({
   item,
   onEdit,
@@ -49,7 +50,7 @@ function EditableRow({
   className,
   children,
 }: {
-  item: OperationItem
+  item: OperationItem | TransferFeedItem
   onEdit: () => void
   swipe: Swipe
   className: string
@@ -532,6 +533,7 @@ function FeedList({
   focus,
   toHead,
   edit,
+  editTransfer,
   swipe,
 }: {
   feed: FeedQuery
@@ -543,6 +545,7 @@ function FeedList({
   toHead: () => void
   // Opens the operation in the form; undefined for one that cannot be edited
   edit: (item: OperationItem) => (() => void) | undefined
+  editTransfer: (item: TransferFeedItem) => (() => void) | undefined
   swipe: Swipe
 }) {
   const { list, direction, setDirection } = useScrollAnchor(!feed.hasPreviousPage, focus)
@@ -626,7 +629,12 @@ function FeedList({
               }
               const { item, difference } = row
               const current = focus !== undefined && (item.cursor === focus || difference?.cursor === focus)
-              const onEdit = item.type === 'OPERATION' ? edit(item) : undefined
+              const onEdit =
+                item.type === 'OPERATION'
+                  ? edit(item)
+                  : item.type === 'TRANSFER'
+                    ? editTransfer(item)
+                    : undefined
               const content = (
                 <FeedRow
                   item={item}
@@ -647,7 +655,7 @@ function FeedList({
                     onEdit ? 'flex flex-col' : rowLayout,
                   )}
                 >
-                  {item.type === 'OPERATION' && onEdit ? (
+                  {(item.type === 'OPERATION' || item.type === 'TRANSFER') && onEdit ? (
                     <EditableRow item={item} onEdit={onEdit} swipe={swipe} className={rowLayout}>
                       {content}
                     </EditableRow>
@@ -692,16 +700,22 @@ export function Feed({
   const { t } = useTranslation()
   // The operation open in the form, if any: to edit it, or to make a new one from it
   const [inForm, setInForm] = useState<{ item: OperationItem; repeat: boolean }>()
+  const [transferInForm, setTransferInForm] = useState<{ item: TransferFeedItem; repeat: boolean }>()
   // A swipe's delete: a refused one brings its row back with Core's word under it. A new swipe clears the last
   // refusal first, in the same update that slides its row away, or that row would come straight back.
   const cancel = useCancelOperation(workspaceId)
+  const cancelTransfer = useCancelTransfer(workspaceId)
   const [failure, setFailure] = useState<Swipe['failure']>()
   const swipe: Swipe = {
     remove: (item) => {
       setFailure(undefined)
-      cancel.mutate(item.id, { onError: (error) => setFailure({ id: item.id, message: error.message }) })
+      const removal = item.type === 'TRANSFER' ? cancelTransfer : cancel
+      removal.mutate(item.id, { onError: (error) => setFailure({ id: item.id, message: error.message }) })
     },
-    repeat: (item) => setInForm({ item, repeat: true }),
+    repeat: (item) =>
+      item.type === 'TRANSFER'
+        ? setTransferInForm({ item, repeat: true })
+        : setInForm({ item, repeat: true }),
     failure,
   }
 
@@ -755,11 +769,17 @@ export function Feed({
   const categoryName = (categoryId: string) => categoryNames.get(categoryId) ?? t('feed.pendingName')
 
   // Core takes no write to a read-only workspace nor to an archived account, so neither offers its rows.
-  // Transfer legs are not operations here: they are edited as a pair, by the transfer form (4.7).
   const archived = new Set(accounts.data.filter((each) => each.archived).map((each) => each.id))
   const edit = (item: OperationItem) =>
     workspace && isWritable(workspace) && !archived.has(item.accountId)
       ? () => setInForm({ item, repeat: false })
+      : undefined
+  const editTransfer = (item: TransferFeedItem) =>
+    workspace &&
+    isWritable(workspace) &&
+    !archived.has(item.source.accountId) &&
+    !archived.has(item.target.accountId)
+      ? () => setTransferInForm({ item, repeat: false })
       : undefined
 
   return (
@@ -773,8 +793,19 @@ export function Feed({
         focus={focus}
         toHead={toHead}
         edit={edit}
+        editTransfer={editTransfer}
         swipe={swipe}
       />
+      {workspace && transferInForm && (
+        <OperationDialog
+          key={`${transferInForm.item.id}-${transferInForm.repeat}`}
+          workspace={workspace}
+          transfer={transferInForm.repeat ? undefined : transferInForm.item}
+          transferTemplate={transferInForm.repeat ? transferInForm.item : undefined}
+          open
+          onClose={() => setTransferInForm(undefined)}
+        />
+      )}
       {/* One dialog for the feed, not one per row; keyed by the operation and the mode, so each opening starts
           its form afresh */}
       {workspace && inForm && (

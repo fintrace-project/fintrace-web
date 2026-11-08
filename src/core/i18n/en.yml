@@ -161,6 +161,7 @@ operations:
   kind:
     EXPENSE: Expense
     INCOME: Income
+    TRANSFER: Transfer
   form:
     title: New operation
     noAccounts: An operation is recorded on an account, and this workspace has none open. Add one first.
@@ -195,6 +196,20 @@ operations:
     deleteConfirm: Delete this operation?
     keep: Keep
     repeat: Repeat
+
+transfers:
+  form:
+    title: New transfer
+    editTitle: Edit transfer
+    deleteConfirm: Delete this transfer?
+    from: From
+    to: To
+    swap: Swap the accounts
+    amount: Amount
+    amountSent: Amount sent
+    amountReceived: Amount received
+    needTwoAccounts: A transfer moves money between two accounts, and this workspace has fewer than two open. Add another first.
+    submit: Add transfer
 
 feed:
   empty: No operations yet.

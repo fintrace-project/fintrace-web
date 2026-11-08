@@ -2,6 +2,13 @@
 export const toDecimal = (typed: string) =>
   typed.trim() === '' ? null : Number(typed.trim().replace(',', '.'))
 
+// What a transfer's two typed amounts imply, for showing while typing only; Core derives the rate it answers with
+export const impliedRate = (sent: string, received: string) => {
+  const source = toDecimal(sent)
+  const target = toDecimal(received)
+  return source && target ? target / source : null
+}
+
 // Core stores amounts as numeric(19, 4): a fifth digit would be rounded away by the database, silently
 const AMOUNT_DIGITS = 4
 

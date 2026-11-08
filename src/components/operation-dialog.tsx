@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Pending } from '@/components/cards'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import type { OperationFeedItem, Workspace } from '@/core/api'
+import type { OperationFeedItem, TransferFeedItem, Workspace } from '@/core/api'
 import { isWritable } from '@/core/workspaces'
 import { accentOf } from '@/lib/accent'
 
@@ -59,6 +59,8 @@ export function OperationDialog({
   accountId,
   operation,
   template,
+  transfer,
+  transferTemplate,
   open,
   onClose,
 }: {
@@ -66,6 +68,8 @@ export function OperationDialog({
   accountId?: string
   operation?: OperationFeedItem
   template?: OperationFeedItem
+  transfer?: TransferFeedItem
+  transferTemplate?: TransferFeedItem
   open: boolean
   onClose: () => void
 }) {
@@ -94,6 +98,8 @@ export function OperationDialog({
             accountId={accountId}
             operation={operation}
             template={template}
+            transfer={transfer}
+            transferTemplate={transferTemplate}
             onDone={onClose}
           />
         </Suspense>

@@ -1,22 +1,19 @@
-import { Pencil, Trash2, X } from 'lucide-react'
+import { Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { AccountGrid, AccountPill } from '@/components/account-grid'
+import { AmountInput } from '@/components/amount-input'
 import { Pending } from '@/components/cards'
 import { CategoryGrid } from '@/components/category-grid'
+import { CommentInput } from '@/components/comment-input'
 import { DateTimePicker } from '@/components/date-time-picker'
+import { FormHeader, type FormKind } from '@/components/form-header'
 import { LoadError } from '@/components/load-error'
 import { Problem } from '@/components/problem'
+import { TransferForm } from '@/components/transfer-form'
 import { Button } from '@/components/ui/button'
-import {
-  DialogClose,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import {
   fieldError,
   hasFieldErrors,
@@ -24,16 +21,16 @@ import {
   type Category,
   type CategoryKind,
   type OperationFeedItem,
+  type TransferFeedItem,
   type Workspace,
 } from '@/core/api'
 import { othersOf } from '@/core/categories'
 import { nowLocal } from '@/core/dates'
-import { amountPattern, isTypingAmount, toDecimal, withLeadingZero } from '@/core/decimal'
-import { currencySymbol } from '@/core/format'
+import { toDecimal } from '@/core/decimal'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
 import { useCancelOperation, useCreateOperation, useReviseOperation } from '@/hooks/use-operation-mutations'
-import { cn } from '@/lib/utils'
+import { formStrip } from '@/lib/form-strip'
 
 export interface FormProps {
   workspace: Workspace
@@ -42,6 +39,10 @@ export interface FormProps {
   operation: OperationFeedItem | undefined
   // Adding, filled from this one but dated now: a repeat of it
   template: OperationFeedItem | undefined
+  // The transfer to edit, opening the transfer form
+  transfer: TransferFeedItem | undefined
+  // Adding a transfer filled from this one but dated now
+  transferTemplate: TransferFeedItem | undefined
   onDone: () => void
 }
 
@@ -72,7 +73,35 @@ export function OperationLoader(props: FormProps) {
   if (open.length === 0) {
     return <NoAccounts workspaceId={props.workspace.id} />
   }
-  return <OperationForm {...props} accounts={open} categories={categories.data} />
+  return <FormOfKind {...props} accounts={open} categories={categories.data} />
+}
+
+// Adding offers both forms under one switch; what was typed crosses over with it
+function FormOfKind(props: FormProps & { accounts: Account[]; categories: Category[] }) {
+  const [start, setStart] = useState<{ kind: FormKind; amount: string }>({ kind: 'EXPENSE', amount: '' })
+
+  if (props.transfer || props.transferTemplate || start.kind === 'TRANSFER') {
+    return (
+      <TransferForm
+        workspace={props.workspace}
+        accountId={props.accountId}
+        accounts={props.accounts}
+        transfer={props.transfer}
+        template={props.transferTemplate}
+        amount={start.amount}
+        onSwitch={(kind, amount) => setStart({ kind, amount })}
+        onDone={props.onDone}
+      />
+    )
+  }
+  return (
+    <OperationForm
+      {...props}
+      initialKind={start.kind as CategoryKind}
+      initialAmount={start.amount}
+      onTransfer={(amount) => setStart({ kind: 'TRANSFER', amount })}
+    />
+  )
 }
 
 function NoAccounts({ workspaceId }: { workspaceId: string }) {
@@ -102,7 +131,16 @@ function OperationForm({
   onDone,
   accounts,
   categories,
-}: FormProps & { accounts: Account[]; categories: Category[] }) {
+  initialKind,
+  initialAmount,
+  onTransfer,
+}: FormProps & {
+  accounts: Account[]
+  categories: Category[]
+  initialKind: CategoryKind
+  initialAmount: string
+  onTransfer: (amount: string) => void
+}) {
   const create = useCreateOperation(workspace.id)
   const revise = useReviseOperation(workspace.id)
   const cancel = useCancelOperation(workspace.id)
@@ -111,13 +149,15 @@ function OperationForm({
   // Editing starts from the operation as the feed shows it, a repeat from its template but dated now; the feed
   // never offers a transfer leg here
   const source = operation ?? template
-  const [kind, setKind] = useState<CategoryKind>(source?.kind === 'INCOME' ? 'INCOME' : 'EXPENSE')
-  const [amount, setAmount] = useState(source ? String(source.amount) : '')
+  const [kind, setKind] = useState<CategoryKind>(
+    source ? (source.kind === 'INCOME' ? 'INCOME' : 'EXPENSE') : initialKind,
+  )
+  const [amount, setAmount] = useState(source ? String(source.amount) : initialAmount)
   const [account, setAccount] = useState(
     accounts.find((each) => each.id === (source?.accountId ?? accountId)) ?? accounts[0]!,
   )
   const [categoryId, setCategoryId] = useState(
-    source?.categoryId ?? othersOf(categories, 'EXPENSE')?.id ?? '',
+    source?.categoryId ?? othersOf(categories, initialKind)?.id ?? '',
   )
   const [occurredAt, setOccurredAt] = useState(() => operation?.occurredAt.slice(0, 16) ?? nowLocal())
   const [comment, setComment] = useState(source?.comment ?? '')
@@ -130,7 +170,11 @@ function OperationForm({
   // The amount and the pills carry no message of their own; Core's for them is listed under the pills
   const rowErrors = ['amount', 'accountId', 'occurredAt'].flatMap((field) => errorOf(field) ?? [])
 
-  const changeKind = (next: CategoryKind) => {
+  const changeKind = (next: FormKind) => {
+    if (next === 'TRANSFER') {
+      onTransfer(amount)
+      return
+    }
     setKind(next)
     setCategoryId(othersOf(categories, next)?.id ?? '')
   }
@@ -161,21 +205,11 @@ function OperationForm({
         {t(operation ? 'operations.form.editTitle' : 'operations.form.title')}
       </DialogTitle>
 
-      <div className="flex items-center justify-between gap-3">
-        <KindToggle value={kind} onChange={changeKind} />
-        <DialogClose asChild>
-          <button
-            type="button"
-            aria-label={t('common.close')}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-          >
-            <X aria-hidden className="size-4" />
-          </button>
-        </DialogClose>
-      </div>
+      <FormHeader value={kind} onChange={changeKind} withTransfer={!source} />
 
       <div className="flex flex-col gap-3">
         <AmountInput
+          label={t('operations.form.amount')}
           value={amount}
           // Adding starts with the figure, a repeat too since amounts differ from time to time; opening one to
           // look at it should not raise the phone's keyboard
@@ -189,6 +223,7 @@ function OperationForm({
           {/* Opened from an account's page, the operation is that account's, so there is nothing to choose */}
           {!fixedAccount && (
             <AccountPill
+              label={t('operations.form.account')}
               account={account}
               open={accountsOpen}
               onToggle={() => setAccountsOpen(!accountsOpen)}
@@ -233,30 +268,10 @@ function OperationForm({
         {errorOf('categoryId') && <span className="text-xs text-destructive">{errorOf('categoryId')}</span>}
       </div>
 
-      <div className="flex flex-col gap-2">
-        <div className="relative">
-          <Pencil
-            aria-hidden
-            className="pointer-events-none absolute top-1/2 left-3.5 size-3.5 -translate-y-1/2 text-muted-foreground"
-          />
-          <Input
-            aria-label={t('operations.form.comment')}
-            aria-invalid={!!errorOf('comment')}
-            value={comment}
-            onChange={(event) => setComment(event.target.value)}
-            placeholder={t('operations.form.commentPlaceholder')}
-            maxLength={255}
-            autoComplete="off"
-            className="h-10 rounded-full border-transparent bg-card pl-9"
-          />
-        </div>
-        {errorOf('comment') && <span className="text-xs text-destructive">{errorOf('comment')}</span>}
-      </div>
+      <CommentInput value={comment} onChange={setComment} error={errorOf('comment')} />
 
       {failure && !hasFieldErrors(failure) && <Problem error={failure} />}
-      {/* Pinned to the bottom when the form scrolls. Reaches the dialog's edges and holds its bottom padding,
-          so the form scrolls behind it and never shows beneath; the fade above says there is more under it */}
-      <div className="sticky bottom-0 -mx-4 mt-auto bg-(--ws-soft) px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))] before:pointer-events-none before:absolute before:inset-x-0 before:-top-4 before:h-4 before:bg-linear-to-t before:from-(--ws-soft) before:to-transparent">
+      <div className={formStrip}>
         {operation && confirming ? (
           <div className="flex items-center gap-2">
             <span className="min-w-0 flex-1 text-sm font-semibold">{t('operations.form.deleteConfirm')}</span>
@@ -306,88 +321,5 @@ function OperationForm({
         )}
       </div>
     </form>
-  )
-}
-
-// Two radios drawn as one switch: the keyboard's arrows move between them, as with any radio group
-function KindToggle({ value, onChange }: { value: CategoryKind; onChange: (kind: CategoryKind) => void }) {
-  const { t } = useTranslation()
-  return (
-    <fieldset className="inline-grid grid-cols-2 gap-1 rounded-xl bg-card p-1">
-      <legend className="sr-only">{t('operations.form.kind')}</legend>
-      {(['EXPENSE', 'INCOME'] as const).map((kind) => (
-        <label
-          key={kind}
-          className="flex h-9 cursor-pointer items-center justify-center rounded-lg px-4 text-sm font-semibold text-muted-foreground has-checked:bg-(--ws) has-checked:text-white has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
-        >
-          <input
-            type="radio"
-            name="operation-kind"
-            value={kind}
-            checked={value === kind}
-            onChange={() => onChange(kind)}
-            className="sr-only"
-          />
-          {t(`operations.kind.${kind}`)}
-        </label>
-      ))}
-    </fieldset>
-  )
-}
-
-// The form's one large figure, in a white field on the tint. The sign is drawn from the kind, never typed: the
-// wire carries a magnitude.
-function AmountInput({
-  value,
-  autoFocus,
-  onChange,
-  income,
-  currency,
-  invalid,
-}: {
-  value: string
-  autoFocus: boolean
-  onChange: (value: string) => void
-  income: boolean
-  currency: string
-  invalid: boolean
-}) {
-  const { t } = useTranslation()
-  return (
-    // A white card like the categories' below, borderless; its ring is the wrapper's, so it turns red by what
-    // the input inside reports
-    <div
-      className={cn(
-        'flex min-w-0 items-center gap-2 rounded-2xl bg-card px-4 py-2 text-4xl font-extrabold tracking-tight tabular-nums',
-        'focus-within:ring-3 focus-within:ring-ring/30',
-        'has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/40',
-        'has-user-invalid:ring-3 has-user-invalid:ring-destructive/40',
-        income && 'text-positive',
-      )}
-    >
-      {/* The sign goes with the figure: the placeholder's shade while there is none, the figure's colour
-          once typed, so "−0.00" and "−333" each read as one */}
-      <span aria-hidden className={cn(!value && 'text-muted-foreground/40')}>
-        {income ? '+' : '−'}
-      </span>
-      <input
-        aria-label={t('operations.form.amount')}
-        autoFocus={autoFocus}
-        aria-invalid={invalid}
-        value={value}
-        // A keystroke that would make it anything but a decimal is dropped, so the field never holds one
-        onChange={(event) => isTypingAmount(event.target.value) && onChange(event.target.value)}
-        onBlur={() => onChange(withLeadingZero(value))}
-        inputMode="decimal"
-        pattern={amountPattern}
-        required
-        autoComplete="off"
-        placeholder="0.00"
-        className="h-14 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/40"
-      />
-      <span className="shrink-0 text-2xl font-semibold text-muted-foreground">
-        {currencySymbol(currency)}
-      </span>
-    </div>
   )
 }

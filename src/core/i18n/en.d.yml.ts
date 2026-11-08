@@ -164,6 +164,7 @@ declare const messages: {
     readonly kind: {
       readonly EXPENSE: "Expense"
       readonly INCOME: "Income"
+      readonly TRANSFER: "Transfer"
     }
     readonly form: {
       readonly title: "New operation"
@@ -200,6 +201,21 @@ declare const messages: {
       readonly deleteConfirm: "Delete this operation?"
       readonly keep: "Keep"
       readonly repeat: "Repeat"
+    }
+  }
+  readonly transfers: {
+    readonly form: {
+      readonly title: "New transfer"
+      readonly editTitle: "Edit transfer"
+      readonly deleteConfirm: "Delete this transfer?"
+      readonly from: "From"
+      readonly to: "To"
+      readonly swap: "Swap the accounts"
+      readonly amount: "Amount"
+      readonly amountSent: "Amount sent"
+      readonly amountReceived: "Amount received"
+      readonly needTwoAccounts: "A transfer moves money between two accounts, and this workspace has fewer than two open. Add another first."
+      readonly submit: "Add transfer"
     }
   }
   readonly feed: {
