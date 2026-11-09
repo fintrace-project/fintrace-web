@@ -42,14 +42,14 @@ export function FormHeader({
 }
 
 // Radios drawn as one switch: the keyboard's arrows move between them, as with any radio group
-function KindToggle({
+export function KindToggle<K extends FormKind>({
   value,
   onChange,
   kinds,
 }: {
-  value: FormKind
-  onChange: (kind: FormKind) => void
-  kinds: FormKind[]
+  value: K
+  onChange: (kind: K) => void
+  kinds: K[]
 }) {
   const { t } = useTranslation()
   return (

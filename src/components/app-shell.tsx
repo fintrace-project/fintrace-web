@@ -65,22 +65,24 @@ export function AppShell() {
           aria-label={t('shell.workspaceSections')}
           className="fixed inset-x-0 bottom-0 grid grid-cols-5 border-t bg-card px-2 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] md:hidden"
         >
-          {sections.map((section) => (
-            <NavLink
-              key={section.to}
-              to={section.to}
-              end={section.key === 'overview'}
-              className={({ isActive }) =>
-                cn(
-                  'flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground',
-                  isActive && 'font-bold text-(--ws)',
-                )
-              }
-            >
-              <section.icon className="size-[22px]" aria-hidden />
-              {t(`sections.${section.key}`)}
-            </NavLink>
-          ))}
+          {sections
+            .filter((section) => !section.desktopOnly)
+            .map((section) => (
+              <NavLink
+                key={section.to}
+                to={section.to}
+                end={section.key === 'overview'}
+                className={({ isActive }) =>
+                  cn(
+                    'flex min-h-13 flex-col items-center justify-center gap-1 text-[11px] text-muted-foreground',
+                    isActive && 'font-bold text-(--ws)',
+                  )
+                }
+              >
+                <section.icon className="size-[22px]" aria-hidden />
+                {t(`sections.${section.key}`)}
+              </NavLink>
+            ))}
         </nav>
       )}
     </div>

@@ -1,9 +1,10 @@
-import { Archive, Trash2 } from 'lucide-react'
+import { Archive, ChevronRight, Tags, Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { useNavigate, useParams } from 'react-router'
+import { Link, useNavigate, useParams } from 'react-router'
 import { Panel, Pending } from '@/components/cards'
 import { CurrencySelect } from '@/components/currency-select'
+import { workspaceCategories } from '@/components/workspace-sections'
 import { PageHeader } from '@/components/page-header'
 import { Field } from '@/components/field'
 import { Problem } from '@/components/problem'
@@ -34,6 +35,14 @@ export function WorkspaceSettingsPage() {
       <PageHeader title={t('settings.title')} />
       {/* Keyed by version: a newer workspace, saved here or elsewhere, starts the form afresh */}
       <GeneralPanel key={workspace.version} workspace={workspace} edit={edit} />
+      <Link
+        to={workspaceCategories(workspace.id)}
+        className="flex min-h-11 items-center gap-3 rounded-2xl border bg-card p-5 text-base font-bold md:hidden"
+      >
+        <Tags className="size-5 text-muted-foreground" aria-hidden />
+        <span className="flex-1">{t('sections.categories')}</span>
+        <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+      </Link>
       <StatusPanel workspace={workspace} />
       <DeletePanel workspace={workspace} />
     </div>

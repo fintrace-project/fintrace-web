@@ -22,6 +22,7 @@ const INSIDE: Record<string, string[]> = {
       'overview',
       'accounts',
       'account',
+      'categories',
       'operations',
       'statistics',
       'charts',

@@ -45,6 +45,7 @@ shell:
 sections:
   overview: Overview
   accounts: Accounts
+  categories: Categories
   operations: Operations
   statistics: Statistics
   charts: Charts
@@ -155,6 +156,31 @@ accounts:
     text: Archived accounts keep their history and balance but take no new entries. Restore one to use it again.
   restore: Restore
   restoring: Restoring…
+
+categories:
+  back: Back
+  fixed: Built-in
+  fixedText: Operations saved without a category land here. It cannot be renamed, moved or archived.
+  subcategories: Subcategories
+  noSubcategories: No subcategories yet.
+  actions: Actions for {{name}}
+  add: Add category
+  addSubcategory: Add subcategory
+  create:
+    title: New category
+    subcategoryTitle: New subcategory in {{name}}
+    closesImport: Adding a category closes import for this workspace for good.
+    action: Add
+    creating: Adding…
+  rename:
+    action: Rename
+    title: Rename {{name}}
+  move:
+    action: Move
+    title: Move {{name}}
+    text: Its subcategories move with it. Past operations stay where they are filed.
+    target: Where to move it
+    topLevel: Top level
 
 operations:
   add: Add operation

@@ -70,6 +70,23 @@ export function categoryOptions(categories: Category[], kind: CategoryKind): Cat
   return options
 }
 
+// Where a category can move: its own branch's root and any category there, except itself, what lies
+// below it, and Others, which stays a leaf (§4.7)
+export function moveTargets(categories: Category[], moving: Category): CategoryOption[] {
+  const root = rootOf(categories, moving.kind)
+  if (!root) {
+    return []
+  }
+  const below = categoryOptions(categories, moving.kind)
+    .filter(({ category }) => !isOthers(category))
+    .filter(({ category }) => !lineage(categories, category.id).some((each) => each.id === moving.id))
+    .map(({ category, depth }) => ({ category, depth: depth + 1 }))
+  return [{ category: root, depth: 0 }, ...below]
+}
+
+export const rootOf = (categories: Category[], kind: CategoryKind) =>
+  categories.find((each) => each.systemCode === `${kind}_ROOT`)
+
 // The names from below the branch's root down to the category: ["Food and drink", "Cafes"]
 export const categoryPath = (categories: Category[], id: string) =>
   lineage(categories, id).map((category) => category.name)

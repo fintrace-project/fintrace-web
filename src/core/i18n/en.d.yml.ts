@@ -43,6 +43,7 @@ declare const messages: {
   readonly sections: {
     readonly overview: "Overview"
     readonly accounts: "Accounts"
+    readonly categories: "Categories"
     readonly operations: "Operations"
     readonly statistics: "Statistics"
     readonly charts: "Charts"
@@ -158,6 +159,34 @@ declare const messages: {
     }
     readonly restore: "Restore"
     readonly restoring: "Restoring…"
+  }
+  readonly categories: {
+    readonly back: "Back"
+    readonly fixed: "Built-in"
+    readonly fixedText: "Operations saved without a category land here. It cannot be renamed, moved or archived."
+    readonly subcategories: "Subcategories"
+    readonly noSubcategories: "No subcategories yet."
+    readonly actions: "Actions for {{name}}"
+    readonly add: "Add category"
+    readonly addSubcategory: "Add subcategory"
+    readonly create: {
+      readonly title: "New category"
+      readonly subcategoryTitle: "New subcategory in {{name}}"
+      readonly closesImport: "Adding a category closes import for this workspace for good."
+      readonly action: "Add"
+      readonly creating: "Adding…"
+    }
+    readonly rename: {
+      readonly action: "Rename"
+      readonly title: "Rename {{name}}"
+    }
+    readonly move: {
+      readonly action: "Move"
+      readonly title: "Move {{name}}"
+      readonly text: "Its subcategories move with it. Past operations stay where they are filed."
+      readonly target: "Where to move it"
+      readonly topLevel: "Top level"
+    }
   }
   readonly operations: {
     readonly add: "Add operation"
