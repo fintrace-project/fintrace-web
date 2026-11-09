@@ -1,26 +1,24 @@
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronRight } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
 import { Pending } from '@/components/cards'
-import {
-  AddCategoryButton,
-  CategoryActionDialog,
-  CategoryMenu,
-  type CategoryAction,
-} from '@/components/category-actions'
-import { EntityIcon } from '@/components/entity-icon'
+import { AddCategoryTile, CategoryMenu } from '@/components/category-actions'
+import { ChildBadge, FoundGroups } from '@/components/category-grid'
+import { CardHeader, EntityTile, TileGroup, type Ring } from '@/components/entity-tile'
 import { KindToggle } from '@/components/form-header'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
-import { Button } from '@/components/ui/button'
 import type { Category, CategoryKind, Workspace } from '@/core/api'
-import { childrenOf, lineage, rootOf } from '@/core/categories'
+import { childrenOf, lineage, rootOf, searchCategories } from '@/core/categories'
 import { useCategories } from '@/hooks/use-categories'
+import { useLongPress } from '@/hooks/use-long-press'
 import { useWorkspace } from '@/hooks/use-workspaces'
 import { cn } from '@/lib/utils'
 
 const BRANCHES: CategoryKind[] = ['EXPENSE', 'INCOME']
+// TileGroup's and this page's grid-cols-4
+const COLUMNS = 4
 
 export function CategoriesPage() {
   // WorkspaceLayout renders this page only for a workspace id it has found
@@ -34,7 +32,7 @@ export function CategoriesPage() {
   const selectedId = params.get('category')
   const opened = categories?.find((each) => each.id === selectedId && each.parentId && !each.archived)
   const kind = opened?.kind ?? chosenKind
-  // In the URL, so the phone's back gesture closes the details
+  // In the URL, so the phone's back gesture walks back up the tree
   const open = (id: string | null) => setParams(id ? { category: id } : {})
 
   return (
@@ -42,14 +40,17 @@ export function CategoriesPage() {
       <PageHeader
         title={t('sections.categories')}
         actions={
-          <KindToggle
-            value={kind}
-            onChange={(next) => {
-              setChosenKind(next)
-              open(null)
-            }}
-            kinds={BRANCHES}
-          />
+          // A wide screen shows both branches, so there is nothing to switch
+          <div className="md:hidden">
+            <KindToggle
+              value={kind}
+              onChange={(next) => {
+                setChosenKind(next)
+                open(null)
+              }}
+              kinds={BRANCHES}
+            />
+          </div>
         }
       />
       {error ? (
@@ -57,18 +58,70 @@ export function CategoriesPage() {
       ) : !categories ? (
         <Pending>{t('common.loading')}</Pending>
       ) : (
-        <CategoryBrowser
-          workspace={workspace}
-          categories={categories}
-          kind={kind}
-          opened={opened}
-          open={open}
+        <div className="grid items-start gap-4 md:grid-cols-2">
+          {BRANCHES.map((branch) => (
+            <div key={branch} className={cn('min-w-0', branch !== kind && 'hidden md:block')}>
+              <CategoryBrowser
+                workspace={workspace}
+                categories={categories}
+                kind={branch}
+                opened={opened?.kind === branch ? opened : undefined}
+                open={open}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// The menu sits beside the tile, not in it: a button cannot hold another
+function ManagedTile({
+  category,
+  categories,
+  ring,
+  editable,
+  onClick,
+  onArchived,
+}: {
+  category: Category
+  categories: Category[]
+  ring: Ring
+  editable: boolean
+  onClick: () => void
+  onArchived: () => void
+}) {
+  const [menuOpen, setMenuOpen] = useState(false)
+  const press = useLongPress(() => setMenuOpen(true))
+
+  return (
+    <div
+      className="relative grid min-w-0 select-none [-webkit-touch-callout:none]"
+      {...(editable ? press : undefined)}
+    >
+      <EntityTile
+        entity={category}
+        ring={ring}
+        large
+        badge={<ChildBadge categories={categories} category={category} />}
+        onClick={onClick}
+      />
+      {editable && (
+        <CategoryMenu
+          category={category}
+          open={menuOpen}
+          onOpenChange={setMenuOpen}
+          onArchived={onArchived}
         />
       )}
     </div>
   )
 }
 
+// One card, as the operation form's picker: the branch's top level as tiles and, under it, a group for each
+// level on the way down to the chosen category. Unlike the picker it shows everything in reading order, since
+// a list being tidied should not hide or reorder itself by use
 function CategoryBrowser({
   workspace,
   categories,
@@ -82,173 +135,117 @@ function CategoryBrowser({
   opened: Category | undefined
   open: (id: string | null) => void
 }) {
+  const [search, setSearch] = useState('')
+  const panel = useRef<HTMLDivElement>(null)
   const { t } = useTranslation()
+  const openedId = opened?.id
+
+  useEffect(() => {
+    if (openedId) {
+      panel.current?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [openedId])
+
   // Core refuses every write to an archived workspace, and one mid-import
   const writable = workspace.status === 'NEW' || workspace.status === 'ACTIVE'
   const root = rootOf(categories, kind)
+  const chain = opened ? lineage(categories, opened.id) : []
+  const onChain = new Set(chain.map((each) => each.id))
+  const ringOf = (category: Category): Ring =>
+    category.id === opened?.id ? 'full' : onChain.has(category.id) ? 'soft' : 'none'
+  const upFromOpened = chain.at(-2)?.id ?? null
+
+  // Tapping the chosen one again steps back up
+  const choose = (category: Category) => {
+    setSearch('')
+    open(category.id === opened?.id ? upFromOpened : category.id)
+  }
+  const upFrom = (category: Category) => lineage(categories, category.id).at(-2)?.id ?? null
+  const tile = (category: Category) => (
+    <ManagedTile
+      key={category.id}
+      category={category}
+      categories={categories}
+      ring={ringOf(category)}
+      editable={writable && category.systemCode === null}
+      onClick={() => choose(category)}
+      onArchived={() => {
+        if (onChain.has(category.id)) {
+          open(upFrom(category))
+        }
+      }}
+    />
+  )
+
+  const query = search.trim()
+  const found = searchCategories(categories, kind, query)
+  // Others stays a leaf, so it opens no level of its own
+  const levels = chain.filter(
+    (each) => each.systemCode === null && (writable || childrenOf(categories, each.id).length > 0),
+  )
+
   const topLevel = root ? childrenOf(categories, root.id) : []
-  // A phone starts on the list alone; a wide screen has room to show the first one's details
-  const shown = opened ?? topLevel[0]
-  const activeId = shown && lineage(categories, shown.id)[0]?.id
+  const cells = topLevel.map(tile)
+  if (writable && root) {
+    cells.unshift(<AddCategoryTile key="add" workspace={workspace} parent={root} />)
+  }
+  const openedAt = cells.findIndex((cell) => cell.key === chain[0]?.id)
+  // The grid is always four across, so the panel can go straight under the tapped tile's row
+  const rowEnd = openedAt < 0 ? cells.length : (Math.floor(openedAt / COLUMNS) + 1) * COLUMNS
 
   return (
     <section
       aria-label={t(`operations.kind.${kind}`)}
-      className="grid rounded-2xl border bg-card md:min-h-[32rem] md:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)]"
+      className="flex flex-col gap-3 rounded-2xl border bg-card p-3"
     >
-      <div className={cn('flex min-w-0 flex-col gap-3 p-3 md:border-r md:p-4', opened && 'hidden md:flex')}>
-        <ul className="flex flex-col gap-1">
-          {topLevel.map((category) => (
-            <li key={category.id}>
-              <button
-                type="button"
-                aria-current={category.id === activeId ? 'true' : undefined}
-                onClick={() => open(category.id)}
-                className="flex min-h-13 w-full items-center gap-3 rounded-xl px-2 text-left outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 md:aria-current:bg-(--ws)/10 md:aria-current:font-semibold"
+      <CardHeader
+        title={t(`operations.kind.${kind}`)}
+        search={search}
+        onSearch={setSearch}
+        label={t('operations.form.searchCategories')}
+      />
+      <div className="grid grid-cols-4 gap-x-2 gap-y-2 empty:hidden">
+        {query ? found.top.map(tile) : cells.slice(0, rowEnd)}
+        {opened && !query && (levels.length > 0 || opened.systemCode !== null) && (
+          <div
+            ref={panel}
+            className="col-span-4 flex scroll-mb-24 flex-col gap-3 rounded-xl bg-muted/50 p-2 md:scroll-mb-4"
+          >
+            {levels.map((parent, index) => (
+              <TileGroup
+                key={parent.id}
+                divided={index > 0}
+                caption={
+                  <>
+                    <span className="truncate">{parent.name}</span>
+                    <ChevronRight aria-hidden className="size-3 shrink-0" />
+                  </>
+                }
               >
-                <EntityIcon entity={category} className="size-9 rounded-[10px]" />
-                <span className="min-w-0 flex-1 truncate text-row">{category.name}</span>
-                <ChildCount categories={categories} category={category} />
-                <ChevronRight className="size-4 shrink-0 text-muted-foreground md:hidden" aria-hidden />
-              </button>
-            </li>
-          ))}
-        </ul>
-        {writable && root && <AddCategoryButton workspace={workspace} root={root} />}
-      </div>
-      {shown && (
-        <div className={cn('flex min-w-0 p-4 md:p-6', !opened && 'hidden md:flex')}>
-          {/* Keyed, so an action left open on one category never carries over to the next */}
-          <CategoryDetails
-            key={shown.id}
-            workspace={workspace}
-            categories={categories}
-            category={shown}
-            writable={writable}
-            open={open}
-          />
-        </div>
-      )}
-    </section>
-  )
-}
-
-function ChildCount({ categories, category }: { categories: Category[]; category: Category }) {
-  const count = childrenOf(categories, category.id).length
-  return count > 0 && <span className="shrink-0 text-sm text-muted-foreground tabular-nums">{count}</span>
-}
-
-function CategoryDetails({
-  workspace,
-  categories,
-  category,
-  writable,
-  open,
-}: {
-  workspace: Workspace
-  categories: Category[]
-  category: Category
-  writable: boolean
-  open: (id: string | null) => void
-}) {
-  const [action, setAction] = useState<CategoryAction | null>(null)
-  const { t } = useTranslation()
-  const ancestors = lineage(categories, category.id).slice(0, -1)
-  const children = childrenOf(categories, category.id)
-  const fixed = category.systemCode !== null
-  const editable = writable && !fixed
-
-  return (
-    <div className="flex min-w-0 flex-1 flex-col gap-5">
-      <Button
-        variant="ghost"
-        onClick={() => open(ancestors.at(-1)?.id ?? null)}
-        className="-ml-2 h-11 self-start text-muted-foreground md:hidden"
-      >
-        <ChevronLeft aria-hidden />
-        {t('categories.back')}
-      </Button>
-      <header className="flex items-center gap-3">
-        <EntityIcon entity={category} className="size-13 rounded-xl text-base" />
-        <div className="min-w-0 flex-1">
-          <p className="flex flex-wrap items-center gap-x-1 text-sm text-muted-foreground">
-            <span>{t(`operations.kind.${category.kind}`)}</span>
-            <ChevronRight className="size-3.5" aria-hidden />
-            {ancestors.map((ancestor) => (
-              <span key={ancestor.id} className="flex min-w-0 items-center gap-x-1">
-                <button
-                  type="button"
-                  onClick={() => open(ancestor.id)}
-                  className="min-w-0 truncate rounded outline-none hover:text-foreground hover:underline focus-visible:ring-3 focus-visible:ring-ring/50"
-                >
-                  {ancestor.name}
-                </button>
-                <ChevronRight className="size-3.5 shrink-0" aria-hidden />
-              </span>
+                {writable && <AddCategoryTile workspace={workspace} parent={parent} />}
+                {childrenOf(categories, parent.id).map(tile)}
+              </TileGroup>
             ))}
-          </p>
-          <h2 className="truncate text-xl font-bold">{category.name}</h2>
-        </div>
-        {editable && (
-          <Button variant="outline" onClick={() => setAction('rename')} className="h-11 md:h-9">
-            {t('categories.rename.action')}
-          </Button>
-        )}
-        {fixed && <span className="shrink-0 text-xs text-muted-foreground">{t('categories.fixed')}</span>}
-      </header>
-      {fixed ? (
-        <p className="text-sm text-muted-foreground">{t('categories.fixedText')}</p>
-      ) : (
-        <section className="flex flex-col gap-1">
-          <div className="flex min-h-11 items-center justify-between gap-2">
-            <h3 className="text-sm font-semibold">{t('categories.subcategories')}</h3>
-            {editable && (
-              <Button variant="secondary" onClick={() => setAction('add')} className="h-11 md:h-9">
-                <Plus aria-hidden />
-                {t('categories.create.action')}
-              </Button>
+            {opened.systemCode !== null && (
+              <p className="px-1 text-sm text-muted-foreground">{t('categories.fixedText')}</p>
             )}
           </div>
-          {children.length === 0 ? (
-            <p className="py-2 text-sm text-muted-foreground">{t('categories.noSubcategories')}</p>
-          ) : (
-            <ul className="divide-y">
-              {children.map((child) => (
-                <li key={child.id} className="flex items-center gap-1 py-1">
-                  <button
-                    type="button"
-                    onClick={() => open(child.id)}
-                    className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 text-left outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
-                  >
-                    <EntityIcon entity={child} className="size-7 rounded-lg text-[11px]" />
-                    <span className="min-w-0 flex-1 truncate text-row">{child.name}</span>
-                    <ChildCount categories={categories} category={child} />
-                    <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                  </button>
-                  {writable && <CategoryMenu workspace={workspace} category={child} />}
-                </li>
-              ))}
-            </ul>
+        )}
+        {!query && cells.slice(rowEnd)}
+      </div>
+      {!query && writable && (
+        <p className="px-1 text-xs text-muted-foreground md:hidden">{t('categories.holdHint')}</p>
+      )}
+      {query && (
+        <>
+          <FoundGroups found={found} tile={tile} />
+          {found.top.length === 0 && found.below.length === 0 && (
+            <p className="py-2 text-center text-sm text-muted-foreground">
+              {t('operations.form.noCategory')}
+            </p>
           )}
-        </section>
+        </>
       )}
-      {editable && (
-        <footer className="mt-auto flex flex-wrap gap-2 pt-2">
-          <Button variant="outline" onClick={() => setAction('move')} className="h-11 md:h-9">
-            {t('categories.move.action')}
-          </Button>
-          <Button variant="destructive" onClick={() => setAction('archive')} className="h-11 md:h-9">
-            {t('categories.archive.action')}
-          </Button>
-        </footer>
-      )}
-      <CategoryActionDialog
-        workspace={workspace}
-        category={category}
-        action={action}
-        onClose={() => setAction(null)}
-        onArchived={() => open(ancestors.at(-1)?.id ?? null)}
-      />
-    </div>
+    </section>
   )
 }

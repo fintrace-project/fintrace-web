@@ -1,9 +1,15 @@
 import { ChevronRight } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { Fragment, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { CardHeader, EntityTile, MoreTile, TileGroup, type Ring } from '@/components/entity-tile'
 import type { Category, CategoryKind } from '@/core/api'
-import { categoryOptions, categoryPath, childrenOf, lineage, topLevelCategories } from '@/core/categories'
+import {
+  childrenOf,
+  lineage,
+  searchCategories,
+  topLevelCategories,
+  type CategorySearch,
+} from '@/core/categories'
 import { recentCategoryIds, withChosen } from '@/core/recent'
 import { useWorkspaceFeed } from '@/hooks/use-feed'
 
@@ -43,22 +49,8 @@ export function CategoryGrid({
   // One picked deeper or through the search stays in view
   const tiles = withChosen(top, chain[0], TILES)
 
-  const query = search.trim().toLocaleLowerCase()
-  const found = query
-    ? categoryOptions(categories, kind)
-        .map(({ category }) => ({ category, path: categoryPath(categories, category.id) }))
-        .filter(({ path }) => path.join(' ').toLocaleLowerCase().includes(query))
-    : []
-  // The search keeps the tree's shape: top-level matches as the grid's tiles, deeper ones in a group per parent
-  const foundTop = found.filter(({ path }) => path.length === 1).map(({ category }) => category)
-  const foundBelow = new Map<string, { path: string[]; matches: Category[] }>()
-  for (const { category, path } of found) {
-    if (path.length > 1 && category.parentId) {
-      const group = foundBelow.get(category.parentId) ?? { path: path.slice(0, -1), matches: [] }
-      group.matches.push(category)
-      foundBelow.set(category.parentId, group)
-    }
-  }
+  const query = search.trim()
+  const found = searchCategories(categories, kind, query)
   const levels = chain.filter((category) => childrenOf(categories, category.id).length > 0)
 
   // A choice in the grid or the search folds it back to the recent few
@@ -71,6 +63,16 @@ export function CategoryGrid({
     setExpanded(!expanded)
     setSearch('')
   }
+  const tileOn = (pick: (categoryId: string) => void) => (category: Category) => (
+    <EntityTile
+      key={category.id}
+      entity={category}
+      ring={ringOf(category)}
+      badge={<ChildBadge categories={categories} category={category} />}
+      onClick={() => pick(category.id)}
+    />
+  )
+  const tile = tileOn(choose)
 
   return (
     // A white card on the dialog's tint, as content is on the pages
@@ -82,49 +84,11 @@ export function CategoryGrid({
         label={t('operations.form.searchCategories')}
       />
       <div className="grid grid-cols-4 gap-x-2 gap-y-2 empty:hidden">
-        {query
-          ? foundTop.map((category) => (
-              <EntityTile
-                key={category.id}
-                entity={category}
-                ring={ringOf(category)}
-                onClick={() => choose(category.id)}
-              />
-            ))
-          : (expanded ? top : tiles).map((category) => (
-              <EntityTile
-                key={category.id}
-                entity={category}
-                ring={ringOf(category)}
-                onClick={() => choose(category.id)}
-              />
-            ))}
+        {query ? found.top.map(tile) : (expanded ? top : tiles).map(tile)}
         {!query && <MoreTile expanded={expanded} onToggle={toggle} />}
       </div>
-      {[...foundBelow].map(([parentId, { path, matches }], index) => (
-        <TileGroup
-          key={parentId}
-          divided={foundTop.length > 0 || index > 0}
-          caption={
-            <>
-              <span className="truncate">
-                <Path names={path} />
-              </span>
-              <ChevronRight aria-hidden className="size-3 shrink-0" />
-            </>
-          }
-        >
-          {matches.map((category) => (
-            <EntityTile
-              key={category.id}
-              entity={category}
-              ring={ringOf(category)}
-              onClick={() => choose(category.id)}
-            />
-          ))}
-        </TileGroup>
-      ))}
-      {query && found.length === 0 && (
+      <FoundGroups found={found} tile={tile} />
+      {query && found.top.length === 0 && found.below.length === 0 && (
         <p className="py-2 text-center text-sm text-muted-foreground">{t('operations.form.noCategory')}</p>
       )}
 
@@ -142,18 +106,52 @@ export function CategoryGrid({
               </>
             }
           >
-            {childrenOf(categories, parent.id).map((child) => (
-              <EntityTile
-                key={child.id}
-                entity={child}
-                ring={ringOf(child)}
-                onClick={() => onChange(child.id)}
-              />
-            ))}
+            {childrenOf(categories, parent.id).map(tileOn(onChange))}
           </TileGroup>
         ))}
     </div>
   )
+}
+
+// How many subcategories a tile opens, on its icon's corner; nothing on a leaf
+export function ChildBadge({ categories, category }: { categories: Category[]; category: Category }) {
+  const { t } = useTranslation()
+  const count = childrenOf(categories, category.id).length
+  if (count === 0) {
+    return null
+  }
+  return (
+    <span className="absolute -right-1 -bottom-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-secondary px-1 text-[11px] font-bold text-foreground tabular-nums ring-2 ring-card">
+      <span aria-hidden>{count}</span>
+      <span className="sr-only">{t('categories.childCount', { count })}</span>
+    </span>
+  )
+}
+
+// A search's deeper matches, a group per parent, following the grid of its top-level ones
+export function FoundGroups({
+  found,
+  tile,
+}: {
+  found: CategorySearch
+  tile: (category: Category) => ReactNode
+}) {
+  return found.below.map(({ parentId, path, matches }, index) => (
+    <TileGroup
+      key={parentId}
+      divided={found.top.length > 0 || index > 0}
+      caption={
+        <>
+          <span className="truncate">
+            <Path names={path} />
+          </span>
+          <ChevronRight aria-hidden className="size-3 shrink-0" />
+        </>
+      }
+    >
+      {matches.map(tile)}
+    </TileGroup>
+  ))
 }
 
 // Names joined by chevrons

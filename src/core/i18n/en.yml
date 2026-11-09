@@ -159,14 +159,13 @@ accounts:
   restoring: Restoring…
 
 categories:
-  back: Back
-  fixed: Built-in
-  fixedText: Operations saved without a category land here. It cannot be renamed, moved or archived.
-  subcategories: Subcategories
-  noSubcategories: No subcategories yet.
+  childCount_one: '{{count, number}} subcategory'
+  childCount_other: '{{count, number}} subcategories'
+  holdHint: Press and hold a category to rename, move or archive it.
   actions: Actions for {{name}}
-  add: Add category
-  addSubcategory: Add subcategory
+  fixedText: Operations saved without a category land here. It cannot be renamed, moved or archived.
+  add: New category
+  addSubcategory: New subcategory
   create:
     title: New category
     subcategoryTitle: New subcategory in {{name}}

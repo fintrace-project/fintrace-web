@@ -162,14 +162,13 @@ declare const messages: {
     readonly restoring: "Restoring…"
   }
   readonly categories: {
-    readonly back: "Back"
-    readonly fixed: "Built-in"
-    readonly fixedText: "Operations saved without a category land here. It cannot be renamed, moved or archived."
-    readonly subcategories: "Subcategories"
-    readonly noSubcategories: "No subcategories yet."
+    readonly childCount_one: "{{count, number}} subcategory"
+    readonly childCount_other: "{{count, number}} subcategories"
+    readonly holdHint: "Press and hold a category to rename, move or archive it."
     readonly actions: "Actions for {{name}}"
-    readonly add: "Add category"
-    readonly addSubcategory: "Add subcategory"
+    readonly fixedText: "Operations saved without a category land here. It cannot be renamed, moved or archived."
+    readonly add: "New category"
+    readonly addSubcategory: "New subcategory"
     readonly create: {
       readonly title: "New category"
       readonly subcategoryTitle: "New subcategory in {{name}}"

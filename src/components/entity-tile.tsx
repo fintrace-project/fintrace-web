@@ -16,11 +16,16 @@ export function EntityTile({
   entity,
   ring,
   sub,
+  large,
+  badge,
   onClick,
 }: {
   entity: Iconed
   ring: Ring
   sub?: ReactNode
+  large?: boolean
+  // Pinned to the icon's corner by whoever passes it
+  badge?: ReactNode
   onClick: () => void
 }) {
   return (
@@ -29,14 +34,17 @@ export function EntityTile({
           workspace's, which marks a choice everywhere in the form */}
       <span
         className={cn(
-          'rounded-full p-0.5 ring-2 ring-transparent transition-shadow',
+          'relative rounded-full p-0.5 ring-2 ring-transparent transition-shadow',
           ring === 'full' && 'ring-(--ws)',
           ring === 'soft' && 'ring-(--ws)/35',
         )}
       >
         <EntityIcon entity={entity} className="size-13 rounded-full text-sm" />
+        {badge}
       </span>
-      <TileName selected={ring !== 'none'}>{entity.name}</TileName>
+      <TileName selected={ring !== 'none'} large={large}>
+        {entity.name}
+      </TileName>
       {sub && (
         <span className="-mt-1 w-full truncate text-center text-[11px] leading-tight text-muted-foreground tabular-nums">
           {sub}
@@ -79,7 +87,7 @@ export function CardHeader({
           onChange={(event) => onSearch(event.target.value)}
           placeholder={t('operations.form.search')}
           autoComplete="off"
-          className="h-11 rounded-full border-transparent bg-(--ws-soft) pr-3 pl-8 text-base md:h-8 md:text-sm"
+          className="h-11 rounded-full border-transparent bg-muted pr-3 pl-8 text-base md:h-8 md:text-sm"
         />
       </div>
     </div>
@@ -105,12 +113,22 @@ export function MoreTile({ expanded, onToggle }: { expanded: boolean; onToggle: 
 
 // Two lines at most. No room is kept for a second: tiles sit at the top of their row, so a longer name only
 // makes its row taller
-export function TileName({ selected, children }: { selected?: boolean; children: ReactNode }) {
+export function TileName({
+  selected,
+  large,
+  children,
+}: {
+  selected?: boolean
+  // For a page of tiles, with room a dialog's picker does not have
+  large?: boolean
+  children: ReactNode
+}) {
   return (
     <span
       className={cn(
-        'line-clamp-2 w-full text-center text-[11px] leading-tight break-words',
-        selected && 'font-semibold',
+        'line-clamp-2 w-full text-center leading-tight break-words',
+        large ? 'text-xs md:text-sm' : 'text-[11px]',
+        selected ? 'font-semibold' : large && 'font-medium',
       )}
     >
       {children}

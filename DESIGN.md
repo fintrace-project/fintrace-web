@@ -163,7 +163,7 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 
 ### Secondary
 
-- **Workspace Tint** (the matching `workspace-*-soft`, as `--ws-soft`): the whole page background inside a workspace, plus active navigation, search fields and full-screen forms.
+- **Workspace Tint** (the matching `workspace-*-soft`, as `--ws-soft`): the whole page background inside a workspace, plus active navigation and full-screen forms.
 
 ### Neutral
 
@@ -205,7 +205,7 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 - **Caption** (13px, `text-caption`): form labels, day headings and hints.
 - **Label** (semibold, 12px, uppercase, slight tracking): card headings in forms.
 - **Micro** (extra-bold, 10px): initials on badges and small icons, and nothing else. It is the floor.
-- **Tile** (11px, tight leading, up to two lines): names under tiles and bottom-tab labels.
+- **Tile** (11px, tight leading, up to two lines): names under tiles and bottom-tab labels. On a page of tiles, with no form competing for the room, names are medium weight at 12px on phones and 14px from `md`.
 
 ### Named Rules
 
@@ -264,7 +264,7 @@ Generously rounded, with radius growing with size: about 10px for controls and s
 
 ### Inputs / Fields
 
-- **Style:** hairline, 12px radius, transparent fill. Search inside forms is a borderless capsule on the workspace tint.
+- **Style:** hairline, 12px radius, transparent fill. Search inside a card is a borderless capsule on Muted Paper, as the workspace tint would read as a hole through to the page.
 - **Focus:** border shifts to Ring with a 3px soft ring.
 - **Error / Disabled:** red border and soft red ring; disabled fades to 50%.
 
@@ -275,7 +275,7 @@ Generously rounded, with radius growing with size: about 10px for controls and s
 
 ### Entity Tile
 
-The signature picker: a 52px round icon in the entity's own colour, with its name below in up to two lines. A chosen tile wears a full ring in the workspace accent; a tile on the way to the chosen one, such as its parent, wears a soft ring.
+The signature picker: a 52px round icon in the entity's own colour, with its name below in up to two lines. A chosen tile wears a full ring in the workspace accent; a tile on the way to the chosen one, such as its parent, wears a soft ring. A category with subcategories carries their count in a neutral badge on the icon's corner.
 
 ### Feed Row
 

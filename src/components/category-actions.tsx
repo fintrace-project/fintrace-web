@@ -2,6 +2,7 @@ import { Archive, Check, EllipsisVertical, FolderInput, Pencil, Plus } from 'luc
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EntityIcon } from '@/components/entity-icon'
+import { TileName, tileClass } from '@/components/entity-tile'
 import { Field } from '@/components/field'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
@@ -26,87 +27,61 @@ import { moveTargets } from '@/core/categories'
 import { useCategories } from '@/hooks/use-categories'
 import { useArchiveCategory, useCreateCategory, useReviseCategory } from '@/hooks/use-category-mutations'
 
-// The dashed control closing the branch's card, adding to its top level
-export function AddCategoryButton({ workspace, root }: { workspace: Workspace; root: Category }) {
+// The dashed tile opening a group, so a long list needs no scrolling to add to it
+export function AddCategoryTile({ workspace, parent }: { workspace: Workspace; parent: Category }) {
   const [open, setOpen] = useState(false)
   const { t } = useTranslation()
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="flex h-11 items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-dashed border-muted-foreground/30 text-sm font-semibold text-muted-foreground outline-none hover:border-(--ws)/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
-      >
-        <Plus className="size-4" aria-hidden />
-        {t('categories.add')}
+      <button type="button" onClick={() => setOpen(true)} className={tileClass}>
+        <span className="flex size-14 items-center justify-center rounded-full border-[1.5px] border-dashed border-muted-foreground/30 text-muted-foreground">
+          <Plus className="size-5" aria-hidden />
+        </span>
+        <TileName large>{t(parent.parentId ? 'categories.addSubcategory' : 'categories.add')}</TileName>
       </button>
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
-          <CreateForm workspace={workspace} parent={root} onCreated={() => setOpen(false)} />
+          <CreateForm workspace={workspace} parent={parent} onCreated={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </>
   )
 }
 
-export type CategoryAction = 'add' | 'rename' | 'move' | 'archive'
+type CategoryAction = 'rename' | 'move' | 'archive'
 
-export function CategoryActionDialog({
-  workspace,
+// The dialog is beside the menu, as the menu's content unmounts once an item is chosen
+export function CategoryMenu({
   category,
-  action,
-  onClose,
+  open,
+  onOpenChange,
   onArchived,
 }: {
-  workspace: Workspace
   category: Category
-  action: CategoryAction | null
-  onClose: () => void
-  onArchived?: () => void
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onArchived: () => void
 }) {
-  return (
-    <Dialog open={action !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
-        {action === 'add' && <CreateForm workspace={workspace} parent={category} onCreated={onClose} />}
-        {action === 'rename' && <RenameForm category={category} onRenamed={onClose} />}
-        {action === 'move' && <MoveForm category={category} onMoved={onClose} />}
-        {action === 'archive' && (
-          <ArchiveConfirmation
-            category={category}
-            onArchived={() => {
-              onClose()
-              onArchived?.()
-            }}
-          />
-        )}
-      </DialogContent>
-    </Dialog>
-  )
-}
-
-export function CategoryMenu({ workspace, category }: { workspace: Workspace; category: Category }) {
   const [dialog, setDialog] = useState<CategoryAction | null>(null)
   const { t } = useTranslation()
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={onOpenChange}>
         <DropdownMenuTrigger asChild>
+          {/* On a phone the long press opens it: unseen, still there for a screen reader, and as big as the tile
+              so that the menu opens clear of the finger, which would choose an item on lifting */}
           <Button
             variant="ghost"
             size="icon"
             aria-label={t('categories.actions', { name: category.name })}
-            className="size-11 shrink-0 rounded-[10px] text-muted-foreground md:size-9"
+            className="absolute top-0 right-0 size-7 rounded-full text-muted-foreground max-md:pointer-events-none max-md:size-full max-md:opacity-0"
           >
             <EllipsisVertical aria-hidden />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5">
-          <DropdownMenuItem onSelect={() => setDialog('add')} className="min-h-11 gap-2.5 px-2 md:min-h-9">
-            <Plus aria-hidden />
-            {t('categories.addSubcategory')}
-          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setDialog('rename')} className="min-h-11 gap-2.5 px-2 md:min-h-9">
             <Pencil aria-hidden />
             {t('categories.rename.action')}
@@ -125,14 +100,43 @@ export function CategoryMenu({ workspace, category }: { workspace: Workspace; ca
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      {/* Beside the menu, not inside it: the menu's content unmounts as soon as an item is chosen */}
       <CategoryActionDialog
-        workspace={workspace}
         category={category}
         action={dialog}
         onClose={() => setDialog(null)}
+        onArchived={onArchived}
       />
     </>
+  )
+}
+
+function CategoryActionDialog({
+  category,
+  action,
+  onClose,
+  onArchived,
+}: {
+  category: Category
+  action: CategoryAction | null
+  onClose: () => void
+  onArchived?: () => void
+}) {
+  return (
+    <Dialog open={action !== null} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent>
+        {action === 'rename' && <RenameForm category={category} onRenamed={onClose} />}
+        {action === 'move' && <MoveForm category={category} onMoved={onClose} />}
+        {action === 'archive' && (
+          <ArchiveConfirmation
+            category={category}
+            onArchived={() => {
+              onClose()
+              onArchived?.()
+            }}
+          />
+        )}
+      </DialogContent>
+    </Dialog>
   )
 }
 

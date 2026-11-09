@@ -70,6 +70,35 @@ export function categoryOptions(categories: Category[], kind: CategoryKind): Cat
   return options
 }
 
+export interface CategorySearch {
+  top: Category[]
+  below: { parentId: string; path: string[]; matches: Category[] }[]
+}
+
+// Keeps the tree's shape: top-level matches apart, deeper ones in a group per parent
+export function searchCategories(categories: Category[], kind: CategoryKind, query: string): CategorySearch {
+  const wanted = query.trim().toLocaleLowerCase()
+  const found = wanted
+    ? categoryOptions(categories, kind)
+        .map(({ category }) => ({ category, path: categoryPath(categories, category.id) }))
+        .filter(({ path }) => path.join(' ').toLocaleLowerCase().includes(wanted))
+    : []
+  const top = found.filter(({ path }) => path.length === 1).map(({ category }) => category)
+  const below = new Map<string, CategorySearch['below'][number]>()
+  for (const { category, path } of found) {
+    if (path.length > 1 && category.parentId) {
+      const group = below.get(category.parentId) ?? {
+        parentId: category.parentId,
+        path: path.slice(0, -1),
+        matches: [],
+      }
+      group.matches.push(category)
+      below.set(category.parentId, group)
+    }
+  }
+  return { top, below: [...below.values()] }
+}
+
 // Where a category can move: its own branch's root and any category there, except itself, what lies
 // below it, and Others, which stays a leaf (§4.7)
 export function moveTargets(categories: Category[], moving: Category): CategoryOption[] {
