@@ -182,6 +182,11 @@ categories:
     text: Its subcategories move with it. Past operations stay where they are filed.
     target: Where to move it
     topLevel: Top level
+  archive:
+    action: Archive
+    archiving: Archiving…
+    title: Archive {{name}}?
+    text: Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. This cannot be undone.
 
 operations:
   add: Add operation

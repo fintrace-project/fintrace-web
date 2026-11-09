@@ -237,6 +237,9 @@ function CategoryDetails({
           <Button variant="outline" onClick={() => setAction('move')} className="h-11 md:h-9">
             {t('categories.move.action')}
           </Button>
+          <Button variant="destructive" onClick={() => setAction('archive')} className="h-11 md:h-9">
+            {t('categories.archive.action')}
+          </Button>
         </footer>
       )}
       <CategoryActionDialog
@@ -244,6 +247,7 @@ function CategoryDetails({
         category={category}
         action={action}
         onClose={() => setAction(null)}
+        onArchived={() => open(ancestors.at(-1)?.id ?? null)}
       />
     </div>
   )

@@ -39,3 +39,20 @@ export function useReviseCategory(category: Category) {
       ),
   })
 }
+
+export function useArchiveCategory(category: Category) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () =>
+      dataOf(
+        await api.DELETE('/api/v1/workspaces/{workspaceId}/categories/{categoryId}', {
+          params: { path: { workspaceId: category.workspaceId, categoryId: category.id } },
+        }),
+      ),
+    // Refetched, as the response names only this category and its subtree went too. Not awaited: the caller's
+    // own onSuccess has to run while the details of this category are still mounted
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: listKey(category.workspaceId), exact: true })
+    },
+  })
+}

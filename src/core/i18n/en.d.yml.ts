@@ -188,6 +188,12 @@ declare const messages: {
       readonly target: "Where to move it"
       readonly topLevel: "Top level"
     }
+    readonly archive: {
+      readonly action: "Archive"
+      readonly archiving: "Archiving…"
+      readonly title: "Archive {{name}}?"
+      readonly text: "Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. This cannot be undone."
+    }
   }
   readonly operations: {
     readonly add: "Add operation"

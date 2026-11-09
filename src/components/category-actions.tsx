@@ -1,4 +1,4 @@
-import { Check, EllipsisVertical, FolderInput, Pencil, Plus } from 'lucide-react'
+import { Archive, Check, EllipsisVertical, FolderInput, Pencil, Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EntityIcon } from '@/components/entity-icon'
@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input'
 import { fieldError, hasFieldErrors, type Category, type Workspace } from '@/core/api'
 import { moveTargets } from '@/core/categories'
 import { useCategories } from '@/hooks/use-categories'
-import { useCreateCategory, useReviseCategory } from '@/hooks/use-category-mutations'
+import { useArchiveCategory, useCreateCategory, useReviseCategory } from '@/hooks/use-category-mutations'
 
 // The dashed control closing the branch's card, adding to its top level
 export function AddCategoryButton({ workspace, root }: { workspace: Workspace; root: Category }) {
@@ -50,18 +50,20 @@ export function AddCategoryButton({ workspace, root }: { workspace: Workspace; r
   )
 }
 
-export type CategoryAction = 'add' | 'rename' | 'move'
+export type CategoryAction = 'add' | 'rename' | 'move' | 'archive'
 
 export function CategoryActionDialog({
   workspace,
   category,
   action,
   onClose,
+  onArchived,
 }: {
   workspace: Workspace
   category: Category
   action: CategoryAction | null
   onClose: () => void
+  onArchived?: () => void
 }) {
   return (
     <Dialog open={action !== null} onOpenChange={(open) => !open && onClose()}>
@@ -69,6 +71,15 @@ export function CategoryActionDialog({
         {action === 'add' && <CreateForm workspace={workspace} parent={category} onCreated={onClose} />}
         {action === 'rename' && <RenameForm category={category} onRenamed={onClose} />}
         {action === 'move' && <MoveForm category={category} onMoved={onClose} />}
+        {action === 'archive' && (
+          <ArchiveConfirmation
+            category={category}
+            onArchived={() => {
+              onClose()
+              onArchived?.()
+            }}
+          />
+        )}
       </DialogContent>
     </Dialog>
   )
@@ -103,6 +114,14 @@ export function CategoryMenu({ workspace, category }: { workspace: Workspace; ca
           <DropdownMenuItem onSelect={() => setDialog('move')} className="min-h-11 gap-2.5 px-2 md:min-h-9">
             <FolderInput aria-hidden />
             {t('categories.move.action')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => setDialog('archive')}
+            className="min-h-11 gap-2.5 px-2 md:min-h-9"
+          >
+            <Archive aria-hidden />
+            {t('categories.archive.action')}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -220,6 +239,36 @@ function MoveForm({ category, onMoved }: { category: Category; onMoved: () => vo
         </Button>
       </DialogFooter>
     </form>
+  )
+}
+
+function ArchiveConfirmation({ category, onArchived }: { category: Category; onArchived: () => void }) {
+  const archive = useArchiveCategory(category)
+  const { t } = useTranslation()
+
+  return (
+    <div className="flex min-w-0 flex-col gap-4">
+      <DialogHeader>
+        <DialogTitle>{t('categories.archive.title', { name: category.name })}</DialogTitle>
+        <DialogDescription>{t('categories.archive.text')}</DialogDescription>
+      </DialogHeader>
+      {archive.error && <Problem error={archive.error} />}
+      <DialogFooter>
+        <DialogClose asChild>
+          <Button type="button" variant="outline" className="h-11 md:h-9">
+            {t('common.cancel')}
+          </Button>
+        </DialogClose>
+        <Button
+          type="button"
+          disabled={archive.isPending}
+          onClick={() => archive.mutate(undefined, { onSuccess: onArchived })}
+          className="h-11 bg-destructive text-white hover:bg-destructive/90 md:h-9"
+        >
+          {t(archive.isPending ? 'categories.archive.archiving' : 'categories.archive.action')}
+        </Button>
+      </DialogFooter>
+    </div>
   )
 }
 
