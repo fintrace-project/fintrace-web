@@ -123,7 +123,9 @@ function CategoryActionDialog({
 }) {
   return (
     <Dialog open={action !== null} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent>
+      {/* Never scrolls itself: the move's list takes what height is left and scrolls alone, or a short screen
+          gets two scrollbars, one eating into the footer */}
+      <DialogContent className="flex flex-col overflow-hidden">
         {action === 'rename' && <RenameForm category={category} onRenamed={onClose} />}
         {action === 'move' && <MoveForm category={category} onMoved={onClose} />}
         {action === 'archive' && (
@@ -198,12 +200,12 @@ function MoveForm({ category, onMoved }: { category: Category; onMoved: () => vo
   }
 
   return (
-    <form onSubmit={submit} className="flex min-w-0 flex-col gap-4">
+    <form onSubmit={submit} className="flex min-h-0 min-w-0 flex-col gap-4">
       <DialogHeader>
         <DialogTitle>{t('categories.move.title', { name: category.name })}</DialogTitle>
         <DialogDescription>{t('categories.move.text')}</DialogDescription>
       </DialogHeader>
-      <fieldset className="flex max-h-[50dvh] flex-col overflow-y-auto">
+      <fieldset className="flex max-h-[50dvh] min-h-0 flex-col overflow-y-auto">
         <legend className="sr-only">{t('categories.move.target')}</legend>
         {moveTargets(categories, category).map(({ category: target, depth }) => (
           <label
