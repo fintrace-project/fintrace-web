@@ -179,7 +179,6 @@ categories:
     action: Move
     title: Move {{name}}
     text: Its subcategories move with it. Past operations stay where they are filed.
-    target: Where to move it
     topLevel: Top level
   archive:
     action: Archive

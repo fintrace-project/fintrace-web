@@ -1,8 +1,8 @@
-import { Archive, Check, EllipsisVertical, FolderInput, Pencil, Plus } from 'lucide-react'
-import { useState, type FormEvent } from 'react'
+import { Archive, ChevronRight, EllipsisVertical, FolderInput, ListTree, Pencil, Plus } from 'lucide-react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { EntityIcon } from '@/components/entity-icon'
-import { TileName, tileClass } from '@/components/entity-tile'
+import { ChildBadge, FoundGroups } from '@/components/category-grid'
+import { CardHeader, EntityTile, TileGroup, TileName, tileClass, type Ring } from '@/components/entity-tile'
 import { Field } from '@/components/field'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
@@ -23,9 +23,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { fieldError, hasFieldErrors, type Category, type Workspace } from '@/core/api'
-import { moveTargets } from '@/core/categories'
+import { childrenOf, lineage, moveTargets, searchCategories } from '@/core/categories'
 import { useCategories } from '@/hooks/use-categories'
 import { useArchiveCategory, useCreateCategory, useReviseCategory } from '@/hooks/use-category-mutations'
+import { cn } from '@/lib/utils'
 
 // The dashed tile opening a group, so a long list needs no scrolling to add to it
 export function AddCategoryTile({ workspace, parent }: { workspace: Workspace; parent: Category }) {
@@ -192,7 +193,55 @@ function MoveForm({ category, onMoved }: { category: Category; onMoved: () => vo
   const move = useReviseCategory(category)
   const { data: categories = [] } = useCategories(category.workspaceId)
   const [parentId, setParentId] = useState(category.parentId!)
+  const [search, setSearch] = useState('')
   const { t } = useTranslation()
+
+  // The branch's root first, then everything but the category's own subtree and Others
+  const [root, ...below] = moveTargets(categories, category).map((option) => option.category)
+  const allowed = new Set(below.map((each) => each.id))
+  const allowedChildren = (id: string) => childrenOf(categories, id).filter((each) => allowed.has(each.id))
+  const chain = lineage(categories, parentId)
+  const onChain = new Set(chain.map((each) => each.id))
+  const ringOf = (target: Category): Ring =>
+    target.id === parentId ? 'full' : onChain.has(target.id) ? 'soft' : 'none'
+  const choose = (target: Category) => {
+    setParentId(target.id)
+    setSearch('')
+  }
+  const tile = (target: Category) => (
+    <EntityTile
+      key={target.id}
+      entity={target}
+      ring={ringOf(target)}
+      badge={<ChildBadge count={allowedChildren(target.id).length} />}
+      onClick={() => choose(target)}
+    />
+  )
+
+  const query = search.trim()
+  const everyMatch = searchCategories(categories, category.kind, query)
+  const found = {
+    top: everyMatch.top.filter((each) => allowed.has(each.id)),
+    below: everyMatch.below
+      .map((group) => ({ ...group, matches: group.matches.filter((each) => allowed.has(each.id)) }))
+      .filter((group) => group.matches.length > 0),
+  }
+  const levels = chain.filter((each) => allowedChildren(each.id).length > 0)
+
+  // As on the categories page: the chosen tile's levels open straight under its row
+  const cells = root
+    ? [
+        <TopLevelTile key="top" chosen={parentId === root.id} onClick={() => choose(root)} />,
+        ...allowedChildren(root.id).map(tile),
+      ]
+    : []
+  const openedAt = cells.findIndex((cell) => cell.key === chain[0]?.id)
+  const rowEnd = openedAt < 0 ? cells.length : (Math.floor(openedAt / 4) + 1) * 4
+
+  const panel = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    panel.current?.scrollIntoView({ block: 'nearest' })
+  }, [parentId])
 
   const submit = (event: FormEvent) => {
     event.preventDefault()
@@ -205,30 +254,48 @@ function MoveForm({ category, onMoved }: { category: Category; onMoved: () => vo
         <DialogTitle>{t('categories.move.title', { name: category.name })}</DialogTitle>
         <DialogDescription>{t('categories.move.text')}</DialogDescription>
       </DialogHeader>
-      <fieldset className="flex max-h-[50dvh] min-h-0 flex-col overflow-y-auto">
-        <legend className="sr-only">{t('categories.move.target')}</legend>
-        {moveTargets(categories, category).map(({ category: target, depth }) => (
-          <label
-            key={target.id}
-            style={{ paddingLeft: `${8 + depth * 20}px` }}
-            className="group flex min-h-11 cursor-pointer items-center gap-2 rounded-lg pr-2 has-checked:bg-muted has-checked:font-semibold has-focus-visible:ring-3 has-focus-visible:ring-ring/50 md:min-h-9"
-          >
-            <input
-              type="radio"
-              name="category-parent"
-              value={target.id}
-              checked={parentId === target.id}
-              onChange={() => setParentId(target.id)}
-              className="sr-only"
-            />
-            {target.parentId && <EntityIcon entity={target} className="size-6 rounded-md text-[10px]" />}
-            <span className="min-w-0 flex-1 truncate">
-              {target.parentId ? target.name : t('categories.move.topLevel')}
-            </span>
-            <Check className="hidden size-4 shrink-0 group-has-checked:block" aria-hidden />
-          </label>
-        ))}
-      </fieldset>
+      {/* The operation form's picker, less the ranking by use: the category's own subtree and Others are no
+          place to move it to, and the branch's root is offered as the top level */}
+      <div className="flex min-h-0 flex-col gap-3 overflow-y-auto">
+        <CardHeader
+          title={t(`operations.kind.${category.kind}`)}
+          search={search}
+          onSearch={setSearch}
+          label={t('operations.form.searchCategories')}
+        />
+        <div className="grid grid-cols-4 gap-2 empty:hidden">
+          {query ? found.top.map(tile) : cells.slice(0, rowEnd)}
+          {!query && levels.length > 0 && (
+            <div ref={panel} className="col-span-4 flex flex-col gap-3 rounded-xl bg-muted/50 p-2">
+              {levels.map((parent, index) => (
+                <TileGroup
+                  key={parent.id}
+                  divided={index > 0}
+                  caption={
+                    <>
+                      <span className="truncate">{parent.name}</span>
+                      <ChevronRight aria-hidden className="size-3 shrink-0" />
+                    </>
+                  }
+                >
+                  {allowedChildren(parent.id).map(tile)}
+                </TileGroup>
+              ))}
+            </div>
+          )}
+          {!query && cells.slice(rowEnd)}
+        </div>
+        {query && (
+          <>
+            <FoundGroups found={found} tile={tile} />
+            {found.top.length === 0 && found.below.length === 0 && (
+              <p className="py-2 text-center text-sm text-muted-foreground">
+                {t('operations.form.noCategory')}
+              </p>
+            )}
+          </>
+        )}
+      </div>
       {move.error && <Problem error={move.error} />}
       <DialogFooter>
         <DialogClose asChild>
@@ -245,6 +312,26 @@ function MoveForm({ category, onMoved }: { category: Category; onMoved: () => vo
         </Button>
       </DialogFooter>
     </form>
+  )
+}
+
+// The branch's root as a choice: no entity of its own to draw, so a tree in a plain circle
+function TopLevelTile({ chosen, onClick }: { chosen: boolean; onClick: () => void }) {
+  const { t } = useTranslation()
+  return (
+    <button type="button" aria-pressed={chosen} onClick={onClick} className={tileClass}>
+      <span
+        className={cn(
+          'rounded-full p-0.5 ring-2 ring-transparent transition-shadow',
+          chosen && 'ring-(--ws)',
+        )}
+      >
+        <span className="flex size-13 items-center justify-center rounded-full bg-muted text-muted-foreground">
+          <ListTree aria-hidden className="size-5" />
+        </span>
+      </span>
+      <TileName selected={chosen}>{t('categories.move.topLevel')}</TileName>
+    </button>
   )
 }
 

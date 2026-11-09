@@ -203,6 +203,7 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 - **Figure** (bold, 15px, tabular, `text-row`): amounts in feeds and names in lists; semibold 14px on nested rows. Headline figures on tiles and cards are 24px extra-bold.
 - **Body** (regular to medium, 14px): default interface text. Inputs are 16px on phones so that focusing one does not zoom the page, and 14px from `md`.
 - **Caption** (13px, `text-caption`): form labels, day headings and hints.
+- **Hint** (11px, Muted Ink at 85%, the floor for AA on a card): a quiet one-line pointer to a gesture or a feature, below the content it explains. Never for anything the user must read.
 - **Label** (semibold, 12px, uppercase, slight tracking): card headings in forms.
 - **Micro** (extra-bold, 10px): initials on badges and small icons, and nothing else. It is the floor.
 - **Tile** (11px, tight leading, up to two lines): names under tiles and bottom-tab labels. On a page of tiles, with no form competing for the room, names are medium weight at 12px on phones and 14px from `md`.

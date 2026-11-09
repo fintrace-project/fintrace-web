@@ -104,7 +104,7 @@ function ManagedTile({
         entity={category}
         ring={ring}
         large
-        badge={<ChildBadge categories={categories} category={category} />}
+        badge={<ChildBadge count={childrenOf(categories, category.id).length} />}
         onClick={onClick}
       />
       {editable && (
@@ -234,7 +234,10 @@ function CategoryBrowser({
         {!query && cells.slice(rowEnd)}
       </div>
       {!query && writable && (
-        <p className="px-1 text-xs text-muted-foreground md:hidden">{t('categories.holdHint')}</p>
+        // Faded as far as AA allows: 85% of Muted Ink is about 4.7:1 on the card
+        <p className="px-1 text-center text-[11px] text-muted-foreground/85 md:hidden">
+          {t('categories.holdHint')}
+        </p>
       )}
       {query && (
         <>

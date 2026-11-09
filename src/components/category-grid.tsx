@@ -68,7 +68,7 @@ export function CategoryGrid({
       key={category.id}
       entity={category}
       ring={ringOf(category)}
-      badge={<ChildBadge categories={categories} category={category} />}
+      badge={<ChildBadge count={childrenOf(categories, category.id).length} />}
       onClick={() => pick(category.id)}
     />
   )
@@ -114,9 +114,8 @@ export function CategoryGrid({
 }
 
 // How many subcategories a tile opens, on its icon's corner; nothing on a leaf
-export function ChildBadge({ categories, category }: { categories: Category[]; category: Category }) {
+export function ChildBadge({ count }: { count: number }) {
   const { t } = useTranslation()
-  const count = childrenOf(categories, category.id).length
   if (count === 0) {
     return null
   }

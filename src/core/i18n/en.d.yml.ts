@@ -184,7 +184,6 @@ declare const messages: {
       readonly action: "Move"
       readonly title: "Move {{name}}"
       readonly text: "Its subcategories move with it. Past operations stay where they are filed."
-      readonly target: "Where to move it"
       readonly topLevel: "Top level"
     }
     readonly archive: {
