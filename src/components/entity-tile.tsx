@@ -79,7 +79,7 @@ export function CardHeader({
           onChange={(event) => onSearch(event.target.value)}
           placeholder={t('operations.form.search')}
           autoComplete="off"
-          className="h-8 rounded-full border-transparent bg-(--ws-soft) pr-3 pl-8 text-sm md:text-sm"
+          className="h-11 rounded-full border-transparent bg-(--ws-soft) pr-3 pl-8 text-base md:h-8 md:text-sm"
         />
       </div>
     </div>

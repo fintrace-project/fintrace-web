@@ -10,16 +10,20 @@ export function Problem({ error, onReload }: { error: Error; onReload?: () => vo
 
   if (problem?.code === 'VERSION_CONFLICT' && onReload) {
     return (
-      <span className="flex flex-wrap items-center gap-2 text-sm text-destructive">
+      <span role="alert" className="flex flex-wrap items-center gap-2 text-sm text-destructive">
         {t('errors.changedElsewhere')}
-        <Button type="button" variant="outline" className="h-9" onClick={onReload}>
+        <Button type="button" variant="outline" className="h-11 md:h-9" onClick={onReload}>
           {t('common.reload')}
         </Button>
       </span>
     )
   }
   if (error instanceof ForbiddenError) {
-    return <span className="text-sm text-destructive">{t('errors.forbidden')}</span>
+    return (
+      <span role="alert" className="text-sm text-destructive">
+        {t('errors.forbidden')}
+      </span>
+    )
   }
 
   // fetch rejects with a TypeError when the request never got an answer
@@ -32,7 +36,7 @@ export function Problem({ error, onReload }: { error: Error; onReload?: () => vo
         : t('errors.unexpected'))
 
   return (
-    <span className="flex flex-col gap-0.5 text-sm text-destructive">
+    <span role="alert" className="flex flex-col gap-0.5 text-sm text-destructive">
       {message}
       {problem?.traceId && problem.status >= 500 && (
         <span className="text-xs text-muted-foreground">

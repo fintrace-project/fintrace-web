@@ -36,7 +36,7 @@ export function AddCategoryButton({ workspace, root }: { workspace: Workspace; r
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="flex h-11 items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-dashed border-input text-sm font-semibold text-muted-foreground outline-none hover:border-(--ws)/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="flex h-11 items-center justify-center gap-2 rounded-[10px] border-[1.5px] border-dashed border-muted-foreground/30 text-sm font-semibold text-muted-foreground outline-none hover:border-(--ws)/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <Plus className="size-4" aria-hidden />
         {t('categories.add')}

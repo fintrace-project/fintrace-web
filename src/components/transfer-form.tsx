@@ -1,4 +1,4 @@
-import { ArrowLeftRight, Trash2 } from 'lucide-react'
+import { ArrowRightLeft } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -14,8 +14,13 @@ import { hasFieldErrors, problemOf, type Account, type TransferFeedItem, type Wo
 import { nowLocal } from '@/core/dates'
 import { impliedRate, toDecimal } from '@/core/decimal'
 import { formatRate } from '@/core/format'
-import { useCancelTransfer, useCreateTransfer, useReviseTransfer } from '@/hooks/use-transfer-mutations'
+import { useCreateTransfer, useReviseTransfer } from '@/hooks/use-transfer-mutations'
 import { formStrip } from '@/lib/form-strip'
+import { cn } from '@/lib/utils'
+
+const capsuleHalf = 'flex-1 basis-0 justify-between bg-transparent focus-visible:ring-inset'
+// As the kind switch marks what is chosen: the tint would vanish into the page around the capsule
+const capsuleHalfOpen = 'bg-(--ws) text-white [&>svg]:text-white'
 
 interface TransferProps {
   workspace: Workspace
@@ -63,7 +68,6 @@ function TransferFields({
 }: TransferProps) {
   const create = useCreateTransfer(workspace.id)
   const revise = useReviseTransfer(workspace.id)
-  const cancel = useCancelTransfer(workspace.id)
   const save = transfer ? revise : create
   const { t } = useTranslation()
   const filled = transfer ?? template
@@ -77,9 +81,10 @@ function TransferFields({
   const [amount, setAmount] = useState(filled ? String(filled.source.amount) : typed)
   const [received, setReceived] = useState(filled ? String(filled.target.amount) : '')
   const [occurredAt, setOccurredAt] = useState(() => transfer?.occurredAt.slice(0, 16) ?? nowLocal())
+  // Half-turns of the swap arrow, so each press visibly does something
+  const [turns, setTurns] = useState(0)
   const [comment, setComment] = useState(filled?.comment ?? '')
   const [picking, setPicking] = useState<'source' | 'target'>()
-  const [confirming, setConfirming] = useState(false)
   // An imported transfer can move different figures in one currency; one field would overwrite the second
   const [uneven] = useState(
     filled !== undefined &&
@@ -90,7 +95,7 @@ function TransferFields({
   const twoAmounts = uneven || source.currency !== target.currency
   const rate = twoAmounts ? impliedRate(amount, received) : null
   const fieldErrors = problemOf(save.error)?.errors?.map((each) => each.message) ?? []
-  const failure = save.error ?? cancel.error
+  const failure = save.error
 
   const swap = () => {
     setSource(target)
@@ -172,21 +177,33 @@ function TransferFields({
         {rate !== null && (
           <span className="text-xs text-muted-foreground">{t('feed.rate', { rate: formatRate(rate) })}</span>
         )}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* One capsule, one setting: from → to. Each half tints while its account is being picked below */}
+        <div className="flex items-center rounded-full bg-card">
           <AccountPill
             label={t('transfers.form.from')}
             account={source}
             open={picking === 'source'}
             onToggle={() => setPicking(picking === 'source' ? undefined : 'source')}
             invalid={false}
+            className={cn(capsuleHalf, picking === 'source' && capsuleHalfOpen)}
           />
           <button
             type="button"
             aria-label={t('transfers.form.swap')}
-            onClick={swap}
-            className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+            title={t('transfers.form.swap')}
+            onClick={() => {
+              swap()
+              setTurns(turns + 1)
+            }}
+            className="group flex size-11 shrink-0 items-center justify-center rounded-full outline-none md:size-9 [&:focus-visible>span]:ring-3 [&:focus-visible>span]:ring-ring/50"
           >
-            <ArrowLeftRight aria-hidden className="size-4" />
+            <span className="flex size-8 items-center justify-center rounded-full transition-colors group-hover:bg-muted group-active:bg-muted md:size-7">
+              <ArrowRightLeft
+                aria-hidden
+                style={{ rotate: `${turns * 180}deg` }}
+                className="size-4 transition-[rotate] duration-200 motion-reduce:transition-none"
+              />
+            </span>
           </button>
           <AccountPill
             label={t('transfers.form.to')}
@@ -194,14 +211,24 @@ function TransferFields({
             open={picking === 'target'}
             onToggle={() => setPicking(picking === 'target' ? undefined : 'target')}
             invalid={false}
-          />
-          <DateTimePicker
-            workspaceId={workspace.id}
-            value={occurredAt}
-            onChange={setOccurredAt}
-            invalid={false}
+            className={cn(capsuleHalf, picking === 'target' && capsuleHalfOpen)}
           />
         </div>
+        {picking && (
+          <AccountGrid
+            workspaceId={workspace.id}
+            accounts={accounts}
+            value={picking === 'source' ? source.id : target.id}
+            onChange={pick}
+          />
+        )}
+        <DateTimePicker
+          workspaceId={workspace.id}
+          value={occurredAt}
+          onChange={setOccurredAt}
+          invalid={false}
+          fill
+        />
         {/* Core's words for whichever field it refused, listed together as the pills carry no message */}
         {fieldErrors.map((error) => (
           <span key={error} className="text-xs text-destructive">
@@ -210,64 +237,21 @@ function TransferFields({
         ))}
       </div>
 
-      {picking && (
-        <AccountGrid
-          workspaceId={workspace.id}
-          accounts={accounts}
-          value={picking === 'source' ? source.id : target.id}
-          onChange={pick}
-        />
-      )}
-
       <CommentInput value={comment} onChange={setComment} error={undefined} />
 
       {failure && !hasFieldErrors(failure) && <Problem error={failure} />}
       <div className={formStrip}>
-        {transfer && confirming ? (
-          <div className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 text-sm font-semibold">{t('transfers.form.deleteConfirm')}</span>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setConfirming(false)}
-              className="h-12 rounded-xl border-transparent bg-card px-4"
-            >
-              {t('operations.form.keep')}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={cancel.isPending}
-              onClick={() => cancel.mutate(transfer.id, { onSuccess: onDone })}
-              className="h-12 rounded-xl px-4 font-bold"
-            >
-              {t(cancel.isPending ? 'operations.form.deleting' : 'operations.form.delete')}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            {transfer && (
-              <Button
-                type="button"
-                variant="outline"
-                aria-label={t('operations.form.delete')}
-                onClick={() => setConfirming(true)}
-                className="size-12 shrink-0 rounded-xl border-transparent bg-card text-destructive"
-              >
-                <Trash2 aria-hidden />
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={save.isPending}
-              className="h-12 min-w-0 flex-1 bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
-            >
-              {transfer
-                ? t(save.isPending ? 'operations.form.saving' : 'operations.form.save')
-                : t(save.isPending ? 'operations.form.adding' : 'transfers.form.submit')}
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={save.isPending}
+            className="h-12 min-w-0 flex-1 bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
+          >
+            {transfer
+              ? t(save.isPending ? 'operations.form.saving' : 'operations.form.save')
+              : t(save.isPending ? 'operations.form.adding' : 'transfers.form.submit')}
+          </Button>
+        </div>
       </div>
     </form>
   )

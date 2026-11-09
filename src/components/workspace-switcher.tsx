@@ -31,7 +31,7 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
           </span>
         )}
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[15px] font-bold">{current?.name ?? t('shell.workspaces')}</span>
+          <span className="truncate text-row font-bold">{current?.name ?? t('shell.workspaces')}</span>
           <span className="truncate text-xs text-muted-foreground">
             {current ? workspaceSummary(current) : t('shell.chooseWorkspace')}
           </span>

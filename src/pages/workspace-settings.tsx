@@ -31,7 +31,7 @@ export function WorkspaceSettingsPage() {
   const { t } = useTranslation()
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-6">
       <PageHeader title={t('settings.title')} />
       {/* Keyed by version: a newer workspace, saved here or elsewhere, starts the form afresh */}
       <GeneralPanel key={workspace.version} workspace={workspace} edit={edit} />
@@ -97,7 +97,10 @@ function GeneralPanel({
           >
             {t(edit.isPending ? 'common.saving' : 'common.save')}
           </Button>
-          {edit.isSuccess && !changed && <span className="text-sm text-positive">{t('common.saved')}</span>}
+          {/* Always there, so a screen reader is already watching it when the word appears */}
+          <span role="status" className="text-sm text-positive">
+            {edit.isSuccess && !changed && t('common.saved')}
+          </span>
           {edit.error && !hasFieldErrors(edit.error) && <Problem error={edit.error} onReload={reload} />}
         </div>
       </form>

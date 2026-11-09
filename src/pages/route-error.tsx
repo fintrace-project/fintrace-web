@@ -14,6 +14,7 @@ export function RouteErrorPage() {
 
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-4">
+      <title>{t('app.pageTitle', { page: t('routeError.title') })}</title>
       <h1 className="text-2xl font-extrabold tracking-tight">{t('routeError.title')}</h1>
       <p className="text-muted-foreground">{t('routeError.text')}</p>
       {detail && <code className="rounded-lg bg-muted px-3 py-2 text-xs break-words">{detail}</code>}

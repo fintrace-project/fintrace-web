@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { cn } from 'cn'
+import { cn } from '@/lib/utils'
 import { Dialog as SheetPrimitive } from 'radix-ui'
 import { i18n } from '@/core/i18n'
 
@@ -60,7 +60,7 @@ function SheetContent({
         {children}
         {showCloseButton && (
           <SheetPrimitive.Close data-slot="sheet-close" asChild>
-            <Button variant="ghost" className="absolute top-3 right-3" size="icon-sm">
+            <Button variant="ghost" className="absolute top-3 right-3 max-md:size-11" size="icon-sm">
               <XIcon />
               <span className="sr-only">{i18n.t('common.close')}</span>
             </Button>

@@ -2,6 +2,7 @@
 declare const messages: {
   readonly app: {
     readonly name: "fintrace"
+    readonly pageTitle: "{{page}} · fintrace"
   }
   readonly common: {
     readonly loading: "Loading…"
@@ -15,7 +16,7 @@ declare const messages: {
     readonly current: "Current"
     readonly name: "Name"
     readonly defaultCurrency: "Default currency"
-    readonly arrivesWith: "Arrives with {{task}}"
+    readonly comingSoon: "Coming soon"
   }
   readonly errors: {
     readonly signingIn: "Signing in…"
@@ -23,11 +24,11 @@ declare const messages: {
     readonly loadAccounts: "Could not load accounts."
     readonly loadFeed: "Could not load the operations."
     readonly loadCategories: "Could not load categories."
-    readonly changedElsewhere: "This changed since the page loaded."
+    readonly changedElsewhere: "This changed in another tab or device. Reload to get the latest, then try again."
     readonly forbidden: "You do not have access to do this."
-    readonly serverAnswered: "The server answered {{status}}."
+    readonly serverAnswered: "The server could not do this (error {{status}}). Try again in a moment."
     readonly network: "Could not reach the server. Check your connection and try again."
-    readonly unexpected: "Something went wrong."
+    readonly unexpected: "Something went wrong. Try again."
     readonly reference: "Reference: <code>{{traceId}}</code>"
   }
   readonly shell: {
@@ -90,7 +91,7 @@ declare const messages: {
   readonly cookieNotice: {
     readonly label: "Cookies"
     readonly text: "This website uses only strictly necessary cookies, such as those that keep you signed in. They hold no personal details, are not shared with third parties and are not used for analytics, advertising or tracking."
-    readonly dismiss: "Accept"
+    readonly dismiss: "Got it"
   }
   readonly home: {
     readonly signIn: "Sign in"
@@ -113,7 +114,7 @@ declare const messages: {
   }
   readonly notFound: {
     readonly title: "Page not found"
-    readonly back: "Back to the overview"
+    readonly back: "Go to your workspaces"
   }
   readonly noAccess: {
     readonly title: "No access"
@@ -127,11 +128,11 @@ declare const messages: {
   readonly overview: {
     readonly summary: "Summary"
     readonly whereMoneyWent: "Where the money went"
-    readonly breakdownPending: "The category breakdown arrives with 4.11."
+    readonly breakdownPending: "The category breakdown is coming soon."
     readonly allStatistics: "All statistics →"
     readonly expensesByMonth: "Expenses by month"
-    readonly chartPending: "The cashflow chart arrives with 4.10."
-    readonly allAccounts: "All →"
+    readonly chartPending: "The cashflow chart is coming soon."
+    readonly allAccounts: "All accounts →"
   }
   readonly accounts: {
     readonly empty: "No accounts yet."
@@ -226,9 +227,6 @@ declare const messages: {
       readonly save: "Save"
       readonly saving: "Saving…"
       readonly delete: "Delete"
-      readonly deleting: "Deleting…"
-      readonly deleteConfirm: "Delete this operation?"
-      readonly keep: "Keep"
       readonly repeat: "Repeat"
     }
   }
@@ -236,7 +234,6 @@ declare const messages: {
     readonly form: {
       readonly title: "New transfer"
       readonly editTitle: "Edit transfer"
-      readonly deleteConfirm: "Delete this transfer?"
       readonly from: "From"
       readonly to: "To"
       readonly swap: "Swap the accounts"
@@ -249,6 +246,11 @@ declare const messages: {
   }
   readonly feed: {
     readonly empty: "No operations yet."
+    readonly operationDeleted: "Operation deleted."
+    readonly transferDeleted: "Transfer deleted."
+    readonly undo: "Undo"
+    readonly operationActions: "Actions for this operation"
+    readonly transferActions: "Actions for this transfer"
     readonly fromTo: "{{source}} → {{target}}"
     readonly rate: "Rate {{rate}}"
     readonly balance: "Balance {{amount}}"
@@ -260,16 +262,16 @@ declare const messages: {
     readonly pendingName: "…"
     readonly accountAndComment: "{{account}} · {{comment}}"
     readonly anchor: "Balance recorded"
-    readonly difference: "{{amount}} unrecorded"
-    readonly differences: "Issues"
+    readonly difference: "{{amount}} not accounted for"
+    readonly differences: "Differences"
     readonly newerDifference: "Newer difference"
     readonly olderDifference: "Older difference"
   }
   readonly statistics: {
-    readonly pending: "The category breakdown arrives with 4.11."
+    readonly pending: "The category breakdown is coming soon."
   }
   readonly charts: {
-    readonly pending: "Balance dynamics and cashflow arrive with 4.9 and 4.10."
+    readonly pending: "Balance and cashflow charts are coming soon."
   }
   readonly preferences: {
     readonly title: "Preferences"
@@ -315,7 +317,7 @@ declare const messages: {
     }
     readonly delete: {
       readonly title: "Delete workspace"
-      readonly text: "Deletion cannot be undone. The workspace and all its accounts, operations and history become unreachable at once and cannot be restored. To keep it out of sight instead, archive it."
+      readonly text: "Deletion cannot be undone. The workspace and all its accounts, operations and history become unreachable at once. To keep it out of sight instead, archive it."
       readonly action: "Delete workspace…"
       readonly confirmTitle: "Delete “{{name}}”?"
       readonly confirmText: "This cannot be undone. Every account, operation and balance in this workspace becomes unreachable immediately."
@@ -350,7 +352,7 @@ declare const messages: {
       readonly categories: "Categories"
       readonly operations: "Operations"
       readonly transfers: "Transfers"
-      readonly anchors: "Balance anchors"
+      readonly anchors: "Recorded balances"
     }
     readonly open: "Open the workspace"
     readonly failed: "Nothing was imported"
@@ -394,8 +396,8 @@ declare const messages: {
     readonly CATEGORY_other: "{{count, number}} categories"
     readonly TRANSFER_one: "{{count, number}} transfer"
     readonly TRANSFER_other: "{{count, number}} transfers"
-    readonly BALANCE_ANCHOR_one: "{{count, number}} balance anchor"
-    readonly BALANCE_ANCHOR_other: "{{count, number}} balance anchors"
+    readonly BALANCE_ANCHOR_one: "{{count, number}} recorded balance"
+    readonly BALANCE_ANCHOR_other: "{{count, number}} recorded balances"
   }
 }
 export default messages

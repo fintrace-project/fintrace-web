@@ -44,7 +44,11 @@ export function AccountPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title={account.name}
-        subtitle={balance && t('feed.balance', { amount: formatBalance(balance) })}
+        subtitle={
+          balance && (
+            <span className="block truncate">{t('feed.balance', { amount: formatBalance(balance) })}</span>
+          )
+        }
         actions={!account.archived && <AddOperationButton workspace={workspace} accountId={account.id} />}
         controls={<DifferenceArrows workspaceId={workspaceId} accountId={account.id} at={at} />}
       />

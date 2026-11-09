@@ -25,7 +25,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
             <LayoutGrid className="size-4 text-muted-foreground" aria-hidden />
           </span>
         )}
-        <span className="truncate text-[15px] font-bold">{current?.name ?? t('shell.workspaces')}</span>
+        <span className="truncate text-row font-bold">{current?.name ?? t('shell.workspaces')}</span>
         <ChevronDown className="size-3.5 shrink-0" strokeWidth={2.4} aria-hidden />
       </SheetTrigger>
 
@@ -36,7 +36,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
         style={current && accentOf(current.id)}
         className="max-h-[85dvh] gap-1.5 rounded-t-3xl border-0 px-4 pt-2.5 pb-[max(2rem,env(safe-area-inset-bottom))]"
       >
-        <div aria-hidden className="mb-2.5 h-1.5 w-10 self-center rounded-full bg-input" />
+        <div aria-hidden className="mb-2.5 h-1.5 w-10 self-center rounded-full bg-border" />
         <SheetHeader className="flex-row items-center justify-between p-0 px-1 pb-2">
           <SheetTitle className="text-xl font-extrabold">{t('shell.workspaces')}</SheetTitle>
           <SheetClose className="flex min-h-11 items-center text-sm font-semibold text-muted-foreground">
@@ -61,7 +61,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
                   >
                     <WorkspaceAvatar workspace={workspace} />
                     <span className="flex min-w-0 flex-1 flex-col">
-                      <span className="truncate text-[15px] font-bold">{workspace.name}</span>
+                      <span className="truncate text-row font-bold">{workspace.name}</span>
                       <span className="truncate text-xs text-muted-foreground">
                         {workspaceSummary(workspace)}
                       </span>
@@ -81,7 +81,7 @@ export function WorkspaceSheet({ current }: { current: Workspace | undefined }) 
 
         <div className="my-2 h-px bg-border" />
         <SheetClose asChild>
-          <Button asChild className="h-13 rounded-2xl text-[15px] font-bold">
+          <Button asChild className="h-13 rounded-2xl text-row font-bold">
             <Link to="/workspaces/new">
               <Plus aria-hidden />
               {t('shell.createWorkspace')}

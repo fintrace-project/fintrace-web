@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { cn } from 'cn'
+import { cn } from '@/lib/utils'
 import { Dialog as DialogPrimitive } from 'radix-ui'
 import { i18n } from '@/core/i18n'
 
@@ -57,7 +57,7 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
-            <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
+            <Button variant="ghost" className="absolute top-2 right-2 max-md:size-11" size="icon-sm">
               <XIcon />
               <span className="sr-only">{i18n.t('common.close')}</span>
             </Button>

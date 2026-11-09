@@ -18,6 +18,7 @@ playwright-report
 # Local only: Claude Code's settings and design scratches
 .claude
 scatches
+.impeccable/hook.cache.json
 
 # Editor directories and files
 .vscode/*

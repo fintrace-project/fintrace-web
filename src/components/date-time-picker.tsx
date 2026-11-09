@@ -20,14 +20,18 @@ export function DateTimePicker({
   value,
   onChange,
   invalid,
+  fill = false,
 }: {
   workspaceId: string
   value: string
   onChange: (value: string) => void
   invalid: boolean
+  // Alone on its line: takes the whole of it, the chevron at the far end
+  fill?: boolean
 }) {
   const { t } = useTranslation()
   const timeId = useId()
+  const shape = cn(pill, fill && 'w-full [&>svg]:ml-auto')
   const wide = useMediaQuery(WIDE)
   const [open, setOpen] = useState(false)
   // The limit is now as of the last opening or Now, so a form left open a while still reaches the present
@@ -69,7 +73,7 @@ export function DateTimePicker({
       // Laid over the pill, unseen: a tap reaches the native input, which opens the phone's own picker
       <label
         className={cn(
-          pill,
+          shape,
           'relative has-aria-invalid:ring-2 has-aria-invalid:ring-destructive has-focus-visible:ring-3 has-focus-visible:ring-ring/50',
         )}
       >
@@ -108,7 +112,7 @@ export function DateTimePicker({
       }}
     >
       <PopoverTrigger asChild>
-        <button type="button" aria-invalid={invalid} className={pill}>
+        <button type="button" aria-invalid={invalid} className={shape}>
           {shown}
         </button>
       </PopoverTrigger>
@@ -144,7 +148,7 @@ export function DateTimePicker({
           >
             {t('operations.form.now')}
           </Button>
-          <label htmlFor={timeId} className="ml-auto text-[13px] text-muted-foreground">
+          <label htmlFor={timeId} className="ml-auto text-caption text-muted-foreground">
             {t('operations.form.time')}
           </label>
           <Input

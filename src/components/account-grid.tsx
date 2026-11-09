@@ -21,15 +21,23 @@ export function AccountPill({
   open,
   onToggle,
   invalid,
+  className,
 }: {
   label: string
   account: Account
   open: boolean
   onToggle: () => void
   invalid: boolean
+  className?: string
 }) {
   return (
-    <button type="button" aria-expanded={open} aria-invalid={invalid} onClick={onToggle} className={pill}>
+    <button
+      type="button"
+      aria-expanded={open}
+      aria-invalid={invalid}
+      onClick={onToggle}
+      className={cn(pill, className)}
+    >
       <span className="sr-only">{label}</span>
       <span className="truncate">{account.name}</span>
       <ChevronDown aria-hidden className={cn(open && 'rotate-180')} />

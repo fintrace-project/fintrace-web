@@ -23,12 +23,15 @@ export function OverviewPage() {
   const { t } = useTranslation()
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={t('sections.overview')}
         actions={
           <>
-            <ArchiveButton workspace={workspace} />
+            {/* On a phone it stays in the workspace's settings, leaving the title's row to the main action */}
+            <div className="max-sm:hidden">
+              <ArchiveButton workspace={workspace} />
+            </div>
             <AddOperationButton workspace={workspace} />
           </>
         }
@@ -39,7 +42,7 @@ export function OverviewPage() {
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
         <aside
           aria-label={t('overview.summary')}
-          className="flex flex-col gap-4 lg:col-start-2 lg:row-start-1"
+          className="flex min-w-0 flex-col gap-4 lg:col-start-2 lg:row-start-1"
         >
           <Panel title={t('overview.whereMoneyWent')} className="md:max-lg:hidden">
             <Pending>{t('overview.breakdownPending')}</Pending>
@@ -80,7 +83,7 @@ function Operations({ workspaceId }: { workspaceId: string }) {
 
 function MoreLink({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
   return (
-    <Link to={to} className={cn('flex min-h-11 items-center px-1 text-[13px] font-bold', className)}>
+    <Link to={to} className={cn('flex min-h-11 items-center px-1 text-caption font-bold', className)}>
       {children}
     </Link>
   )

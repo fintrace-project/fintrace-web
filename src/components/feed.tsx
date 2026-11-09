@@ -1,11 +1,27 @@
-import { ArrowRight, ArrowUp, ChevronDown, Pen, Repeat2, Trash2, type LucideIcon } from 'lucide-react'
+import {
+  ArrowRight,
+  ArrowUp,
+  ChevronDown,
+  EllipsisVertical,
+  Pen,
+  Repeat2,
+  Trash2,
+  type LucideIcon,
+} from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InitialsAvatar, Pending } from '@/components/cards'
 import { LoadError } from '@/components/load-error'
 import { OperationDialog } from '@/components/operation-dialog'
 import { SwipeRow } from '@/components/swipe-row'
+import { UndoBar } from '@/components/undo-bar'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import type { Account, AccountFeedItem, TransferFeedItem, TransferLeg, WorkspaceFeedItem } from '@/core/api'
 import { dayTotals, feedRows, runTotal, type DifferenceItem, type OperationItem } from '@/core/feed-rows'
 import {
@@ -18,8 +34,7 @@ import {
 } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
-import { useCancelOperation } from '@/hooks/use-operation-mutations'
-import { useCancelTransfer } from '@/hooks/use-transfer-mutations'
+import { useUndoableDelete } from '@/hooks/use-undoable-delete'
 import { useWorkspace } from '@/hooks/use-workspaces'
 import { isWritable } from '@/core/workspaces'
 import { useScrollAnchor } from '@/hooks/use-scroll-anchor'
@@ -32,17 +47,64 @@ const rowLayout = 'flex min-h-14 w-full items-center gap-3 py-2.5'
 // A row that opens its operation reaches the card's edges, so the tint under the pointer and the red strip a
 // swipe uncovers do too; the row's own padding puts its content back in line
 const bleed = '-mx-4 w-[calc(100%+2rem)] md:-mx-5 md:w-[calc(100%+2.5rem)]'
-const editableRow = 'px-4 text-left outline-none hover:bg-(--ws-soft)/60 focus-visible:bg-(--ws-soft) md:px-5'
+const editableRow =
+  'px-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset md:px-5'
 
 // The swipe's delete, held by the feed: a refused one brings its row back with Core's word under it
 interface Swipe {
   remove: (item: OperationItem | TransferFeedItem) => void
+  removeNow: (item: OperationItem | TransferFeedItem) => void
   repeat: (item: OperationItem | TransferFeedItem) => void
   failure: { id: string; message: string } | undefined
+  undone: string | undefined
 }
 
-// An operation or a transfer that opens in its form on a tap; on a phone, a swipe left deletes it, a transfer's
-// both legs at once, and a swipe right opens a new one made from it
+// Delete and repeat for what cannot swipe: a mouse or a keyboard. Beside the row's button, since a button cannot
+// hold another
+function RowMenu({ item, swipe }: { item: OperationItem | TransferFeedItem; swipe: Swipe }) {
+  const { t } = useTranslation()
+  // Focus returning to the button draws its keyboard ring, which is noise after a mouse click
+  const openedByPointer = useRef(false)
+  return (
+    <span className="mr-1 flex shrink-0 pointer-coarse:hidden md:mr-2">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t(item.type === 'TRANSFER' ? 'feed.transferActions' : 'feed.operationActions')}
+            onPointerDown={() => (openedByPointer.current = true)}
+            onKeyDown={() => (openedByPointer.current = false)}
+            className="size-9 rounded-[10px] text-muted-foreground"
+          >
+            <EllipsisVertical aria-hidden />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent
+          align="end"
+          className="w-44 rounded-xl p-1.5"
+          onCloseAutoFocus={(event) => openedByPointer.current && event.preventDefault()}
+        >
+          <DropdownMenuItem onSelect={() => swipe.repeat(item)} className="min-h-9 gap-2.5 px-2">
+            <Repeat2 aria-hidden />
+            {t('operations.form.repeat')}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            variant="destructive"
+            onSelect={() => swipe.removeNow(item)}
+            className="min-h-9 gap-2.5 px-2"
+          >
+            <Trash2 aria-hidden />
+            {t('operations.form.delete')}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </span>
+  )
+}
+
+// An operation or a transfer that opens in its form on a tap. On a phone, a swipe left deletes it, a transfer's
+// both legs at once, and a swipe right opens a new one made from it; elsewhere, the row's menu does the same
 function EditableRow({
   item,
   onEdit,
@@ -71,14 +133,25 @@ function EditableRow({
           icon: <Repeat2 aria-hidden />,
           onSwipe: () => swipe.repeat(item),
         }}
-        failed={failure !== undefined}
+        restored={failure !== undefined || swipe.undone === item.id}
         className={bleed}
       >
-        <button type="button" onClick={onEdit} className={cn(editableRow, className)}>
-          {children}
-        </button>
+        <div className="flex items-center hover:bg-muted/60 has-focus-visible:bg-muted/60">
+          <button
+            type="button"
+            onClick={onEdit}
+            className={cn(editableRow, className, 'min-w-0 flex-1 not-pointer-coarse:pr-2')}
+          >
+            {children}
+          </button>
+          <RowMenu item={item} swipe={swipe} />
+        </div>
       </SwipeRow>
-      {failure && <p className="pb-2 text-xs text-destructive">{failure.message}</p>}
+      {failure && (
+        <p role="alert" className="pb-2 text-xs text-destructive">
+          {failure.message}
+        </p>
+      )}
     </>
   )
 }
@@ -100,7 +173,7 @@ function accountIdsOf(item: FeedItem): string[] {
 }
 
 // An account's small icon, on an operation's corner and in a transfer's pair alike
-const accountBadge = 'absolute size-[22px] rounded-md border-2 border-card text-[8px]'
+const accountBadge = 'absolute size-[22px] rounded-md border-2 border-card text-[10px]'
 
 // A row's icon: what it is about, with an account badged on the corner
 type Named = { id: string; name: string }
@@ -123,7 +196,7 @@ function RowAvatar({ main, badge }: { main: Named; badge?: Named }) {
 // One tile split in two, source then target as the title reads, each half in its account's colour
 function AccountPair({ source, target }: { source: Named; target: Named }) {
   const half =
-    'flex flex-1 items-center justify-center bg-(--ws-soft) pb-1.5 text-[9px] font-extrabold text-(--ws)'
+    'flex flex-1 items-center justify-center bg-(--ws-soft) pb-1.5 text-[10px] font-extrabold text-(--ws)'
   return (
     <span aria-hidden className="relative size-9 shrink-0">
       <span className="flex size-full gap-0.5 overflow-hidden rounded-[10px]">
@@ -182,9 +255,7 @@ function OperationRow({
         <span className="truncate text-sm font-semibold">{categoryName}</span>
         {detail && <span className="truncate text-xs text-muted-foreground">{detail}</span>}
       </span>
-      <span
-        className={cn('text-[15px] font-bold whitespace-nowrap', item.kind === 'INCOME' && 'text-positive')}
-      >
+      <span className={cn('text-row font-bold whitespace-nowrap', item.kind === 'INCOME' && 'text-positive')}>
         {formatOperationAmount(item)}
       </span>
     </>
@@ -197,14 +268,14 @@ function TransferAmount({ item }: { item: TransferItem }) {
     const incoming = item.side === 'TARGET'
     const { currency } = incoming ? item.target : item.source
     return (
-      <span className={cn('text-[15px] font-bold whitespace-nowrap', incoming && 'text-positive')}>
+      <span className={cn('text-row font-bold whitespace-nowrap', incoming && 'text-positive')}>
         {formatSignedMagnitude(item.amount, currency, incoming)}
       </span>
     )
   }
   // Across the workspace a transfer only moves money, so it has no sign
   return (
-    <span className="flex flex-col items-end text-[15px] font-bold whitespace-nowrap">
+    <span className="flex flex-col items-end text-row font-bold whitespace-nowrap">
       <span>{formatMoney(item.source.amount, item.source.currency)}</span>
       {!sameFigure(item.source, item.target) && (
         <span>{formatMoney(item.target.amount, item.target.currency)}</span>
@@ -286,7 +357,7 @@ function AnchorRow({
         <span className="truncate text-sm font-semibold">{t('feed.anchor')}</span>
         {difference && <DifferenceNote item={difference} currency={currency} />}
       </span>
-      <span className="text-[15px] font-bold whitespace-nowrap">{formatMoney(value, currency)}</span>
+      <span className="text-row font-bold whitespace-nowrap">{formatMoney(value, currency)}</span>
     </>
   )
 }
@@ -387,7 +458,7 @@ function RunRows({
               />
             </span>
           </span>
-          <span className={cn('text-[15px] font-bold whitespace-nowrap', income && 'text-positive')}>
+          <span className={cn('text-row font-bold whitespace-nowrap', income && 'text-positive')}>
             {formatSignedMagnitude(runTotal(items), first.currency, income)}
           </span>
         </button>
@@ -599,7 +670,7 @@ function FeedList({
       {days.map(({ day, items: ofDay }, index) => (
         <section key={day} className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3 px-1">
-            <h2 className="text-[13px] font-bold text-muted-foreground">{formatFeedDay(day)}</h2>
+            <h2 className="text-caption font-bold text-muted-foreground">{formatFeedDay(day)}</h2>
             {/* A day cut by the window's edge would show too little, so it shows nothing until it is whole */}
             {!(index === 0 && feed.hasPreviousPage) && !(index === days.length - 1 && feed.hasNextPage) && (
               <span className="flex gap-2 text-xs text-muted-foreground">
@@ -652,7 +723,8 @@ function FeedList({
                   className={cn(
                     'group aria-[current=true]:-mx-4 aria-[current=true]:px-4 motion-safe:aria-[current=true]:animate-arrive-row md:aria-[current=true]:-mx-5 md:aria-[current=true]:px-5',
                     // A column only for an editable row, whose refusal message goes under it
-                    onEdit ? 'flex flex-col' : rowLayout,
+                    // The other rows keep the column their menu-less figures would lose beside the menus
+                    onEdit ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
                   )}
                 >
                   {(item.type === 'OPERATION' || item.type === 'TRANSFER') && onEdit ? (
@@ -701,22 +773,17 @@ export function Feed({
   // The operation open in the form, if any: to edit it, or to make a new one from it
   const [inForm, setInForm] = useState<{ item: OperationItem; repeat: boolean }>()
   const [transferInForm, setTransferInForm] = useState<{ item: TransferFeedItem; repeat: boolean }>()
-  // A swipe's delete: a refused one brings its row back with Core's word under it. A new swipe clears the last
-  // refusal first, in the same update that slides its row away, or that row would come straight back.
-  const cancel = useCancelOperation(workspaceId)
-  const cancelTransfer = useCancelTransfer(workspaceId)
-  const [failure, setFailure] = useState<Swipe['failure']>()
+  // A refused delete brings its row back with Core's word under it
+  const deletion = useUndoableDelete(workspaceId)
   const swipe: Swipe = {
-    remove: (item) => {
-      setFailure(undefined)
-      const removal = item.type === 'TRANSFER' ? cancelTransfer : cancel
-      removal.mutate(item.id, { onError: (error) => setFailure({ id: item.id, message: error.message }) })
-    },
+    remove: deletion.remove,
+    removeNow: deletion.removeNow,
     repeat: (item) =>
       item.type === 'TRANSFER'
         ? setTransferInForm({ item, repeat: true })
         : setInForm({ item, repeat: true }),
-    failure,
+    failure: deletion.failure,
+    undone: deletion.undone,
   }
 
   const items = feed.data ? feed.data.pages.flatMap((page) => page.items) : []
@@ -795,6 +862,13 @@ export function Feed({
         edit={edit}
         editTransfer={editTransfer}
         swipe={swipe}
+      />
+      <UndoBar
+        message={
+          deletion.pending &&
+          t(deletion.pending.type === 'TRANSFER' ? 'feed.transferDeleted' : 'feed.operationDeleted')
+        }
+        onUndo={deletion.undo}
       />
       {workspace && transferInForm && (
         <OperationDialog

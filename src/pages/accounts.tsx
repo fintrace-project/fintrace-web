@@ -72,7 +72,10 @@ function AccountCard({
 }) {
   return (
     <div
-      className={cn('relative flex flex-col gap-3.5 rounded-2xl border bg-card p-5', muted && 'bg-card/50')}
+      className={cn(
+        'relative flex min-w-0 flex-col gap-3.5 rounded-2xl border bg-card p-5',
+        muted && 'bg-card/50',
+      )}
     >
       <div className="flex items-start justify-between gap-2">
         <InitialsAvatar
@@ -86,7 +89,7 @@ function AccountCard({
         {/* The link's area stretches over the card; the card's controls sit above it */}
         <Link
           to={`/w/${account.workspaceId}/accounts/${account.id}`}
-          className="truncate text-[15px] font-bold after:absolute after:inset-0 after:rounded-2xl"
+          className="truncate text-row font-bold after:absolute after:inset-0 after:rounded-2xl"
         >
           {account.name}
         </Link>

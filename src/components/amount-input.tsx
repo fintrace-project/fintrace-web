@@ -29,8 +29,8 @@ export function AmountInput({
     // the input inside reports
     <div
       className={cn(
-        'flex min-w-0 items-center gap-2 rounded-2xl bg-card px-4 py-2 text-4xl font-extrabold tracking-tight tabular-nums',
-        'focus-within:ring-3 focus-within:ring-ring/30',
+        'flex min-w-0 items-center gap-2 rounded-2xl border border-outline bg-card px-4 py-2 text-4xl font-extrabold tracking-tight tabular-nums',
+        'focus-within:ring-3 focus-within:ring-ring/50',
         'has-aria-invalid:ring-3 has-aria-invalid:ring-destructive/40',
         'has-user-invalid:ring-3 has-user-invalid:ring-destructive/40',
         income && 'text-positive',
@@ -39,7 +39,7 @@ export function AmountInput({
       {/* The sign goes with the figure: the placeholder's shade while there is none, the figure's colour
           once typed, so "−0.00" and "−333" each read as one */}
       {!unsigned && (
-        <span aria-hidden className={cn(!value && 'text-muted-foreground/40')}>
+        <span aria-hidden className={cn(!value && 'text-muted-foreground/70')}>
           {income ? '+' : '−'}
         </span>
       )}
@@ -56,7 +56,7 @@ export function AmountInput({
         required
         autoComplete="off"
         placeholder="0.00"
-        className="h-14 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/40"
+        className="h-14 min-w-0 flex-1 bg-transparent outline-none placeholder:text-muted-foreground/70"
       />
       <span className="shrink-0 text-2xl font-semibold text-muted-foreground">
         {currencySymbol(currency)}

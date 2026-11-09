@@ -32,7 +32,7 @@ export function FormHeader({
         <button
           type="button"
           aria-label={t('common.close')}
-          className="flex size-10 shrink-0 items-center justify-center rounded-full bg-card outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-card outline-none md:size-10 focus-visible:ring-3 focus-visible:ring-ring/50"
         >
           <X aria-hidden className="size-4" />
         </button>
@@ -63,7 +63,7 @@ export function KindToggle<K extends FormKind>({
       {kinds.map((kind) => (
         <label
           key={kind}
-          className="flex h-9 cursor-pointer items-center justify-center rounded-lg px-3 text-sm font-semibold text-muted-foreground has-checked:bg-(--ws) has-checked:text-white has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
+          className="flex h-11 cursor-pointer items-center justify-center rounded-lg px-3 md:h-9 text-sm font-semibold text-muted-foreground has-checked:bg-(--ws) has-checked:text-white has-focus-visible:ring-3 has-focus-visible:ring-ring/50"
         >
           <input
             type="radio"

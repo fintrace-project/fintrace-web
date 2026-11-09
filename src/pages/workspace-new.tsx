@@ -38,7 +38,7 @@ export function WorkspaceNewPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-6">
       <PageHeader title={t('workspaceNew.title')} />
       <Panel title={t('workspaceNew.panel')}>
         <form onSubmit={submit} className="flex flex-col gap-5">
@@ -69,7 +69,7 @@ export function WorkspaceNewPage() {
           </div>
 
           <fieldset className="flex flex-col gap-2">
-            <legend className="mb-1.5 text-[13px] text-muted-foreground">
+            <legend className="mb-1.5 text-caption text-muted-foreground">
               {t('workspaceNew.howToStart')}
             </legend>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -150,7 +150,7 @@ function StartOption({
       <span className={cn('mt-0.5 text-muted-foreground', checked && 'text-foreground')}>{icon}</span>
       <span className="flex flex-col gap-1">
         <span className="text-sm font-bold">{title}</span>
-        <span className="text-[13px] text-muted-foreground">{children}</span>
+        <span className="text-caption text-muted-foreground">{children}</span>
       </span>
     </label>
   )

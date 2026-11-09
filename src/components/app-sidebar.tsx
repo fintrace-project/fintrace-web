@@ -38,7 +38,7 @@ export function AppSidebar({ current, sections }: { current: Workspace | undefin
                   <>
                     <span
                       aria-hidden
-                      className={cn('size-1.5 rounded-full bg-input', isActive && 'bg-(--ws)')}
+                      className={cn('size-1.5 rounded-full bg-border', isActive && 'bg-(--ws)')}
                     />
                     {t(`sections.${section.key}`)}
                   </>

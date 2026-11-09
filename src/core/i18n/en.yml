@@ -4,6 +4,7 @@
 
 app:
   name: fintrace
+  pageTitle: '{{page}} · fintrace'
 
 common:
   loading: Loading…
@@ -17,7 +18,7 @@ common:
   current: Current
   name: Name
   defaultCurrency: Default currency
-  arrivesWith: Arrives with {{task}}
+  comingSoon: Coming soon
 
 errors:
   signingIn: Signing in…
@@ -25,11 +26,11 @@ errors:
   loadAccounts: Could not load accounts.
   loadFeed: Could not load the operations.
   loadCategories: Could not load categories.
-  changedElsewhere: This changed since the page loaded.
+  changedElsewhere: This changed in another tab or device. Reload to get the latest, then try again.
   forbidden: You do not have access to do this.
-  serverAnswered: The server answered {{status}}.
+  serverAnswered: The server could not do this (error {{status}}). Try again in a moment.
   network: Could not reach the server. Check your connection and try again.
-  unexpected: Something went wrong.
+  unexpected: Something went wrong. Try again.
   reference: 'Reference: <code>{{traceId}}</code>'
 
 shell:
@@ -93,7 +94,7 @@ newWorkspaceBanner:
 cookieNotice:
   label: Cookies
   text: This website uses only strictly necessary cookies, such as those that keep you signed in. They hold no personal details, are not shared with third parties and are not used for analytics, advertising or tracking.
-  dismiss: Accept
+  dismiss: Got it
 
 home:
   signIn: Sign in
@@ -113,7 +114,7 @@ home:
 
 notFound:
   title: Page not found
-  back: Back to the overview
+  back: Go to your workspaces
 
 noAccess:
   title: No access
@@ -127,11 +128,11 @@ routeError:
 overview:
   summary: Summary
   whereMoneyWent: Where the money went
-  breakdownPending: The category breakdown arrives with 4.11.
+  breakdownPending: The category breakdown is coming soon.
   allStatistics: All statistics →
   expensesByMonth: Expenses by month
-  chartPending: The cashflow chart arrives with 4.10.
-  allAccounts: All →
+  chartPending: The cashflow chart is coming soon.
+  allAccounts: All accounts →
 
 accounts:
   empty: No accounts yet.
@@ -218,16 +219,12 @@ operations:
     save: Save
     saving: Saving…
     delete: Delete
-    deleting: Deleting…
-    deleteConfirm: Delete this operation?
-    keep: Keep
     repeat: Repeat
 
 transfers:
   form:
     title: New transfer
     editTitle: Edit transfer
-    deleteConfirm: Delete this transfer?
     from: From
     to: To
     swap: Swap the accounts
@@ -239,6 +236,11 @@ transfers:
 
 feed:
   empty: No operations yet.
+  operationDeleted: Operation deleted.
+  transferDeleted: Transfer deleted.
+  undo: Undo
+  operationActions: Actions for this operation
+  transferActions: Actions for this transfer
   fromTo: '{{source}} → {{target}}'
   rate: Rate {{rate}}
   balance: Balance {{amount}}
@@ -250,16 +252,16 @@ feed:
   pendingName: …
   accountAndComment: '{{account}} · {{comment}}'
   anchor: Balance recorded
-  difference: '{{amount}} unrecorded'
-  differences: Issues
+  difference: '{{amount}} not accounted for'
+  differences: Differences
   newerDifference: Newer difference
   olderDifference: Older difference
 
 statistics:
-  pending: The category breakdown arrives with 4.11.
+  pending: The category breakdown is coming soon.
 
 charts:
-  pending: Balance dynamics and cashflow arrive with 4.9 and 4.10.
+  pending: Balance and cashflow charts are coming soon.
 
 preferences:
   title: Preferences
@@ -302,7 +304,7 @@ settings:
     importing: An import is running. The workspace can be archived once it has finished.
   delete:
     title: Delete workspace
-    text: Deletion cannot be undone. The workspace and all its accounts, operations and history become unreachable at once and cannot be restored. To keep it out of sight instead, archive it.
+    text: Deletion cannot be undone. The workspace and all its accounts, operations and history become unreachable at once. To keep it out of sight instead, archive it.
     action: Delete workspace…
     confirmTitle: Delete “{{name}}”?
     confirmText: This cannot be undone. Every account, operation and balance in this workspace becomes unreachable immediately.
@@ -334,7 +336,7 @@ import:
     categories: Categories
     operations: Operations
     transfers: Transfers
-    anchors: Balance anchors
+    anchors: Recorded balances
   open: Open the workspace
   failed: Nothing was imported
   refused: The file was refused.
@@ -377,5 +379,5 @@ entities:
   CATEGORY_other: '{{count, number}} categories'
   TRANSFER_one: '{{count, number}} transfer'
   TRANSFER_other: '{{count, number}} transfers'
-  BALANCE_ANCHOR_one: '{{count, number}} balance anchor'
-  BALANCE_ANCHOR_other: '{{count, number}} balance anchors'
+  BALANCE_ANCHOR_one: '{{count, number}} recorded balance'
+  BALANCE_ANCHOR_other: '{{count, number}} recorded balances'

@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { cloneElement, isValidElement, type ReactNode } from 'react'
 import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
@@ -17,16 +17,23 @@ export function Field({
   hideLabel?: boolean
   children: ReactNode
 }) {
+  const errorId = `${id}-error`
   return (
     <div className="flex flex-col gap-1.5">
       <Label
         htmlFor={id}
-        className={cn('text-[13px] font-normal text-muted-foreground', hideLabel && 'sr-only')}
+        className={cn('text-caption font-normal text-muted-foreground', hideLabel && 'sr-only')}
       >
         {label}
       </Label>
-      {children}
-      {error && <span className="text-xs text-destructive">{error}</span>}
+      {error && isValidElement<{ 'aria-describedby'?: string }>(children)
+        ? cloneElement(children, { 'aria-describedby': errorId })
+        : children}
+      {error && (
+        <span id={errorId} role="alert" className="text-xs text-destructive">
+          {error}
+        </span>
+      )}
     </div>
   )
 }

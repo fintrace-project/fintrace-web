@@ -28,11 +28,11 @@ export function HomePage() {
 
       <main className="mx-auto w-full max-w-5xl flex-1 px-4">
         <section className="py-12 md:py-24">
-          <h1 className="max-w-2xl text-3xl font-semibold tracking-tight md:text-5xl">
+          <h1 className="max-w-2xl text-3xl font-extrabold tracking-tight md:text-5xl">
             {t('home.headline')}
           </h1>
           <p className="mt-4 max-w-xl text-muted-foreground md:text-lg">{t('home.lead')}</p>
-          <Button asChild size="lg" className="mt-8 h-11 w-full px-5 md:w-auto">
+          <Button asChild size="lg" className="mt-8 h-11 w-full rounded-[10px] px-5 font-bold md:w-auto">
             <a href="/auth/login">
               <LogIn aria-hidden />
               {t('home.signInTo')}
@@ -42,9 +42,9 @@ export function HomePage() {
 
         <section aria-label={t('home.features')} className="grid gap-3 pb-12 md:grid-cols-3 md:gap-4">
           {features.map((feature) => (
-            <div key={feature.key} className="rounded-lg border p-4">
+            <div key={feature.key} className="rounded-2xl border bg-card p-5">
               <feature.icon className="size-5 text-muted-foreground" aria-hidden />
-              <h2 className="mt-3 font-medium">{t(`home.${feature.key}.title`)}</h2>
+              <h2 className="mt-3 font-bold">{t(`home.${feature.key}.title`)}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{t(`home.${feature.key}.text`)}</p>
             </div>
           ))}

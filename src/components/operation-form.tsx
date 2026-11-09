@@ -1,4 +1,3 @@
-import { Trash2 } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -29,7 +28,7 @@ import { nowLocal } from '@/core/dates'
 import { toDecimal } from '@/core/decimal'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
-import { useCancelOperation, useCreateOperation, useReviseOperation } from '@/hooks/use-operation-mutations'
+import { useCreateOperation, useReviseOperation } from '@/hooks/use-operation-mutations'
 import { formStrip } from '@/lib/form-strip'
 
 export interface FormProps {
@@ -143,7 +142,6 @@ function OperationForm({
 }) {
   const create = useCreateOperation(workspace.id)
   const revise = useReviseOperation(workspace.id)
-  const cancel = useCancelOperation(workspace.id)
   const save = operation ? revise : create
   const { t } = useTranslation()
   // Editing starts from the operation as the feed shows it, a repeat from its template but dated now; the feed
@@ -163,7 +161,6 @@ function OperationForm({
   const [comment, setComment] = useState(source?.comment ?? '')
   const [accountsOpen, setAccountsOpen] = useState(false)
   // Delete asks once more in the button row itself, rather than in a second dialog over this one
-  const [confirming, setConfirming] = useState(false)
 
   const errorOf = (field: string) => fieldError(save.error, field)
   const fixedAccount = account.id === accountId
@@ -195,7 +192,7 @@ function OperationForm({
     }
   }
 
-  const failure = save.error ?? cancel.error
+  const failure = save.error
 
   return (
     // min-w-0: a grid or flex item is otherwise as wide as its widest content. flex-1 with the button's mt-auto
@@ -235,6 +232,7 @@ function OperationForm({
             value={occurredAt}
             onChange={setOccurredAt}
             invalid={!!errorOf('occurredAt')}
+            fill={!!fixedAccount}
           />
         </div>
         {rowErrors.map((error) => (
@@ -272,53 +270,19 @@ function OperationForm({
 
       {failure && !hasFieldErrors(failure) && <Problem error={failure} />}
       <div className={formStrip}>
-        {operation && confirming ? (
-          <div className="flex items-center gap-2">
-            <span className="min-w-0 flex-1 text-sm font-semibold">{t('operations.form.deleteConfirm')}</span>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setConfirming(false)}
-              className="h-12 rounded-xl border-transparent bg-card px-4"
-            >
-              {t('operations.form.keep')}
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={cancel.isPending}
-              onClick={() => cancel.mutate(operation.id, { onSuccess: onDone })}
-              className="h-12 rounded-xl px-4 font-bold"
-            >
-              {t(cancel.isPending ? 'operations.form.deleting' : 'operations.form.delete')}
-            </Button>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            {operation && (
-              <Button
-                type="button"
-                variant="outline"
-                aria-label={t('operations.form.delete')}
-                onClick={() => setConfirming(true)}
-                className="size-12 shrink-0 rounded-xl border-transparent bg-card text-destructive"
-              >
-                <Trash2 aria-hidden />
-              </Button>
-            )}
-            <Button
-              type="submit"
-              disabled={save.isPending}
-              className="h-12 min-w-0 flex-1 bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
-            >
-              {operation
-                ? t(save.isPending ? 'operations.form.saving' : 'operations.form.save')
-                : save.isPending
-                  ? t('operations.form.adding')
-                  : t(`operations.form.submit.${kind}`)}
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button
+            type="submit"
+            disabled={save.isPending}
+            className="h-12 min-w-0 flex-1 bg-(--ws) font-bold text-white hover:bg-(--ws)/85"
+          >
+            {operation
+              ? t(save.isPending ? 'operations.form.saving' : 'operations.form.save')
+              : save.isPending
+                ? t('operations.form.adding')
+                : t(`operations.form.submit.${kind}`)}
+          </Button>
+        </div>
       </div>
     </form>
   )

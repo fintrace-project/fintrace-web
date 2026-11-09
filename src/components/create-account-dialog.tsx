@@ -27,9 +27,9 @@ export function CreateAccountDialog({ workspace }: { workspace: Workspace }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-input text-muted-foreground outline-none hover:border-(--ws)/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50">
+      <DialogTrigger className="flex min-h-44 flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-muted-foreground/30 text-muted-foreground outline-none hover:border-(--ws)/50 hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50">
         <Plus className="size-6" aria-hidden />
-        <span className="text-[15px] font-semibold">{t('accounts.add')}</span>
+        <span className="text-row font-semibold">{t('accounts.add')}</span>
       </DialogTrigger>
       <DialogContent>
         <CreateAccountForm workspace={workspace} onCreated={() => setOpen(false)} />

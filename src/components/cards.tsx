@@ -30,15 +30,18 @@ export function Pending({ children }: { children: ReactNode }) {
   return <p className="text-sm text-muted-foreground">{children}</p>
 }
 
-function PendingTile({ label, task }: { label: string; task: string }) {
+function PendingTile({ label }: { label: string }) {
   const { t } = useTranslation()
   return (
-    <div className="flex flex-col gap-2 rounded-2xl border bg-card p-5">
-      <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span aria-hidden className="text-[28px] font-extrabold tracking-tight text-muted-foreground/50">
+    <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card px-5 py-3 sm:flex-col sm:items-start sm:justify-start sm:gap-2 sm:p-5">
+      <span className="text-caption text-muted-foreground">{label}</span>
+      <span
+        aria-hidden
+        className="text-2xl font-extrabold tracking-tight text-muted-foreground/50 max-sm:hidden"
+      >
         —
       </span>
-      <span className="text-xs text-muted-foreground">{t('common.arrivesWith', { task })}</span>
+      <span className="text-xs text-muted-foreground">{t('common.comingSoon')}</span>
     </div>
   )
 }
@@ -47,10 +50,10 @@ function PendingTile({ label, task }: { label: string; task: string }) {
 export function TotalsTiles() {
   const { t } = useTranslation()
   return (
-    <section aria-label={t('totals.label')} className="grid gap-4 sm:grid-cols-3">
-      <PendingTile label={t('totals.balance')} task="4.13" />
-      <PendingTile label={t('totals.income')} task="4.10" />
-      <PendingTile label={t('totals.expenses')} task="4.10" />
+    <section aria-label={t('totals.label')} className="grid gap-2 sm:grid-cols-3 sm:gap-4">
+      <PendingTile label={t('totals.balance')} />
+      <PendingTile label={t('totals.income')} />
+      <PendingTile label={t('totals.expenses')} />
     </section>
   )
 }
@@ -70,7 +73,7 @@ export function InitialsAvatar({
       aria-hidden
       style={accentOf(colorId)}
       className={cn(
-        'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--ws-soft) text-[13px] font-extrabold text-(--ws)',
+        'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--ws-soft) text-caption font-extrabold text-(--ws)',
         className,
       )}
     >

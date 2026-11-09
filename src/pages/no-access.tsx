@@ -8,6 +8,7 @@ export function NoAccessPage() {
   return (
     <main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-4 px-4">
       <ShieldX className="size-10 text-muted-foreground" aria-hidden />
+      <title>{t('app.pageTitle', { page: t('noAccess.title') })}</title>
       <h1 className="text-2xl font-extrabold tracking-tight">{t('noAccess.title')}</h1>
       <p className="text-muted-foreground">{t('noAccess.text')}</p>
       <form method="post" action="/auth/logout">

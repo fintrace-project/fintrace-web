@@ -53,7 +53,7 @@ export function WorkspaceImportPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-6">
       <PageHeader title={t('import.title')} />
       {body}
     </div>
@@ -95,7 +95,7 @@ function DumpPicker({
       <Pending>{t('import.intro')}</Pending>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1.5 text-[13px] text-muted-foreground">{t('import.from')}</legend>
+        <legend className="mb-1.5 text-caption text-muted-foreground">{t('import.from')}</legend>
         <div className="flex flex-wrap gap-2">
           {importSources.map((each) => (
             <label
@@ -130,7 +130,7 @@ function DumpPicker({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
         className={cn(
-          'flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-input bg-card px-4 py-8 text-center has-focus-visible:ring-3 has-focus-visible:ring-ring/50',
+          'flex min-h-48 cursor-pointer flex-col items-center justify-center gap-2 rounded-2xl border-[1.5px] border-dashed border-muted-foreground/30 bg-card px-4 py-8 text-center has-focus-visible:ring-3 has-focus-visible:ring-ring/50',
           dragging && 'border-(--ws) bg-(--ws-soft)',
         )}
       >
@@ -142,14 +142,14 @@ function DumpPicker({
         <FileUp className="size-8 text-muted-foreground" aria-hidden />
         {file ? (
           <>
-            <span className="text-[15px] font-bold break-all">{file.name}</span>
-            <span className="text-[13px] text-muted-foreground">
+            <span className="text-row font-bold break-all">{file.name}</span>
+            <span className="text-caption text-muted-foreground">
               {t('import.chosen', { size: formatBytes(file.size) })}
             </span>
           </>
         ) : (
           <>
-            <span className="text-[15px] font-bold">
+            <span className="text-row font-bold">
               <Trans
                 i18nKey="import.drop"
                 components={{
@@ -158,7 +158,7 @@ function DumpPicker({
                 }}
               />
             </span>
-            <span className="text-[13px] text-muted-foreground">
+            <span className="text-caption text-muted-foreground">
               {t('import.fileHint', {
                 file: t(`importSources.${source.id}.file`),
                 size: formatBytes(source.maxBytes),

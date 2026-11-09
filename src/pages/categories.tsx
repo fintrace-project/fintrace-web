@@ -96,7 +96,7 @@ function CategoryBrowser({
       aria-label={t(`operations.kind.${kind}`)}
       className="grid rounded-2xl border bg-card md:min-h-[32rem] md:grid-cols-[minmax(15rem,20rem)_minmax(0,1fr)]"
     >
-      <div className={cn('flex flex-col gap-3 p-3 md:border-r md:p-4', opened && 'hidden md:flex')}>
+      <div className={cn('flex min-w-0 flex-col gap-3 p-3 md:border-r md:p-4', opened && 'hidden md:flex')}>
         <ul className="flex flex-col gap-1">
           {topLevel.map((category) => (
             <li key={category.id}>
@@ -107,7 +107,7 @@ function CategoryBrowser({
                 className="flex min-h-13 w-full items-center gap-3 rounded-xl px-2 text-left outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50 md:aria-current:bg-(--ws)/10 md:aria-current:font-semibold"
               >
                 <EntityIcon entity={category} className="size-9 rounded-[10px]" />
-                <span className="min-w-0 flex-1 truncate text-[15px]">{category.name}</span>
+                <span className="min-w-0 flex-1 truncate text-row">{category.name}</span>
                 <ChildCount categories={categories} category={category} />
                 <ChevronRight className="size-4 shrink-0 text-muted-foreground md:hidden" aria-hidden />
               </button>
@@ -221,7 +221,7 @@ function CategoryDetails({
                     className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 rounded-lg px-1 text-left outline-none hover:bg-muted/60 focus-visible:ring-3 focus-visible:ring-ring/50"
                   >
                     <EntityIcon entity={child} className="size-7 rounded-lg text-[11px]" />
-                    <span className="min-w-0 flex-1 truncate text-[15px]">{child.name}</span>
+                    <span className="min-w-0 flex-1 truncate text-row">{child.name}</span>
                     <ChildCount categories={categories} category={child} />
                     <ChevronRight className="size-4 shrink-0 text-muted-foreground" aria-hidden />
                   </button>

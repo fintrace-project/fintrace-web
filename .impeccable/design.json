@@ -1,0 +1,354 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-09T00:00:00Z",
+  "title": "Design System: fintrace",
+  "extensions": {
+    "colorMeta": {
+      "warm-paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "tonalRamp": [
+          "oklch(15% 0.004 90)",
+          "oklch(25% 0.005 90)",
+          "oklch(35% 0.006 90)",
+          "oklch(45% 0.007 90)",
+          "oklch(60% 0.008 90)",
+          "oklch(75% 0.008 90)",
+          "oklch(88% 0.006 90)",
+          "oklch(97% 0.004 90)"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Ink",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(25% 0 0)",
+          "oklch(35% 0 0)",
+          "oklch(45% 0 0)",
+          "oklch(60% 0 0)",
+          "oklch(75% 0 0)",
+          "oklch(88% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "card": { "role": "neutral", "displayName": "Card" },
+      "muted-ink": { "role": "neutral", "displayName": "Muted Ink" },
+      "secondary-paper": { "role": "neutral", "displayName": "Secondary Paper" },
+      "muted-paper": { "role": "neutral", "displayName": "Muted Paper" },
+      "accent-paper": { "role": "neutral", "displayName": "Accent Paper" },
+      "destructive": {
+        "role": "semantic",
+        "displayName": "Destructive",
+        "canonical": "oklch(0.51 0.228 27.325)",
+        "tonalRamp": [
+          "oklch(15% 0.06 27)",
+          "oklch(25% 0.1 27)",
+          "oklch(35% 0.15 27)",
+          "oklch(45% 0.2 27)",
+          "oklch(58% 0.245 27)",
+          "oklch(75% 0.14 27)",
+          "oklch(88% 0.06 27)",
+          "oklch(95% 0.025 27)"
+        ]
+      },
+      "positive": {
+        "role": "semantic",
+        "displayName": "Positive",
+        "tonalRamp": [
+          "oklch(15% 0.04 150)",
+          "oklch(25% 0.07 150)",
+          "oklch(35% 0.09 150)",
+          "oklch(45% 0.11 150)",
+          "oklch(60% 0.13 150)",
+          "oklch(75% 0.11 150)",
+          "oklch(88% 0.06 150)",
+          "oklch(95% 0.025 150)"
+        ]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "Warning",
+        "tonalRamp": [
+          "oklch(15% 0.04 70)",
+          "oklch(25% 0.07 70)",
+          "oklch(35% 0.09 70)",
+          "oklch(45% 0.11 70)",
+          "oklch(60% 0.15 70)",
+          "oklch(75% 0.15 70)",
+          "oklch(88% 0.08 70)",
+          "oklch(95% 0.03 70)"
+        ]
+      },
+      "workspace-blue": {
+        "role": "secondary",
+        "displayName": "Workspace Blue",
+        "tonalRamp": [
+          "oklch(15% 0.05 264)",
+          "oklch(25% 0.09 264)",
+          "oklch(35% 0.13 264)",
+          "oklch(45% 0.16 264)",
+          "oklch(60% 0.15 264)",
+          "oklch(75% 0.1 264)",
+          "oklch(88% 0.05 264)",
+          "oklch(95% 0.02 264)"
+        ]
+      },
+      "workspace-rust": {
+        "role": "secondary",
+        "displayName": "Workspace Rust",
+        "tonalRamp": [
+          "oklch(15% 0.05 40)",
+          "oklch(25% 0.09 40)",
+          "oklch(35% 0.12 40)",
+          "oklch(45% 0.15 40)",
+          "oklch(60% 0.15 40)",
+          "oklch(75% 0.1 40)",
+          "oklch(88% 0.05 40)",
+          "oklch(95% 0.02 40)"
+        ]
+      },
+      "workspace-teal": {
+        "role": "secondary",
+        "displayName": "Workspace Teal",
+        "tonalRamp": [
+          "oklch(15% 0.03 185)",
+          "oklch(25% 0.05 185)",
+          "oklch(35% 0.07 185)",
+          "oklch(45% 0.09 185)",
+          "oklch(60% 0.1 185)",
+          "oklch(75% 0.08 185)",
+          "oklch(88% 0.04 185)",
+          "oklch(95% 0.02 185)"
+        ]
+      },
+      "workspace-violet": {
+        "role": "secondary",
+        "displayName": "Workspace Violet",
+        "tonalRamp": [
+          "oklch(15% 0.06 293)",
+          "oklch(25% 0.11 293)",
+          "oklch(35% 0.16 293)",
+          "oklch(45% 0.2 293)",
+          "oklch(60% 0.16 293)",
+          "oklch(75% 0.1 293)",
+          "oklch(88% 0.05 293)",
+          "oklch(95% 0.02 293)"
+        ]
+      },
+      "workspace-amber": {
+        "role": "secondary",
+        "displayName": "Workspace Amber",
+        "tonalRamp": [
+          "oklch(15% 0.04 62)",
+          "oklch(25% 0.07 62)",
+          "oklch(35% 0.09 62)",
+          "oklch(45% 0.11 62)",
+          "oklch(60% 0.13 62)",
+          "oklch(75% 0.11 62)",
+          "oklch(88% 0.06 62)",
+          "oklch(95% 0.025 62)"
+        ]
+      },
+      "workspace-magenta": {
+        "role": "secondary",
+        "displayName": "Workspace Magenta",
+        "tonalRamp": [
+          "oklch(15% 0.05 355)",
+          "oklch(25% 0.09 355)",
+          "oklch(35% 0.13 355)",
+          "oklch(45% 0.17 355)",
+          "oklch(60% 0.16 355)",
+          "oklch(75% 0.1 355)",
+          "oklch(88% 0.05 355)",
+          "oklch(95% 0.02 355)"
+        ]
+      },
+      "workspace-olive": {
+        "role": "secondary",
+        "displayName": "Workspace Olive",
+        "tonalRamp": [
+          "oklch(15% 0.04 130)",
+          "oklch(25% 0.07 130)",
+          "oklch(35% 0.1 130)",
+          "oklch(45% 0.12 130)",
+          "oklch(60% 0.13 130)",
+          "oklch(75% 0.11 130)",
+          "oklch(88% 0.06 130)",
+          "oklch(95% 0.03 130)"
+        ]
+      },
+      "workspace-sky": {
+        "role": "secondary",
+        "displayName": "Workspace Sky",
+        "tonalRamp": [
+          "oklch(15% 0.04 237)",
+          "oklch(25% 0.07 237)",
+          "oklch(35% 0.09 237)",
+          "oklch(45% 0.12 237)",
+          "oklch(60% 0.12 237)",
+          "oklch(75% 0.09 237)",
+          "oklch(88% 0.04 237)",
+          "oklch(95% 0.02 237)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The amount being typed in the operation and transfer forms."
+      },
+      "headline": { "displayName": "Headline", "purpose": "Page titles; 24px on phones, 32px from md." },
+      "section": { "displayName": "Section", "purpose": "Major headings within a page." },
+      "title": { "displayName": "Title", "purpose": "Panel headings." },
+      "figure": { "displayName": "Figure", "purpose": "Amounts in feeds." },
+      "body": { "displayName": "Body", "purpose": "Default interface text." },
+      "label": { "displayName": "Label", "purpose": "Uppercase card headings in forms." },
+      "caption": { "displayName": "Caption", "purpose": "Form labels, day headings and hints." },
+      "micro": { "displayName": "Micro", "purpose": "Initials on badges and small icons; the floor." },
+      "tile": { "displayName": "Tile", "purpose": "Names under tiles and bottom-tab labels." }
+    },
+    "shadows": [
+      {
+        "name": "float",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Menus, popovers, floating buttons; workspace card hover."
+      },
+      {
+        "name": "overlay",
+        "value": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+        "purpose": "Sheets and the cookie notice."
+      }
+    ],
+    "motion": [
+      { "name": "overlay", "value": "100ms", "purpose": "Dialogs, menus and popovers opening and closing." },
+      { "name": "sheet-swipe", "value": "200ms", "purpose": "Sheets, and a swiped row settling back." },
+      {
+        "name": "arrive",
+        "value": "1800ms ease-out",
+        "purpose": "A row reached by a jump: holds its tint, then fades."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The default action outside a workspace.",
+      "html": "<button class=\"ds-btn-primary\">Sign in to fintrace</button>",
+      "css": ".ds-btn-primary { height: 44px; padding: 0 20px; background: var(--primary, #1a1a1a); color: var(--primary-foreground, #fff); border: 1px solid transparent; border-radius: 12px; font: 500 14px 'Manrope Variable', system-ui, sans-serif; transition: all .15s; } .ds-btn-primary:hover { opacity: .8; } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(26 26 26 / .5); } .ds-btn-primary:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Workspace Action",
+      "kind": "button",
+      "refersTo": "button-workspace-action",
+      "description": "The main action inside a workspace, in its accent.",
+      "html": "<button class=\"ds-btn-ws\">Add operation</button>",
+      "css": ".ds-btn-ws { height: 44px; padding: 0 16px; background: var(--ws, #2f5fd0); color: #fff; border: 0; border-radius: 10px; font: 700 14px 'Manrope Variable', system-ui, sans-serif; } .ds-btn-ws:hover { opacity: .85; } .ds-btn-ws:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(26 26 26 / .5); } .ds-btn-ws:active { transform: translateY(1px); }"
+    },
+    {
+      "name": "Destructive Button",
+      "kind": "button",
+      "description": "A soft red action; solid red is kept for the moment of commitment.",
+      "html": "<button class=\"ds-btn-danger\">Delete</button>",
+      "css": ".ds-btn-danger { height: 44px; padding: 0 16px; background: color-mix(in oklch, oklch(0.51 0.228 27.325) 10%, transparent); color: oklch(0.51 0.228 27.325); border: 1px solid transparent; border-radius: 12px; font: 500 14px 'Manrope Variable', system-ui, sans-serif; } .ds-btn-danger:hover { background: color-mix(in oklch, oklch(0.51 0.228 27.325) 20%, transparent); } .ds-btn-danger:focus-visible { outline: none; box-shadow: 0 0 0 3px color-mix(in oklch, oklch(0.51 0.228 27.325) 20%, transparent); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A hairline field.",
+      "html": "<input class=\"ds-input\" placeholder=\"Name\">",
+      "css": ".ds-input { height: 32px; width: 220px; padding: 4px 10px; background: transparent; color: var(--foreground, #1a1a1a); border: 1px solid var(--input, #8a857b); border-radius: 12px; font: 400 14px 'Manrope Variable', system-ui, sans-serif; outline: none; } .ds-input::placeholder { color: var(--muted-foreground, #5e5a52); } .ds-input:focus-visible { border-color: var(--ring, #1a1a1a); box-shadow: 0 0 0 3px rgb(26 26 26 / .5); }"
+    },
+    {
+      "name": "Pill",
+      "kind": "chip",
+      "refersTo": "pill",
+      "description": "A white capsule on the tint that says what is chosen and opens something.",
+      "html": "<div class=\"ds-pill-bg\"><button class=\"ds-pill\">Main account</button></div>",
+      "css": ".ds-pill-bg { padding: 16px; background: var(--ws-soft, #e8eefb); } .ds-pill { height: 44px; padding: 0 14px; background: var(--card, #fff); color: var(--foreground, #1a1a1a); border: 1px solid var(--outline, transparent); border-radius: 9999px; font: 500 14px 'Manrope Variable', system-ui, sans-serif; } .ds-pill:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(26 26 26 / .5); }"
+    },
+    {
+      "name": "Panel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "A flat white card with a hairline.",
+      "html": "<section class=\"ds-panel\"><h2>Accounts</h2><p>Your accounts appear here.</p></section>",
+      "css": ".ds-panel { padding: 20px; background: var(--card, #fff); border: 1px solid var(--border, #e6e3dc); border-radius: 21.6px; font-family: 'Manrope Variable', system-ui, sans-serif; } .ds-panel h2 { margin: 0 0 12px; font-size: 16px; font-weight: 700; } .ds-panel p { margin: 0; font-size: 14px; color: var(--muted-foreground, #5e5a52); }"
+    },
+    {
+      "name": "Feed Row",
+      "kind": "custom",
+      "description": "Icon, name and detail, then the right-aligned tabular figure.",
+      "html": "<div class=\"ds-row\"><span class=\"ds-row-icon\">GR</span><span class=\"ds-row-name\">Groceries<small>Main account</small></span><span class=\"ds-row-amount\">−42.10</span></div>",
+      "css": ".ds-row { display: flex; align-items: center; gap: 12px; width: 320px; padding: 12px 16px; background: var(--card, #fff); font-family: 'Manrope Variable', system-ui, sans-serif; font-variant-numeric: tabular-nums; } .ds-row:hover { background: color-mix(in srgb, var(--ws-soft, #e8eefb) 60%, transparent); } .ds-row-icon { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 10px; background: var(--ws-soft, #e8eefb); color: var(--ws, #2f5fd0); font-size: 13px; font-weight: 800; } .ds-row-name { flex: 1; font-size: 14px; } .ds-row-name small { display: block; font-size: 12px; color: var(--muted-foreground, #5e5a52); } .ds-row-amount { font-size: 15px; font-weight: 700; white-space: nowrap; }"
+    },
+    {
+      "name": "Entity Tile",
+      "kind": "custom",
+      "description": "The signature picker: a round icon, its name below, a ring when chosen.",
+      "html": "<button class=\"ds-tile\" aria-pressed=\"true\"><span class=\"ds-tile-ring\"><span class=\"ds-tile-icon\">FO</span></span><span class=\"ds-tile-name\">Food</span></button>",
+      "css": ".ds-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 72px; padding: 2px 0; background: none; border: 0; border-radius: 16.8px; font-family: 'Manrope Variable', system-ui, sans-serif; } .ds-tile:focus-visible { outline: none; box-shadow: 0 0 0 3px rgb(26 26 26 / .5); } .ds-tile-ring { padding: 2px; border-radius: 9999px; box-shadow: 0 0 0 2px var(--ws, #2f5fd0); } .ds-tile-icon { display: flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 9999px; background: var(--ws-soft, #e8eefb); color: var(--ws, #2f5fd0); font-size: 14px; font-weight: 800; } .ds-tile-name { font-size: 11px; font-weight: 600; line-height: 1.25; }"
+    },
+    {
+      "name": "Bottom Tab",
+      "kind": "nav",
+      "description": "Phone navigation: an active tab turns bold in the workspace accent.",
+      "html": "<nav class=\"ds-tabs\"><a class=\"ds-tab ds-tab-active\">Overview</a><a class=\"ds-tab\">Accounts</a><a class=\"ds-tab\">Operations</a></nav>",
+      "css": ".ds-tabs { display: grid; grid-template-columns: repeat(3, 1fr); width: 320px; padding: 8px; background: var(--card, #fff); border-top: 1px solid var(--border, #e6e3dc); font-family: 'Manrope Variable', system-ui, sans-serif; } .ds-tab { display: flex; align-items: center; justify-content: center; min-height: 52px; font-size: 11px; color: var(--muted-foreground, #5e5a52); } .ds-tab-active { font-weight: 700; color: var(--ws, #2f5fd0); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Pocket Balance Sheet",
+    "overview": "fintrace is a compact instrument for checking and updating your money in seconds, mostly one-handed on a phone. Warm paper, near-black ink and heavy Manrope headings give it the plainness of a sheet of figures; large tiles, capsules and swipes make it something you handle rather than read.\n\nThe interface is neutral until a workspace opens. Then the workspace's own colour floods the page as a soft tint and marks what is active and what is chosen, so you always know which sheet you hold. Everything else stays ink on paper, and figures stay the darkest, heaviest thing in a row.\n\nNothing about it should read as banking-app corporate (navy, stock trust signals, formal distance) or gamified budgeting (mascots, streaks, confetti, cheerful nudges about spending).",
+    "keyCharacteristics": [
+      "Thumb-first: tiles, capsules, bottom tabs and swipes lead, and desktop inherits them.",
+      "One changing colour per workspace on an otherwise neutral, warm base.",
+      "Tabular figures everywhere, in a heavy weight where they matter.",
+      "Flat surfaces separated by tint, thin borders and white.",
+      "Soft, generous shapes around strict alignment."
+    ],
+    "rules": [
+      {
+        "name": "The One Sheet Rule",
+        "body": "Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars.",
+        "section": "colors"
+      },
+      {
+        "name": "The Expenses Stay Ink Rule",
+        "body": "Income is green; expenses are plain ink with their sign. Red is reserved for errors and destruction, so spending never reads as a mistake.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Rule",
+        "body": "Numerals are tabular across the whole document, set once on the root. Never turn it off for a component, because figures must align in a column.",
+        "section": "typography"
+      },
+      {
+        "name": "The Shadow Means Floating Rule",
+        "body": "Surfaces at rest in the page have no shadow. If it scrolls with the page, separate it with tint or a border instead.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take a workspace's colour from --ws and --ws-soft, set by accentOf(), and never hard-code one.",
+      "Do define new colours as tokens in src/index.css, in both :root and .dark. Dark mode is planned, so new components must work in both, even though nothing switches it on yet.",
+      "Do make every control usable without hover and about 44px tall on phones.",
+      "Do keep transitions short: 100ms for overlays, 200ms for sheets and swipes.",
+      "Do honour reduced motion for anything that loops."
+    ],
+    "donts": [
+      "Don't drift towards banking-app corporate: navy, stock trust signals, formal distance.",
+      "Don't add gamified budgeting: mascots, streaks, confetti or cheerful nudges about spending.",
+      "Don't put a shadow on a surface at rest in the page.",
+      "Don't colour expenses red.",
+      "Don't add a second typeface, or switch off tabular numerals."
+    ]
+  }
+}

@@ -21,7 +21,7 @@ export function WorkspacesPage() {
   const { t } = useTranslation()
 
   const search = (
-    <label className="flex min-h-11 min-w-40 flex-1 items-center gap-2 rounded-[10px] border bg-card px-3.5 text-sm text-muted-foreground sm:flex-none">
+    <label className="flex min-h-11 min-w-40 flex-1 items-center gap-2 rounded-[10px] border bg-card px-3.5 text-sm text-muted-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50 sm:flex-none">
       <Search className="size-4" aria-hidden />
       <input
         type="search"
@@ -44,7 +44,7 @@ export function WorkspacesPage() {
   )
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-6">
       <PageHeader
         title={t('workspaces.title')}
         eyebrow={user.data && t('workspaces.hello', { name: user.data.firstName ?? displayName(user.data) })}
@@ -94,11 +94,11 @@ function WorkspaceGroups({ workspaces, query }: { workspaces: Workspace[]; query
         ))}
         <Link
           to="/workspaces/new"
-          className="flex min-h-44 flex-col items-center justify-center gap-2.5 rounded-[18px] border-[1.5px] border-dashed border-input text-muted-foreground hover:bg-card"
+          className="flex min-h-44 flex-col items-center justify-center gap-2.5 rounded-2xl border-[1.5px] border-dashed border-muted-foreground/30 text-muted-foreground hover:bg-card"
         >
           <Plus className="size-7" aria-hidden />
-          <span className="text-[15px] font-bold text-foreground">{t('shell.createWorkspace')}</span>
-          <span className="text-[13px]">{t('workspaces.createHint')}</span>
+          <span className="text-row font-bold text-foreground">{t('shell.createWorkspace')}</span>
+          <span className="text-caption">{t('workspaces.createHint')}</span>
         </Link>
       </section>
 
@@ -125,14 +125,14 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
       to={`/w/${workspace.id}`}
       style={accentOf(workspace.id)}
       className={cn(
-        'flex flex-col gap-4.5 rounded-[18px] border bg-card p-5.5 transition-shadow hover:shadow-md',
-        workspace.status === 'ARCHIVED' && 'opacity-70',
+        'flex min-w-0 flex-col gap-4 rounded-2xl border bg-card p-5 transition-shadow hover:shadow-md',
+        workspace.status === 'ARCHIVED' && 'bg-card/50',
       )}
     >
       <div className="flex items-center gap-3">
         <WorkspaceAvatar workspace={workspace} className="size-11 text-lg" />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <span className="truncate text-[17px] font-bold">{workspace.name}</span>
+          <span className="truncate text-base font-bold">{workspace.name}</span>
           <span className="truncate text-xs text-muted-foreground">
             {t('workspaces.created', { date: formatShortDate(workspace.createdAt) })}
           </span>
@@ -143,7 +143,7 @@ function WorkspaceCard({ workspace }: { workspace: Workspace }) {
       </div>
       <div className="flex flex-col gap-0.5">
         <span className="text-xs text-muted-foreground">{t('workspaces.currency')}</span>
-        <span className="text-[26px] font-extrabold tracking-tight">{workspace.defaultCurrency}</span>
+        <span className="text-2xl font-extrabold tracking-tight">{workspace.defaultCurrency}</span>
       </div>
     </Link>
   )

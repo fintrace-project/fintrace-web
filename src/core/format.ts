@@ -19,7 +19,8 @@ export const currencySymbol = (currency: string) =>
     .find((part) => part.type === 'currency')?.value ?? currency
 
 export const formatBalance = (balance: AccountBalance | undefined) =>
-  balance ? formatMoney(balance.balance, balance.currency) : '—'
+  // Intl writes a hyphen; the feeds' figures carry a true minus
+  balance ? formatMoney(balance.balance, balance.currency).replace('-', '−') : '—'
 
 // The wire's amount is a magnitude: the sign is written from what the caller knows, the figure left as Core sent it
 export const formatSignedMagnitude = (amount: number, currency: string, positive: boolean) =>
