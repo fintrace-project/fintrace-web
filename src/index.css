@@ -41,10 +41,19 @@
   --color-background: var(--background);
   --color-outline: var(--outline);
   --color-positive: var(--positive);
+  --color-negative: var(--negative);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
   --color-warning-border: var(--warning-border);
   --color-warning-foreground: var(--warning-foreground);
+  --color-income-soft: var(--income-soft);
+  --color-income-border: var(--income-border);
+  --color-expense-soft: var(--expense-soft);
+  --color-expense-border: var(--expense-border);
+  --color-transfer-soft: var(--transfer-soft);
+  --color-transfer-border: var(--transfer-border);
+  --color-anchor-soft: var(--anchor-soft);
+  --color-anchor-border: var(--anchor-border);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -86,10 +95,21 @@
   --accent-foreground: #1a1a1a;
   --destructive: oklch(0.51 0.228 27.325);
   --positive: #1f6e36;
+  /* Money out, as --positive is money in; apart from --destructive, which means delete and errors */
+  --negative: #b42318;
   --warning: #d97706;
   --warning-soft: #fdf6e3;
   --warning-border: #e8b860;
   --warning-foreground: #7a4a05;
+  /* The feed's cards, tinted by what each item is: money in, money out, moved, observed */
+  --income-soft: #eef7f0;
+  --income-border: #bfdec9;
+  --expense-soft: #fdf2e8;
+  --expense-border: #f1cba8;
+  --transfer-soft: #eef3fc;
+  --transfer-border: #c3d4f0;
+  --anchor-soft: #f4f2ee;
+  --anchor-border: #dedad2;
   --border: #e6e3dc;
   --input: #8a857b;
   /* Round the white capsules on the tint; a colour here draws an outline on them all */
@@ -131,10 +151,19 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
   --positive: oklch(0.72 0.15 150);
+  --negative: oklch(0.72 0.16 28);
   --warning: #f59e0b;
   --warning-soft: #3a2c10;
   --warning-border: #8a6520;
   --warning-foreground: #f6d58e;
+  --income-soft: #14261a;
+  --income-border: #2d5539;
+  --expense-soft: #2a1d12;
+  --expense-border: #654024;
+  --transfer-soft: #141f31;
+  --transfer-border: #2f4870;
+  --anchor-soft: #232220;
+  --anchor-border: #3d3b37;
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --outline: transparent;

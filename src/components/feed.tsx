@@ -52,6 +52,32 @@ const rowLayout = 'flex min-h-14 w-full items-center gap-3 py-2.5'
 // A row that opens its operation reaches the card's edges, so the tint under the pointer and the red strip a
 // swipe uncovers do too; the row's own padding puts its content back in line
 const bleed = '-mx-4 w-[calc(100%+2rem)] md:-mx-5 md:w-[calc(100%+2.5rem)]'
+// Each item its own card, tinted by what it is: money in, money out, moved between accounts, observed. A
+// difference moved no money, so it is drawn in outline only, a phantom of the operation it could become.
+const card = 'overflow-hidden rounded-2xl border px-4 md:px-5'
+
+function toneOf(item: FeedItem): string {
+  switch (item.type) {
+    case 'OPERATION':
+      return item.kind === 'INCOME'
+        ? 'border-income-border bg-income-soft'
+        : 'border-expense-border bg-expense-soft'
+    // In an account's feed a transfer is money out of it or into it, tinted so; across the workspace it is
+    // both at once, its own colour
+    case 'TRANSFER':
+      if ('side' in item) {
+        return item.side === 'SOURCE'
+          ? 'border-expense-border bg-expense-soft'
+          : 'border-income-border bg-income-soft'
+      }
+      return 'border-transfer-border bg-transfer-soft'
+    case 'BALANCE_ANCHOR':
+      return 'border-anchor-border bg-anchor-soft'
+    case 'DIFFERENCE':
+      return 'border-dashed border-muted-foreground/40 bg-transparent'
+  }
+}
+
 const editableRow =
   'px-4 text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:ring-inset md:px-5'
 
@@ -266,7 +292,12 @@ function OperationRow({
         <span className="truncate text-sm font-semibold">{categoryName}</span>
         {detail && <span className="truncate text-xs text-muted-foreground">{detail}</span>}
       </span>
-      <span className={cn('text-row font-bold whitespace-nowrap', item.kind === 'INCOME' && 'text-positive')}>
+      <span
+        className={cn(
+          'text-row font-bold whitespace-nowrap',
+          item.kind === 'INCOME' ? 'text-positive' : 'text-negative',
+        )}
+      >
         {formatOperationAmount(item)}
       </span>
     </>
@@ -279,7 +310,9 @@ function TransferAmount({ item }: { item: TransferItem }) {
     const incoming = item.side === 'TARGET'
     const { currency } = incoming ? item.target : item.source
     return (
-      <span className={cn('text-row font-bold whitespace-nowrap', incoming && 'text-positive')}>
+      <span
+        className={cn('text-row font-bold whitespace-nowrap', incoming ? 'text-positive' : 'text-negative')}
+      >
         {formatSignedMagnitude(item.amount, currency, incoming)}
       </span>
     )
@@ -337,17 +370,24 @@ function DifferenceRow({
   bookable: boolean
 }) {
   const { t } = useTranslation()
+  // Faded inside its outlined card: the operation it could become, not one that exists. On one wrapper rather
+  // than the row's button, so the hover and the focus ring stay at full strength.
   return (
-    <>
+    <span className="flex min-w-0 flex-1 items-center gap-3 opacity-70">
       <RowIcon icon={CircleHelp} />
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-semibold">{t('feed.unaccounted')}</span>
         {bookable && <span className="truncate text-xs text-muted-foreground">{t('feed.bookIt')}</span>}
       </span>
-      <span className={cn('text-row font-bold whitespace-nowrap', item.amount > 0 && 'text-positive')}>
+      <span
+        className={cn(
+          'text-row font-bold whitespace-nowrap',
+          item.amount > 0 ? 'text-positive' : 'text-negative',
+        )}
+      >
         {formatSignedMagnitude(Math.abs(item.amount), currency, item.amount > 0)}
       </span>
-    </>
+    </span>
   )
 }
 
@@ -446,88 +486,95 @@ function RunRows({
   const members = items.slice(0, -1)
 
   return (
-    <>
-      {/* The oldest item's cursor stays with the run as newer ones join it or leave the window, and stays
-          on this row when expanded, so opening a run moves nothing above it */}
-      <li data-cursor={items.at(-1)!.cursor}>
-        <button
-          type="button"
-          aria-expanded={expanded}
-          onClick={onToggle}
-          className="flex min-h-14 w-full items-center gap-3 py-2.5 text-left"
-        >
-          <RowAvatar
-            main={{ id: first.categoryId, name: categoryName }}
-            badge={inOwnAccount ? undefined : { id: first.accountId, name: accountName }}
-          />
-          <span className="flex min-w-0 flex-1 flex-col">
-            <span className="truncate text-sm font-semibold">{categoryName}</span>
-            {/* On touch, beside the count: there is no menu column there, and after the amount it would break
+    // One card for the whole run, its members opening inside it. The oldest item's cursor stays with the run
+    // as newer ones join it or leave the window, and stays on this card when expanded, so opening a run moves
+    // nothing above it.
+    <li data-cursor={items.at(-1)!.cursor} className={cn(card, toneOf(first), 'flex flex-col')}>
+      <button
+        type="button"
+        aria-expanded={expanded}
+        onClick={onToggle}
+        className="flex min-h-14 w-full items-center gap-3 py-2.5 text-left"
+      >
+        <RowAvatar
+          main={{ id: first.categoryId, name: categoryName }}
+          badge={inOwnAccount ? undefined : { id: first.accountId, name: accountName }}
+        />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="truncate text-sm font-semibold">{categoryName}</span>
+          {/* On touch, beside the count: there is no menu column there, and after the amount it would break
                 the figures' one right edge */}
-            <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
-              <span className="truncate">
-                {inOwnAccount
-                  ? t('feed.run', { count: items.length })
-                  : t('feed.runInAccount', { count: items.length, account: accountName })}
-              </span>
-              <ChevronDown
-                aria-hidden
-                className={cn(
-                  'size-3.5 shrink-0 transition-transform not-pointer-coarse:hidden',
-                  expanded && 'rotate-180',
-                )}
-              />
+          <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+            <span className="truncate">
+              {inOwnAccount
+                ? t('feed.run', { count: items.length })
+                : t('feed.runInAccount', { count: items.length, account: accountName })}
             </span>
-          </span>
-          <span className={cn('text-row font-bold whitespace-nowrap', income && 'text-positive')}>
-            {formatSignedMagnitude(runTotal(items), first.currency, income)}
-          </span>
-          {/* With a mouse, in the column the other rows' menus take: as wide as a menu button and reaching as far
-              past the row's edge, 8 px after the figure as theirs is */}
-          <span className="-mr-3 -ml-1 flex w-9 shrink-0 justify-center text-muted-foreground pointer-coarse:hidden">
             <ChevronDown
               aria-hidden
-              className={cn('size-4 transition-transform', expanded && 'rotate-180')}
+              className={cn(
+                'size-3.5 shrink-0 transition-transform not-pointer-coarse:hidden',
+                expanded && 'rotate-180',
+              )}
             />
           </span>
-        </button>
-      </li>
-      {expanded &&
-        items.map((item) => {
-          const onEdit = edit(item)
-          const layout = 'flex min-h-10 w-full items-center gap-3 py-1.5 pl-12'
-          const content = (
-            <>
-              <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{item.comment}</span>
-              <span className={cn('text-sm font-semibold whitespace-nowrap', income && 'text-positive')}>
-                {formatOperationAmount(item)}
-              </span>
-            </>
-          )
-          return (
-            <li
-              key={item.cursor}
-              data-cursor={members.includes(item) ? item.cursor : undefined}
-              // A column only for an editable row, whose refusal message goes under it
-              className={onEdit ? 'flex flex-col' : layout}
-            >
-              {onEdit ? (
-                // The run's own indent, kept inside the row that reaches the card's edges
-                <EditableRow
-                  item={item}
-                  onEdit={onEdit}
-                  swipe={swipe}
-                  className={cn(layout, 'pl-16 md:pl-17')}
+        </span>
+        <span
+          className={cn('text-row font-bold whitespace-nowrap', income ? 'text-positive' : 'text-negative')}
+        >
+          {formatSignedMagnitude(runTotal(items), first.currency, income)}
+        </span>
+        {/* With a mouse, in the column the other rows' menus take: as wide as a menu button and reaching as far
+              past the row's edge, 8 px after the figure as theirs is */}
+        <span className="-mr-3 -ml-1 flex w-9 shrink-0 justify-center text-muted-foreground pointer-coarse:hidden">
+          <ChevronDown aria-hidden className={cn('size-4 transition-transform', expanded && 'rotate-180')} />
+        </span>
+      </button>
+      {expanded && (
+        // bg-inherit down to each member's swipe row, which covers its strips with the run card's tint
+        <ul className="flex flex-col divide-y divide-foreground/10 border-t border-foreground/10 bg-inherit">
+          {items.map((item) => {
+            const onEdit = edit(item)
+            const layout = 'flex min-h-10 w-full items-center gap-3 py-1.5 pl-12'
+            const content = (
+              <>
+                <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{item.comment}</span>
+                <span
+                  className={cn(
+                    'text-sm font-semibold whitespace-nowrap',
+                    income ? 'text-positive' : 'text-negative',
+                  )}
                 >
-                  {content}
-                </EditableRow>
-              ) : (
-                content
-              )}
-            </li>
-          )
-        })}
-    </>
+                  {formatOperationAmount(item)}
+                </span>
+              </>
+            )
+            return (
+              <li
+                key={item.cursor}
+                data-cursor={members.includes(item) ? item.cursor : undefined}
+                // A column only for an editable row, whose refusal message goes under it
+                className={onEdit ? 'flex flex-col bg-inherit' : layout}
+              >
+                {onEdit ? (
+                  // The run's own indent, kept inside the row that reaches the card's edges
+                  <EditableRow
+                    item={item}
+                    onEdit={onEdit}
+                    swipe={swipe}
+                    className={cn(layout, 'pl-16 md:pl-17')}
+                  >
+                    {content}
+                  </EditableRow>
+                ) : (
+                  content
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+    </li>
   )
 }
 
@@ -704,8 +751,9 @@ function FeedList({
         fetchMore={fetchNewer}
       />
       {days.map(({ day, items: ofDay }, index) => (
-        <section key={day} className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between gap-3 px-1">
+        // A white panel per day on the page's tint, its items' tinted cards inside it
+        <section key={day} className="flex flex-col gap-2 rounded-2xl border bg-card p-2 pt-3 md:p-3">
+          <div className="flex items-baseline justify-between gap-3 px-2">
             <h2 className="text-caption font-bold text-muted-foreground">{formatFeedDay(day)}</h2>
             {/* A day cut by the window's edge would show too little, so it shows nothing until it is whole */}
             {!(index === 0 && feed.hasPreviousPage) && !(index === days.length - 1 && feed.hasNextPage) && (
@@ -716,7 +764,7 @@ function FeedList({
               </span>
             )}
           </div>
-          <ul className="flex flex-col divide-y overflow-hidden rounded-2xl border bg-card px-4 md:px-5">
+          <ul className="flex flex-col gap-2">
             {feedRows(ofDay).map((row) => {
               if (row.kind === 'RUN') {
                 const expanded = row.items.some((item) => open.has(item.cursor))
@@ -760,12 +808,15 @@ function FeedList({
                   data-cursor={item.cursor}
                   aria-current={current || undefined}
                   className={cn(
-                    'group aria-[current=true]:-mx-4 aria-[current=true]:px-4 motion-safe:aria-[current=true]:animate-arrive-row md:aria-[current=true]:-mx-5 md:aria-[current=true]:px-5',
-                    // A menu-less row is w-full, so the margins alone would only shift it: widened by both of them
-                    'aria-[current=true]:w-[calc(100%+2rem)] md:aria-[current=true]:w-[calc(100%+2.5rem)]',
-                    // A column only for an editable row, whose refusal message goes under it
-                    // The other rows keep the column their menu-less figures would lose beside the menus
-                    onEdit || onDelete || onBook ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
+                    card,
+                    toneOf(item),
+                    'group motion-safe:aria-[current=true]:animate-arrive-row',
+                    // A column only for an editable row, whose refusal message goes under it. The other rows keep
+                    // the column their menu-less figures would lose beside the menus, restated from md, or the
+                    // card's md:px-5 wins (conventions.md)
+                    onEdit || onDelete || onBook
+                      ? 'flex flex-col'
+                      : cn(rowLayout, 'not-pointer-coarse:pr-12 md:not-pointer-coarse:pr-13'),
                   )}
                 >
                   {(item.type === 'OPERATION' || item.type === 'TRANSFER') && onEdit ? (

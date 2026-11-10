@@ -134,7 +134,9 @@ export function SwipeRow({
   const action = side === 'left' ? toLeft : side === 'right' ? toRight : undefined
 
   return (
-    <div className={cn('relative overflow-hidden', className)}>
+    // The row covers the strips with the background of the card it sits in, taken down through this wrapper,
+    // so it is opaque wherever its card is and shows the card's own tint and flash
+    <div className={cn('relative overflow-hidden bg-inherit', className)}>
       {/* Seen only through the gap the row leaves, on the side it leaves; deeper once letting go would act */}
       {action && (
         <div
@@ -159,7 +161,10 @@ export function SwipeRow({
         onLostPointerCapture={(event) => event.target === event.currentTarget && cancel()}
         onClickCapture={clickCapture}
         style={{ transform: gone ? 'translateX(-100%)' : `translateX(${drag?.dx ?? 0}px)` }}
-        className={cn('relative touch-pan-y bg-card', drag === null && 'transition-transform duration-200')}
+        className={cn(
+          'relative touch-pan-y bg-inherit',
+          drag === null && 'transition-transform duration-200',
+        )}
       >
         {children}
       </div>
