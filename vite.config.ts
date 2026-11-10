@@ -26,6 +26,12 @@ export default defineConfig({
   // Read by scripts/check-bundle-limits.ts; the image leaves it out
   build: {
     manifest: true,
+    // An inlined font is a data: URL, which the production CSP's font-src 'self' refuses (§3.3)
+    assetsInlineLimit: (file) => (file.endsWith('.woff2') ? false : undefined),
+  },
+  // The BFF replaces it in index.html with each response's nonce, the one its CSP allows for styles (§3.3)
+  html: {
+    cspNonce: '__CSP_NONCE__',
   },
   // In the local stack the BFF proxies here with the upstream's own Host, which Vite refuses unless listed.
   server: {

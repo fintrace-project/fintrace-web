@@ -1,4 +1,5 @@
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { setNonce } from 'get-nonce'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { I18nextProvider } from 'react-i18next'
@@ -8,6 +9,13 @@ import { ApiError, ForbiddenError, UnauthorizedError } from '@/core/api'
 import { i18n } from '@/core/i18n'
 import './index.css'
 import { router } from './router'
+
+// Radix's scroll lock adds a <style> the production CSP allows only with the page's nonce. Browsers
+// blank the attribute once the page loads, so it is read from the property.
+const nonce = document.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')?.nonce
+if (nonce) {
+  setNonce(nonce)
+}
 
 // A lapsed session, met by a read or a write, goes back to sign-in
 const toSignIn = (error: Error) => {
