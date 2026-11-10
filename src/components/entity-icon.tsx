@@ -21,7 +21,7 @@ export function EntityIcon({ entity, className }: { entity: Iconed; className?: 
       aria-hidden
       style={accentOf(entity.id)}
       className={cn(
-        'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--ws-soft) text-(--ws) [&>svg]:size-[55%]',
+        'flex size-9 shrink-0 items-center justify-center rounded-control bg-(--ws-soft) text-(--ws) [&>svg]:size-[55%]',
         className,
       )}
     >

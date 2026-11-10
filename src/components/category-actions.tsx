@@ -82,7 +82,7 @@ export function CategoryMenu({
             <EllipsisVertical aria-hidden />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5">
+        <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem onSelect={() => setDialog('rename')} className="min-h-11 gap-2.5 px-2 md:min-h-9">
             <Pencil aria-hidden />
             {t('categories.rename.action')}

@@ -81,7 +81,7 @@ function AccountCard({
         <InitialsAvatar
           name={account.name}
           colorId={account.id}
-          className={cn('size-10 rounded-xl text-sm', muted && 'grayscale')}
+          className={cn('size-10 text-sm', muted && 'grayscale')}
         />
         {!muted && <div className="relative z-10">{children}</div>}
       </div>

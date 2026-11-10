@@ -54,7 +54,10 @@ const rowLayout = 'flex min-h-14 w-full items-center gap-3 py-2.5'
 const bleed = '-mx-4 w-[calc(100%+2rem)] md:-mx-5 md:w-[calc(100%+2.5rem)]'
 // Each item its own card, tinted by what it is: money in, money out, moved between accounts, observed. A
 // difference moved no money, so it is drawn in outline only, a phantom of the operation it could become.
-const card = 'overflow-hidden rounded-2xl border px-4 md:px-5'
+// Nearly square, as ledger entries; the day's panel takes this radius plus its padding, so the two stay concentric
+const card = 'overflow-hidden rounded-sm border px-4 md:px-5'
+const dayPanel =
+  'flex flex-col gap-2 rounded-[calc(var(--radius-sm)+0.5rem)] border bg-card p-2 pt-3 md:rounded-[calc(var(--radius-sm)+0.75rem)] md:p-3'
 
 function toneOf(item: FeedItem): string {
   switch (item.type) {
@@ -106,14 +109,14 @@ function RowMenu({ item, swipe }: { item: OperationItem | TransferFeedItem; swip
             aria-label={t(item.type === 'TRANSFER' ? 'feed.transferActions' : 'feed.operationActions')}
             onPointerDown={() => (openedByPointer.current = true)}
             onKeyDown={() => (openedByPointer.current = false)}
-            className="size-9 rounded-[10px] text-muted-foreground"
+            className="size-9 rounded-control text-muted-foreground"
           >
             <EllipsisVertical aria-hidden />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent
           align="end"
-          className="w-44 rounded-xl p-1.5"
+          className="w-44"
           onCloseAutoFocus={(event) => openedByPointer.current && event.preventDefault()}
         >
           <DropdownMenuItem onSelect={() => swipe.repeat(item)} className="min-h-9 gap-2.5 px-2">
@@ -210,7 +213,7 @@ function accountIdsOf(item: FeedItem): string[] {
 }
 
 // An account's small icon, on an operation's corner and in a transfer's pair alike
-const accountBadge = 'absolute size-[22px] rounded-md border-2 border-card text-[10px]'
+const accountBadge = 'absolute size-[22px] rounded-control border-2 border-card text-[10px]'
 
 // A row's icon: what it is about, with an account badged on the corner
 type Named = { id: string; name: string }
@@ -236,7 +239,7 @@ function AccountPair({ source, target }: { source: Named; target: Named }) {
     'flex flex-1 items-center justify-center bg-(--ws-soft) pb-1.5 text-[10px] font-extrabold text-(--ws)'
   return (
     <span aria-hidden className="relative size-9 shrink-0">
-      <span className="flex size-full gap-0.5 overflow-hidden rounded-[10px]">
+      <span className="flex size-full gap-0.5 overflow-hidden rounded-control">
         <span style={accentOf(source.id)} className={half}>
           {initials(source.name)}
         </span>
@@ -255,7 +258,7 @@ function RowIcon({ icon: Icon }: { icon: LucideIcon }) {
   return (
     <span
       aria-hidden
-      className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-muted text-muted-foreground"
+      className="flex size-9 shrink-0 items-center justify-center rounded-control bg-muted text-muted-foreground"
     >
       <Icon className="size-4" />
     </span>
@@ -752,7 +755,7 @@ function FeedList({
       />
       {days.map(({ day, items: ofDay }, index) => (
         // A white panel per day on the page's tint, its items' tinted cards inside it
-        <section key={day} className="flex flex-col gap-2 rounded-2xl border bg-card p-2 pt-3 md:p-3">
+        <section key={day} className={dayPanel}>
           <div className="flex items-baseline justify-between gap-3 px-2">
             <h2 className="text-caption font-bold text-muted-foreground">{formatFeedDay(day)}</h2>
             {/* A day cut by the window's edge would show too little, so it shows nothing until it is whole */}
@@ -840,7 +843,7 @@ function FeedList({
                           size="icon"
                           aria-label={t('anchors.delete.action')}
                           onClick={onDelete}
-                          className="size-9 rounded-[10px] text-muted-foreground pointer-coarse:size-11"
+                          className="size-9 rounded-control text-muted-foreground pointer-coarse:size-11"
                         >
                           <Trash2 aria-hidden />
                         </Button>

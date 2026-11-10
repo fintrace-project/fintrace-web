@@ -101,7 +101,7 @@ function DumpPicker({
             <label
               key={each.id}
               className={cn(
-                'flex min-h-11 cursor-pointer items-center rounded-[10px] border bg-card px-4 text-sm font-semibold has-focus-visible:ring-3 has-focus-visible:ring-ring/50',
+                'flex min-h-11 cursor-pointer items-center rounded-control border bg-card px-4 text-sm font-semibold has-focus-visible:ring-3 has-focus-visible:ring-ring/50',
                 each.id === sourceId && 'border-foreground',
               )}
             >
@@ -177,7 +177,7 @@ function DumpPicker({
         </p>
       )}
       <div className="flex flex-wrap items-center gap-3">
-        <Button type="submit" disabled={!file || tooBig} className="h-11 rounded-[10px] px-5 font-bold">
+        <Button type="submit" disabled={!file || tooBig} className="h-11 rounded-control px-5 font-bold">
           {t('import.submit')}
         </Button>
         {error && <Problem error={error} />}
@@ -199,7 +199,7 @@ function ImportClosed({ workspace }: { workspace: Workspace }) {
     <Panel title={t('import.closed.title')}>
       <Pending>{t('import.closed.text', { workspace: workspace.name })}</Pending>
       <div>
-        <Button asChild className="h-11 rounded-[10px] px-5 font-bold">
+        <Button asChild className="h-11 rounded-control px-5 font-bold">
           <Link to="/workspaces/new">{t('import.closed.action')}</Link>
         </Button>
       </div>
@@ -242,7 +242,7 @@ function ImportResult({
             ))}
           </dl>
           <div>
-            <Button asChild className="h-11 rounded-[10px] px-5 font-bold">
+            <Button asChild className="h-11 rounded-control px-5 font-bold">
               <Link to={`/w/${workspace.id}`}>{t('import.open')}</Link>
             </Button>
           </div>
@@ -289,7 +289,7 @@ function ImportResult({
           </p>
         )}
         <div>
-          <Button onClick={onRetry} className="h-11 rounded-[10px] px-5 font-bold">
+          <Button onClick={onRetry} className="h-11 rounded-control px-5 font-bold">
             {t('import.retry')}
           </Button>
         </div>

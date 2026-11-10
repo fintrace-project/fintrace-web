@@ -17,6 +17,15 @@ colors:
   ring: '#1a1a1a'
   destructive: 'oklch(0.51 0.228 27.325)'
   positive: '#1f6e36'
+  negative: '#b42318'
+  income-soft: '#eef7f0'
+  income-border: '#bfdec9'
+  expense-soft: '#fdf2e8'
+  expense-border: '#f1cba8'
+  transfer-soft: '#eef3fc'
+  transfer-border: '#c3d4f0'
+  anchor-soft: '#f4f2ee'
+  anchor-border: '#dedad2'
   warning: '#d97706'
   warning-soft: '#fdf6e3'
   warning-border: '#e8b860'
@@ -178,15 +187,17 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 
 ### Meaning
 
-- **Positive**: income figures only.
+- **Positive**: money in — income figures.
+- **Negative**: money out — expense figures in the feed. A red of its own, apart from Destructive.
 - **Destructive**: errors, invalid fields, destructive actions and swipe-to-delete.
-- **Warning** family: a difference between computed and observed balances, and nothing else today.
+- **Feed tints** (`income`, `expense`, `transfer`, `anchor`, each a soft fill and a border): the feed's cards, by what each item is. Pale enough that the figure carries the meaning.
+- **Warning** family: no use in the feed today; kept for a state that needs one.
 
 ### Named Rules
 
-**The One Sheet Rule.** Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars.
+**The One Sheet Rule.** Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars. The feed's tints are not accents: they say what an item is, sit on white day panels, and stay pale.
 
-**The Expenses Stay Ink Rule.** Income is green; expenses are plain ink with their sign. Red is reserved for errors and destruction, so spending never reads as a mistake.
+**The Money Out Is Not An Error Rule.** Expenses are red as income is green, but in `--negative`, never `--destructive`: the two may be tuned apart, and a delete must stay distinguishable from a purchase. (Until 2026-11-10 expenses were plain ink; changed with the feed's cards.)
 
 ## Typography
 
@@ -236,7 +247,20 @@ The system is flat. Depth comes from white cards on tinted paper and from hairli
 
 ## Shapes
 
-Generously rounded, with radius growing with size: about 10px for controls and small avatars, 12px for kit buttons and inputs, about 22px for cards and lists, and full circles for pills, tiles and round buttons. Full-screen phone forms lose their radius entirely. Radii derive from a 12px base; 10px is the one deliberate value outside that scale.
+Generously rounded, with radius growing with size. Radii derive from a 12px base (`--radius`); 10px is the one deliberate value outside that scale, and has its own token.
+
+- **Control** (`rounded-control`, 10px): workspace actions, icon buttons, menu items, and every avatar, whatever its size.
+- **Kit** (`rounded-lg`, 12px): kit buttons and inputs.
+- **Floating** (`rounded-xl`, 16.8px): menus and popovers, with 6px padding so their items nest evenly; also panels set one level inside a card.
+- **Card** (`rounded-2xl`, about 22px): cards and lists. The feed is the exception, set by the rule below.
+- **Entry** (`rounded-sm`, 7.2px): the feed's item cards.
+- **Full**: pills, tiles and round buttons.
+
+Full-screen phone forms lose their radius entirely.
+
+### Named Rules
+
+**The Concentric Rule.** A rounded box inside another takes the outer radius less the gap between them, so the gap stays even at the corners. The feed's item cards are nearly square (`rounded-sm`, 7.2px), as ledger entries, and their day panel is derived from them: `calc(var(--radius-sm) + <panel padding>)`, about 15px on phones and 19px from `md`, below a card's usual 22px.
 
 ## Components
 
@@ -280,7 +304,7 @@ The signature picker: a 52px round icon in the entity's own colour, with its nam
 
 ### Feed Row
 
-A dense list row inside one rounded card, split by hairlines: icon, name and detail, then the right-aligned figure. Rows are grouped by day. On a phone, swiping left reveals delete and swiping right reveals repeat, both deepening in colour once letting go would act. A row reached by a jump highlights in the tint and fades over 1.8s. A swipe's delete waits 5s behind an ink bar with Undo, above the bottom tabs and above any other floating notice.
+Each item is its own card, tinted by what it is: income green, expense orange, a recorded balance grey, a transfer by its side in an account's feed and blue across the workspace. Inside, an icon, name and detail, then the right-aligned figure. A difference is a dashed, faded phantom card; a run is one card with its members opening inside it. Each day is a white panel holding its cards, concentric with them (Shapes). On a phone, swiping left reveals delete and swiping right reveals repeat, both deepening in colour once letting go would act. A row reached by a jump highlights in the tint and fades over 1.8s. A swipe's delete waits 5s behind an ink bar with Undo, above the bottom tabs and above any other floating notice.
 
 ### Amount Field
 

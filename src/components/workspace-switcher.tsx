@@ -24,9 +24,9 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
     <DropdownMenu>
       <DropdownMenuTrigger className="flex min-h-14 w-full items-center gap-3 rounded-xl border bg-card px-2.5 py-2 text-left outline-none hover:bg-accent focus-visible:ring-3 focus-visible:ring-ring/50">
         {current ? (
-          <WorkspaceAvatar workspace={current} className="size-9 rounded-[10px] text-base" />
+          <WorkspaceAvatar workspace={current} className="size-9 rounded-control text-base" />
         ) : (
-          <span className="flex size-9 items-center justify-center rounded-[10px] bg-muted">
+          <span className="flex size-9 items-center justify-center rounded-control bg-muted">
             <LayoutGrid className="size-4 text-muted-foreground" aria-hidden />
           </span>
         )}
@@ -51,10 +51,10 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
               <DropdownMenuItem
                 key={workspace.id}
                 asChild
-                className={cn('min-h-12 gap-2.5 rounded-[10px] px-2', active && 'bg-accent')}
+                className={cn('min-h-12 gap-2.5 rounded-control px-2', active && 'bg-accent')}
               >
                 <Link to={`/w/${workspace.id}`}>
-                  <WorkspaceAvatar workspace={workspace} className="size-7 rounded-lg text-xs" />
+                  <WorkspaceAvatar workspace={workspace} className="size-7 text-xs" />
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-semibold">{workspace.name}</span>
                     <span className="truncate text-xs text-muted-foreground">
@@ -67,13 +67,13 @@ export function WorkspaceSwitcher({ current }: { current: Workspace | undefined 
             )
           })}
         <DropdownMenuSeparator className="mx-0" />
-        <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-[10px] px-2 font-semibold">
+        <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-control px-2 font-semibold">
           <Link to="/workspaces/new">
             <Plus aria-hidden />
             {t('shell.createWorkspace')}
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-[10px] px-2 font-semibold">
+        <DropdownMenuItem asChild className="min-h-11 gap-2.5 rounded-control px-2 font-semibold">
           <Link to="/workspaces">
             <LayoutGrid aria-hidden />
             {t('shell.allWorkspaces')}

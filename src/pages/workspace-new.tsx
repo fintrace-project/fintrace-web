@@ -98,7 +98,7 @@ export function WorkspaceNewPage() {
             <Button
               type="submit"
               disabled={!name.trim() || create.isPending}
-              className="h-11 rounded-[10px] px-5 font-bold"
+              className="h-11 rounded-control px-5 font-bold"
             >
               {t(create.isPending ? 'workspaceNew.creating' : 'workspaceNew.create')}
             </Button>

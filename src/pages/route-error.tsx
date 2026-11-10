@@ -19,10 +19,10 @@ export function RouteErrorPage() {
       <p className="text-muted-foreground">{t('routeError.text')}</p>
       {detail && <code className="rounded-lg bg-muted px-3 py-2 text-xs break-words">{detail}</code>}
       <div className="flex flex-wrap gap-2">
-        <Button className="h-11 rounded-[10px] font-bold" onClick={() => window.location.reload()}>
+        <Button className="h-11 rounded-control font-bold" onClick={() => window.location.reload()}>
           {t('common.reload')}
         </Button>
-        <Button asChild variant="outline" className="h-11 rounded-[10px]">
+        <Button asChild variant="outline" className="h-11 rounded-control">
           <Link to="/" reloadDocument>
             {t('routeError.home')}
           </Link>

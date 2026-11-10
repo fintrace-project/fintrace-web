@@ -21,7 +21,7 @@ export function ArchiveButton({ workspace }: { workspace: Workspace }) {
         variant="outline"
         disabled={setArchived.isPending}
         onClick={() => setArchived.mutate({ archived: true, version: workspace.version })}
-        className="h-11 rounded-[10px] bg-card px-4 font-semibold"
+        className="h-11 rounded-control bg-card px-4 font-semibold"
       >
         <Archive aria-hidden />
         {t(setArchived.isPending ? 'archive.archiving' : 'archive.archive')}
@@ -49,7 +49,7 @@ export function ArchivedBanner({ workspace }: { workspace: Workspace }) {
       <Button
         disabled={setArchived.isPending}
         onClick={() => setArchived.mutate({ archived: false, version: workspace.version })}
-        className="h-11 rounded-[10px] px-4 font-bold md:h-9"
+        className="h-11 rounded-control px-4 font-bold md:h-9"
       >
         <ArchiveRestore aria-hidden />
         {t(setArchived.isPending ? 'archive.unarchiving' : 'archive.unarchive')}

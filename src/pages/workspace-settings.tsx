@@ -93,7 +93,7 @@ function GeneralPanel({
           <Button
             type="submit"
             disabled={!changed || edit.isPending}
-            className="h-11 rounded-[10px] px-5 font-bold"
+            className="h-11 rounded-control px-5 font-bold"
           >
             {t(edit.isPending ? 'common.saving' : 'common.save')}
           </Button>
@@ -123,7 +123,7 @@ function StatusPanel({ workspace }: { workspace: Workspace }) {
               variant="outline"
               disabled={setArchived.isPending}
               onClick={() => setArchived.mutate({ archived: true, version: workspace.version })}
-              className="h-11 rounded-[10px] px-4 font-semibold"
+              className="h-11 rounded-control px-4 font-semibold"
             >
               <Archive aria-hidden />
               {t('settings.archive.action')}
@@ -148,7 +148,7 @@ function DeletePanel({ workspace }: { workspace: Workspace }) {
       <Dialog>
         <div>
           <DialogTrigger asChild>
-            <Button variant="destructive" className="h-11 rounded-[10px] px-4 font-semibold">
+            <Button variant="destructive" className="h-11 rounded-control px-4 font-semibold">
               <Trash2 aria-hidden />
               {t('settings.delete.action')}
             </Button>

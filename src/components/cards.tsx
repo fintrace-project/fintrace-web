@@ -73,7 +73,7 @@ export function InitialsAvatar({
       aria-hidden
       style={accentOf(colorId)}
       className={cn(
-        'flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-(--ws-soft) text-caption font-extrabold text-(--ws)',
+        'flex size-9 shrink-0 items-center justify-center rounded-control bg-(--ws-soft) text-caption font-extrabold text-(--ws)',
         className,
       )}
     >

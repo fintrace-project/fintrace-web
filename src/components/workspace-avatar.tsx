@@ -15,7 +15,7 @@ export function WorkspaceAvatar({
       aria-hidden
       style={accentOf(workspace.id)}
       className={cn(
-        'flex size-10 shrink-0 items-center justify-center rounded-xl bg-(--ws) text-sm font-extrabold text-white',
+        'flex size-10 shrink-0 items-center justify-center rounded-control bg-(--ws) text-sm font-extrabold text-white',
         className,
       )}
     >

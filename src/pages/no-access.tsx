@@ -12,7 +12,7 @@ export function NoAccessPage() {
       <h1 className="text-2xl font-extrabold tracking-tight">{t('noAccess.title')}</h1>
       <p className="text-muted-foreground">{t('noAccess.text')}</p>
       <form method="post" action="/auth/logout">
-        <Button type="submit" className="h-11 w-full rounded-[10px] font-bold sm:w-auto">
+        <Button type="submit" className="h-11 w-full rounded-control font-bold sm:w-auto">
           <LogOut aria-hidden />
           {t('account.signOut')}
         </Button>

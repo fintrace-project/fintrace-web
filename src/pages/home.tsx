@@ -32,7 +32,7 @@ export function HomePage() {
             {t('home.headline')}
           </h1>
           <p className="mt-4 max-w-xl text-muted-foreground md:text-lg">{t('home.lead')}</p>
-          <Button asChild size="lg" className="mt-8 h-11 w-full rounded-[10px] px-5 font-bold md:w-auto">
+          <Button asChild size="lg" className="mt-8 h-11 w-full rounded-control px-5 font-bold md:w-auto">
             <a href="/auth/login">
               <LogIn aria-hidden />
               {t('home.signInTo')}

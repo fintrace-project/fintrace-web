@@ -39,7 +39,7 @@ export function RecordBalanceButton({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="h-11 rounded-[10px] px-4 font-semibold">
+        <Button variant="outline" className="h-11 rounded-control px-4 font-semibold">
           <Scale aria-hidden />
           {t('anchors.record.action')}
         </Button>

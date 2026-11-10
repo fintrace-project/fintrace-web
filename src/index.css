@@ -61,6 +61,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  /* Controls and small avatars: the one deliberate radius off the scale (DESIGN.md) */
+  --radius-control: 10px;
 }
 
 /* What a jump lands on says so for a moment, then is an ordinary row: holds, then fades */

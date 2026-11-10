@@ -38,12 +38,12 @@ export function AccountMenu({ account }: { account: Account }) {
             size="icon"
             disabled={setArchived.isPending}
             aria-label={t('accounts.actions', { name: account.name })}
-            className="size-11 rounded-[10px] md:size-9"
+            className="size-11 rounded-control md:size-9"
           >
             <EllipsisVertical aria-hidden />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44 rounded-xl p-1.5">
+        <DropdownMenuContent align="end" className="w-44">
           <DropdownMenuItem onSelect={() => setRenaming(true)} className="min-h-11 gap-2.5 px-2 md:min-h-9">
             <Pencil aria-hidden />
             {t('accounts.rename.action')}
@@ -120,7 +120,7 @@ export function RestoreButton({ account }: { account: Account }) {
         variant="outline"
         disabled={setArchived.isPending}
         onClick={() => setArchived.mutate(false)}
-        className="h-11 w-fit rounded-[10px] px-4 font-semibold md:h-9"
+        className="h-11 w-fit rounded-control px-4 font-semibold md:h-9"
       >
         <ArchiveRestore aria-hidden />
         {t(setArchived.isPending ? 'accounts.restoring' : 'accounts.restore')}

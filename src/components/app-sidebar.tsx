@@ -8,7 +8,7 @@ import type { Workspace } from '@/core/api'
 import { cn } from '@/lib/utils'
 
 const navItem =
-  'flex min-h-11 items-center gap-2.5 rounded-[10px] px-3 text-sm text-muted-foreground hover:bg-accent'
+  'flex min-h-11 items-center gap-2.5 rounded-control px-3 text-sm text-muted-foreground hover:bg-accent'
 
 // Desktop only: the workspace switcher, the current workspace's sections, its settings and who is signed in at the foot.
 export function AppSidebar({ current, sections }: { current: Workspace | undefined; sections: Section[] }) {

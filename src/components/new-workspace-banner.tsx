@@ -16,7 +16,7 @@ export function NewWorkspaceBanner({ workspace }: { workspace: Workspace }) {
       <p className="min-w-0 flex-1 text-sm">
         <Trans i18nKey="newWorkspaceBanner.text" components={{ b: <b className="font-bold" /> }} />
       </p>
-      <Button asChild className="h-11 rounded-[10px] px-4 font-bold md:h-9">
+      <Button asChild className="h-11 rounded-control px-4 font-bold md:h-9">
         <Link to={`/w/${workspace.id}/import`}>{t('newWorkspaceBanner.action')}</Link>
       </Button>
     </div>

@@ -106,7 +106,7 @@ function CurrencySearch({ value, onPick }: { value: string; onPick: (code: strin
             onClick={() => onPick(currency.code)}
             onMouseMove={() => setActive(index)}
             className={cn(
-              'flex min-h-11 cursor-default items-center gap-2 rounded-md px-2 md:min-h-9',
+              'flex min-h-11 cursor-default items-center gap-2 rounded-control px-2 md:min-h-9',
               index === active && 'bg-accent',
             )}
           >

@@ -38,7 +38,7 @@ export function AddOperationButton({ workspace, accountId }: { workspace: Worksp
     <>
       <Button
         onClick={() => setOpen(true)}
-        className="h-11 rounded-[10px] bg-(--ws) px-4 font-bold text-white hover:bg-(--ws)/85"
+        className="h-11 rounded-control bg-(--ws) px-4 font-bold text-white hover:bg-(--ws)/85"
       >
         <Plus aria-hidden />
         {t('operations.add')}

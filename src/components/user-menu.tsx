@@ -53,7 +53,7 @@ function AccountMenu({
       <form ref={signOut} method="post" action="/auth/logout" hidden />
       <DropdownMenu>
         {children}
-        <DropdownMenuContent align={align} side={side} className="w-60 rounded-xl p-1.5">
+        <DropdownMenuContent align={align} side={side} className="w-60">
           {user && (
             <>
               <DropdownMenuLabel className="flex flex-col gap-0.5 px-2 py-1.5">
@@ -101,7 +101,7 @@ export function UserCard() {
         <DropdownMenuTrigger
           aria-label={t('account.settings')}
           title={t('account.settings')}
-          className="flex size-11 items-center justify-center rounded-[10px] text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=open]:bg-accent data-[state=open]:text-foreground"
+          className="flex size-11 items-center justify-center rounded-control text-muted-foreground outline-none hover:bg-accent hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50 data-[state=open]:bg-accent data-[state=open]:text-foreground"
         >
           <UserCog className="size-5" aria-hidden />
         </DropdownMenuTrigger>
