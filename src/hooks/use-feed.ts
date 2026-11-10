@@ -68,20 +68,20 @@ export function useAccountFeed(workspaceId: string, accountId: string, at: strin
   })
 }
 
-function useNearestDifference(
+function useNearestAnchor(
   workspaceId: string,
   accountId: string,
   direction: 'older' | 'newer',
   at: string | undefined,
 ) {
   return useQuery({
-    queryKey: ['workspaces', workspaceId, 'accounts', accountId, 'nearestDifference', direction, at ?? null],
+    queryKey: ['workspaces', workspaceId, 'accounts', accountId, 'nearestAnchor', direction, at ?? null],
     queryFn: async ({ signal }) =>
       dataOf(
         await api.GET('/api/v1/workspaces/{workspaceId}/accounts/{accountId}/feed', {
           params: {
             path: { workspaceId, accountId },
-            query: { ...(at ? { [direction]: at } : {}), kinds: ['DIFFERENCE'], size: 1 },
+            query: { ...(at ? { [direction]: at } : {}), kinds: ['BALANCE_ANCHOR'], size: 1 },
           },
           signal,
         }),
@@ -92,10 +92,11 @@ function useNearestDifference(
   })
 }
 
-// The cursors the arrows lead to, each looked up with no page scanned (§10.5). With no position yet
-// the older one is the account's newest difference.
-export function useDifferenceArrows(workspaceId: string, accountId: string, at: string | undefined) {
-  const older = useNearestDifference(workspaceId, accountId, 'older', at)
-  const newer = useNearestDifference(workspaceId, accountId, 'newer', at)
+// The cursors the arrows lead to, each looked up with no page scanned (§10.5). Every recorded balance, a zero
+// difference included; a difference sits under its anchor, so none is skipped. With no position yet the older
+// one is the account's newest anchor.
+export function useAnchorArrows(workspaceId: string, accountId: string, at: string | undefined) {
+  const older = useNearestAnchor(workspaceId, accountId, 'older', at)
+  const newer = useNearestAnchor(workspaceId, accountId, 'newer', at)
   return { older: older.data, newer: newer.data }
 }

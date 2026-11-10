@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
 import { Pending } from '@/components/cards'
-import { DifferenceArrows } from '@/components/difference-arrows'
+import { AnchorArrows } from '@/components/anchor-arrows'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'
 import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
+import { RecordBalanceButton } from '@/components/record-balance-dialog'
 import type { Account } from '@/core/api'
 import { formatBalance } from '@/core/format'
 import { useAccountBalances, useAccounts } from '@/hooks/use-accounts'
@@ -49,8 +50,15 @@ export function AccountPage() {
             <span className="block truncate">{t('feed.balance', { amount: formatBalance(balance) })}</span>
           )
         }
-        actions={!account.archived && <AddOperationButton workspace={workspace} accountId={account.id} />}
-        controls={<DifferenceArrows workspaceId={workspaceId} accountId={account.id} at={at} />}
+        actions={
+          !account.archived && (
+            <>
+              <RecordBalanceButton workspace={workspace} account={account} balance={balance} />
+              <AddOperationButton workspace={workspace} accountId={account.id} />
+            </>
+          )
+        }
+        controls={<AnchorArrows workspaceId={workspaceId} accountId={account.id} at={at} />}
       />
       <AccountFeed account={account} at={at} />
     </div>

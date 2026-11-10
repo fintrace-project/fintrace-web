@@ -158,6 +158,25 @@ accounts:
   restore: Restore
   restoring: Restoring…
 
+anchors:
+  record:
+    action: Record balance
+    title: Record the balance of {{name}}
+    text: Enter what the account holds now, as counted or on a statement. The difference from what fintrace computed is kept and shown in the account's history.
+    closesImport: Enter what the account holds now, as counted or on a statement. Recording a balance closes import for this workspace for good.
+    value: Balance now, {{currency}}
+    hint: What fintrace computes now; change it to what you counted. Negative for a debt.
+  delete:
+    action: Delete the latest recorded balance
+    title: Delete recorded balance?
+    text: To fix a mistyped value, delete it and record it again.
+    recorded: Recorded
+    balance: Balance
+    change: '{{before}} → {{after}}'
+    fromOperations: from operations only
+    confirm: Delete
+    deleting: Deleting…
+
 categories:
   childCount_one: '{{count, number}} subcategory'
   childCount_other: '{{count, number}} subcategories'
@@ -256,9 +275,9 @@ feed:
   accountAndComment: '{{account}} · {{comment}}'
   anchor: Balance recorded
   difference: '{{amount}} not accounted for'
-  differences: Differences
-  newerDifference: Newer difference
-  olderDifference: Older difference
+  anchors: Recorded balances
+  newerAnchor: Newer recorded balance
+  olderAnchor: Older recorded balance
 
 statistics:
   pending: The category breakdown is coming soon.

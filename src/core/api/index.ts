@@ -6,6 +6,7 @@ import type { components, paths } from './schema'
 export type Workspace = components['schemas']['WorkspaceResponse']
 export type Account = components['schemas']['AccountResponse']
 export type AccountBalance = components['schemas']['AccountBalanceResponse']
+export type BalanceAnchor = components['schemas']['BalanceAnchorResponse']
 export type Category = components['schemas']['CategoryResponse']
 export type CategoryKind = components['schemas']['CategoryKind']
 export type CreateOperationRequest = components['schemas']['CreateOperationRequest']

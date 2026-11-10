@@ -161,6 +161,27 @@ declare const messages: {
     readonly restore: "Restore"
     readonly restoring: "Restoring…"
   }
+  readonly anchors: {
+    readonly record: {
+      readonly action: "Record balance"
+      readonly title: "Record the balance of {{name}}"
+      readonly text: "Enter what the account holds now, as counted or on a statement. The difference from what fintrace computed is kept and shown in the account's history."
+      readonly closesImport: "Enter what the account holds now, as counted or on a statement. Recording a balance closes import for this workspace for good."
+      readonly value: "Balance now, {{currency}}"
+      readonly hint: "What fintrace computes now; change it to what you counted. Negative for a debt."
+    }
+    readonly delete: {
+      readonly action: "Delete the latest recorded balance"
+      readonly title: "Delete recorded balance?"
+      readonly text: "To fix a mistyped value, delete it and record it again."
+      readonly recorded: "Recorded"
+      readonly balance: "Balance"
+      readonly change: "{{before}} → {{after}}"
+      readonly fromOperations: "from operations only"
+      readonly confirm: "Delete"
+      readonly deleting: "Deleting…"
+    }
+  }
   readonly categories: {
     readonly childCount_one: "{{count, number}} subcategory"
     readonly childCount_other: "{{count, number}} subcategories"
@@ -267,9 +288,9 @@ declare const messages: {
     readonly accountAndComment: "{{account}} · {{comment}}"
     readonly anchor: "Balance recorded"
     readonly difference: "{{amount}} not accounted for"
-    readonly differences: "Differences"
-    readonly newerDifference: "Newer difference"
-    readonly olderDifference: "Older difference"
+    readonly anchors: "Recorded balances"
+    readonly newerAnchor: "Newer recorded balance"
+    readonly olderAnchor: "Older recorded balance"
   }
   readonly statistics: {
     readonly pending: "The category breakdown is coming soon."

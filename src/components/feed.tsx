@@ -11,6 +11,7 @@ import {
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { InitialsAvatar, Pending } from '@/components/cards'
+import { DeleteAnchorDialog } from '@/components/delete-anchor-dialog'
 import { LoadError } from '@/components/load-error'
 import { OperationDialog } from '@/components/operation-dialog'
 import { SwipeRow } from '@/components/swipe-row'
@@ -33,6 +34,7 @@ import {
   initials,
 } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
+import { useLatestAnchor } from '@/hooks/use-anchors'
 import { useCategories } from '@/hooks/use-categories'
 import { useUndoableDelete } from '@/hooks/use-undoable-delete'
 import { useWorkspace } from '@/hooks/use-workspaces'
@@ -140,7 +142,12 @@ function EditableRow({
           <button
             type="button"
             onClick={onEdit}
-            className={cn(editableRow, className, 'min-w-0 flex-1 not-pointer-coarse:pr-2')}
+            // Restated from md, or editableRow's md:px-5 wins and the figure sits 12 px left of the menu-less rows'
+            className={cn(
+              editableRow,
+              className,
+              'min-w-0 flex-1 not-pointer-coarse:pr-2 md:not-pointer-coarse:pr-2',
+            )}
           >
             {children}
           </button>
@@ -157,6 +164,7 @@ function EditableRow({
 }
 
 type TransferItem = Extract<FeedItem, { type: 'TRANSFER' }>
+type AnchorItem = Extract<FeedItem, { type: 'BALANCE_ANCHOR' }>
 type AccountName = (accountId: string) => string
 type CategoryName = (categoryId: string) => string
 
@@ -445,7 +453,8 @@ function RunRows({
           />
           <span className="flex min-w-0 flex-1 flex-col">
             <span className="truncate text-sm font-semibold">{categoryName}</span>
-            {/* Beside the count rather than after the amount, so amounts keep one right edge in every row */}
+            {/* On touch, beside the count: there is no menu column there, and after the amount it would break
+                the figures' one right edge */}
             <span className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
               <span className="truncate">
                 {inOwnAccount
@@ -454,12 +463,23 @@ function RunRows({
               </span>
               <ChevronDown
                 aria-hidden
-                className={cn('size-3.5 shrink-0 transition-transform', expanded && 'rotate-180')}
+                className={cn(
+                  'size-3.5 shrink-0 transition-transform not-pointer-coarse:hidden',
+                  expanded && 'rotate-180',
+                )}
               />
             </span>
           </span>
           <span className={cn('text-row font-bold whitespace-nowrap', income && 'text-positive')}>
             {formatSignedMagnitude(runTotal(items), first.currency, income)}
+          </span>
+          {/* With a mouse, in the column the other rows' menus take: as wide as a menu button and reaching as far
+              past the row's edge, 8 px after the figure as theirs is */}
+          <span className="-mr-3 -ml-1 flex w-9 shrink-0 justify-center text-muted-foreground pointer-coarse:hidden">
+            <ChevronDown
+              aria-hidden
+              className={cn('size-4 transition-transform', expanded && 'rotate-180')}
+            />
           </span>
         </button>
       </li>
@@ -605,6 +625,7 @@ function FeedList({
   toHead,
   edit,
   editTransfer,
+  deleteAnchor,
   swipe,
 }: {
   feed: FeedQuery
@@ -617,8 +638,11 @@ function FeedList({
   // Opens the operation in the form; undefined for one that cannot be edited
   edit: (item: OperationItem) => (() => void) | undefined
   editTransfer: (item: TransferFeedItem) => (() => void) | undefined
+  // Asks to delete the anchor; undefined for all but the account's latest (§10.4)
+  deleteAnchor: (item: AnchorItem) => (() => void) | undefined
   swipe: Swipe
 }) {
+  const { t } = useTranslation()
   const { list, direction, setDirection } = useScrollAnchor(!feed.hasPreviousPage, focus)
   // Which runs are open, by every cursor in them, so a refetch or a new item joining leaves one open
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set())
@@ -706,6 +730,7 @@ function FeedList({
                   : item.type === 'TRANSFER'
                     ? editTransfer(item)
                     : undefined
+              const onDelete = item.type === 'BALANCE_ANCHOR' ? deleteAnchor(item) : undefined
               const content = (
                 <FeedRow
                   item={item}
@@ -722,15 +747,40 @@ function FeedList({
                   aria-current={current || undefined}
                   className={cn(
                     'group aria-[current=true]:-mx-4 aria-[current=true]:px-4 motion-safe:aria-[current=true]:animate-arrive-row md:aria-[current=true]:-mx-5 md:aria-[current=true]:px-5',
+                    // A menu-less row is w-full, so the margins alone would only shift it: widened by both of them
+                    'aria-[current=true]:w-[calc(100%+2rem)] md:aria-[current=true]:w-[calc(100%+2.5rem)]',
                     // A column only for an editable row, whose refusal message goes under it
                     // The other rows keep the column their menu-less figures would lose beside the menus
-                    onEdit ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
+                    onEdit || onDelete ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
                   )}
                 >
                   {(item.type === 'OPERATION' || item.type === 'TRANSFER') && onEdit ? (
                     <EditableRow item={item} onEdit={onEdit} swipe={swipe} className={rowLayout}>
                       {content}
                     </EditableRow>
+                  ) : onDelete ? (
+                    // Laid out as EditableRow is, so its figure and icon line up with the operations' figure and menu
+                    <div className={cn(bleed, 'flex items-center')}>
+                      <div
+                        className={cn(
+                          rowLayout,
+                          'min-w-0 flex-1 px-4 not-pointer-coarse:pr-2 md:px-5 md:not-pointer-coarse:pr-2',
+                        )}
+                      >
+                        {content}
+                      </div>
+                      <span className="mr-1 flex shrink-0 md:mr-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t('anchors.delete.action')}
+                          onClick={onDelete}
+                          className="size-9 rounded-[10px] text-muted-foreground pointer-coarse:size-11"
+                        >
+                          <Trash2 aria-hidden />
+                        </Button>
+                      </span>
+                    </div>
                   ) : (
                     content
                   )}
@@ -773,6 +823,8 @@ export function Feed({
   // The operation open in the form, if any: to edit it, or to make a new one from it
   const [inForm, setInForm] = useState<{ item: OperationItem; repeat: boolean }>()
   const [transferInForm, setTransferInForm] = useState<{ item: TransferFeedItem; repeat: boolean }>()
+  const latestAnchor = useLatestAnchor(workspaceId, account?.id)
+  const [deletingAnchor, setDeletingAnchor] = useState(false)
   // A refused delete brings its row back with Core's word under it
   const deletion = useUndoableDelete(workspaceId)
   const swipe: Swipe = {
@@ -848,6 +900,10 @@ export function Feed({
     !archived.has(item.target.accountId)
       ? () => setTransferInForm({ item, repeat: false })
       : undefined
+  const deleteAnchor = (item: AnchorItem) =>
+    workspace && isWritable(workspace) && account && !account.archived && item.id === latestAnchor.data?.id
+      ? () => setDeletingAnchor(true)
+      : undefined
 
   return (
     <>
@@ -861,8 +917,12 @@ export function Feed({
         toHead={toHead}
         edit={edit}
         editTransfer={editTransfer}
+        deleteAnchor={deleteAnchor}
         swipe={swipe}
       />
+      {deletingAnchor && latestAnchor.data && (
+        <DeleteAnchorDialog anchor={latestAnchor.data} onClose={() => setDeletingAnchor(false)} />
+      )}
       <UndoBar
         message={
           deletion.pending &&
