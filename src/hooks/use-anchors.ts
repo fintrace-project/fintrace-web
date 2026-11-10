@@ -11,9 +11,9 @@ const anchorsKey = (workspaceId: string, accountId: string) => [
   'anchors',
 ]
 
-// Core lists them newest first, so the head is the one that may be deleted (§10.4); null when there is none.
-// Asked for nothing without an account, so the workspace's feed can hold the hook too.
-export function useLatestAnchor(workspaceId: string, accountId: string | undefined) {
+// Newest first, as Core lists them, so the head is the one that may be deleted (§10.4) and each anchor's
+// predecessor is the next one. Asked for nothing without an account, so the workspace's feed can hold it too.
+export function useAnchors(workspaceId: string, accountId: string | undefined) {
   return useQuery({
     queryKey: anchorsKey(workspaceId, accountId ?? ''),
     queryFn: async ({ signal }) =>
@@ -22,7 +22,7 @@ export function useLatestAnchor(workspaceId: string, accountId: string | undefin
           params: { path: { workspaceId, accountId: accountId! } },
           signal,
         }),
-      ).items[0] ?? null,
+      ).items,
     enabled: accountId !== undefined,
   })
 }

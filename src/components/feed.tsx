@@ -2,6 +2,7 @@ import {
   ArrowRight,
   ArrowUp,
   ChevronDown,
+  CircleHelp,
   EllipsisVertical,
   Pen,
   Repeat2,
@@ -9,11 +10,13 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
+import { justBeforeAnchor } from '@/core/dates'
 import { useTranslation } from 'react-i18next'
 import { InitialsAvatar, Pending } from '@/components/cards'
 import { DeleteAnchorDialog } from '@/components/delete-anchor-dialog'
 import { LoadError } from '@/components/load-error'
 import { OperationDialog } from '@/components/operation-dialog'
+import type { Compensation } from '@/components/operation-form'
 import { SwipeRow } from '@/components/swipe-row'
 import { UndoBar } from '@/components/undo-bar'
 import { Button } from '@/components/ui/button'
@@ -34,7 +37,7 @@ import {
   initials,
 } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
-import { useLatestAnchor } from '@/hooks/use-anchors'
+import { useAnchors } from '@/hooks/use-anchors'
 import { useCategories } from '@/hooks/use-categories'
 import { useUndoableDelete } from '@/hooks/use-undoable-delete'
 import { useWorkspace } from '@/hooks/use-workspaces'
@@ -322,22 +325,33 @@ function TransferRow({ item, accountName }: { item: TransferItem; accountName: A
   )
 }
 
-// A quiet second line, not an alarm: nothing has gone wrong that the reader can act on yet. The figure's
-// sign says which way, measured against the previous anchor plus the operations since (§4.6).
-function DifferenceNote({ item, currency }: { item: DifferenceItem; currency: string }) {
+// The money the anchor found that no operation explains, under its anchor. The figure's sign says which way,
+// measured against the previous anchor plus the operations since (§4.6); a tap books it as an operation.
+function DifferenceRow({
+  item,
+  currency,
+  bookable,
+}: {
+  item: DifferenceItem
+  currency: string
+  bookable: boolean
+}) {
   const { t } = useTranslation()
-  const figure = formatSignedMagnitude(Math.abs(item.amount), currency, item.amount > 0)
   return (
-    // The arrows jump to the difference, so it keeps its own place to be found by
-    <span
-      data-cursor={item.cursor}
-      className="truncate text-xs text-muted-foreground motion-safe:group-aria-[current=true]:animate-arrive-note"
-    >
-      {t('feed.difference', { amount: figure })}
-    </span>
+    <>
+      <RowIcon icon={CircleHelp} />
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-semibold">{t('feed.unaccounted')}</span>
+        {bookable && <span className="truncate text-xs text-muted-foreground">{t('feed.bookIt')}</span>}
+      </span>
+      <span className={cn('text-row font-bold whitespace-nowrap', item.amount > 0 && 'text-positive')}>
+        {formatSignedMagnitude(Math.abs(item.amount), currency, item.amount > 0)}
+      </span>
+    </>
   )
 }
 
+// Marked when the row under it is its difference
 function AnchorRow({
   value,
   difference,
@@ -363,7 +377,6 @@ function AnchorRow({
       </span>
       <span className="flex min-w-0 flex-1 flex-col">
         <span className="truncate text-sm font-semibold">{t('feed.anchor')}</span>
-        {difference && <DifferenceNote item={difference} currency={currency} />}
       </span>
       <span className="text-row font-bold whitespace-nowrap">{formatMoney(value, currency)}</span>
     </>
@@ -373,6 +386,7 @@ function AnchorRow({
 function FeedRow({
   item,
   difference,
+  bookable,
   account,
   accountName,
   categoryName,
@@ -380,6 +394,8 @@ function FeedRow({
   item: FeedItem
   // The next item, when it is this anchor's difference
   difference: DifferenceItem | undefined
+  // A difference that a tap books as an operation
+  bookable: boolean
   account: Account | undefined
   accountName: AccountName
   categoryName: CategoryName
@@ -400,14 +416,7 @@ function FeedRow({
     case 'BALANCE_ANCHOR':
       return account && <AnchorRow value={item.value} difference={difference} currency={account.currency} />
     case 'DIFFERENCE':
-      // On its own only until its anchor's page arrives, lined up with the text of the rows around it
-      return (
-        account && (
-          <span className="pl-12">
-            <DifferenceNote item={item} currency={account.currency} />
-          </span>
-        )
-      )
+      return account && <DifferenceRow item={item} currency={account.currency} bookable={bookable} />
   }
 }
 
@@ -626,6 +635,7 @@ function FeedList({
   edit,
   editTransfer,
   deleteAnchor,
+  bookDifference,
   swipe,
 }: {
   feed: FeedQuery
@@ -640,6 +650,8 @@ function FeedList({
   editTransfer: (item: TransferFeedItem) => (() => void) | undefined
   // Asks to delete the anchor; undefined for all but the account's latest (§10.4)
   deleteAnchor: (item: AnchorItem) => (() => void) | undefined
+  // Opens the form to book the difference as an operation; undefined where none can be written
+  bookDifference: (item: DifferenceItem) => (() => void) | undefined
   swipe: Swipe
 }) {
   const { t } = useTranslation()
@@ -723,7 +735,7 @@ function FeedList({
                 )
               }
               const { item, difference } = row
-              const current = focus !== undefined && (item.cursor === focus || difference?.cursor === focus)
+              const current = focus !== undefined && item.cursor === focus
               const onEdit =
                 item.type === 'OPERATION'
                   ? edit(item)
@@ -731,10 +743,12 @@ function FeedList({
                     ? editTransfer(item)
                     : undefined
               const onDelete = item.type === 'BALANCE_ANCHOR' ? deleteAnchor(item) : undefined
+              const onBook = item.type === 'DIFFERENCE' ? bookDifference(item) : undefined
               const content = (
                 <FeedRow
                   item={item}
                   difference={difference}
+                  bookable={onBook !== undefined}
                   account={account}
                   accountName={accountName}
                   categoryName={categoryName}
@@ -751,7 +765,7 @@ function FeedList({
                     'aria-[current=true]:w-[calc(100%+2rem)] md:aria-[current=true]:w-[calc(100%+2.5rem)]',
                     // A column only for an editable row, whose refusal message goes under it
                     // The other rows keep the column their menu-less figures would lose beside the menus
-                    onEdit || onDelete ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
+                    onEdit || onDelete || onBook ? 'flex flex-col' : cn(rowLayout, 'not-pointer-coarse:pr-8'),
                   )}
                 >
                   {(item.type === 'OPERATION' || item.type === 'TRANSFER') && onEdit ? (
@@ -781,6 +795,21 @@ function FeedList({
                         </Button>
                       </span>
                     </div>
+                  ) : onBook ? (
+                    // Opens on a tap as an operation's row does; no menu beside it, so its figure is held in the
+                    // menu-less rows' line by padding, restated from md (conventions.md)
+                    <button
+                      type="button"
+                      onClick={onBook}
+                      className={cn(
+                        editableRow,
+                        rowLayout,
+                        bleed,
+                        'hover:bg-muted/60 not-pointer-coarse:pr-12 md:not-pointer-coarse:pr-13',
+                      )}
+                    >
+                      {content}
+                    </button>
                   ) : (
                     content
                   )}
@@ -823,8 +852,10 @@ export function Feed({
   // The operation open in the form, if any: to edit it, or to make a new one from it
   const [inForm, setInForm] = useState<{ item: OperationItem; repeat: boolean }>()
   const [transferInForm, setTransferInForm] = useState<{ item: TransferFeedItem; repeat: boolean }>()
-  const latestAnchor = useLatestAnchor(workspaceId, account?.id)
+  const anchors = useAnchors(workspaceId, account?.id)
+  const latestAnchor = anchors.data?.[0]
   const [deletingAnchor, setDeletingAnchor] = useState(false)
+  const [compensation, setCompensation] = useState<Compensation>()
   // A refused delete brings its row back with Core's word under it
   const deletion = useUndoableDelete(workspaceId)
   const swipe: Swipe = {
@@ -901,9 +932,28 @@ export function Feed({
       ? () => setTransferInForm({ item, repeat: false })
       : undefined
   const deleteAnchor = (item: AnchorItem) =>
-    workspace && isWritable(workspace) && account && !account.archived && item.id === latestAnchor.data?.id
+    workspace && isWritable(workspace) && account && !account.archived && item.id === latestAnchor?.id
       ? () => setDeletingAnchor(true)
       : undefined
+  // Dated by the anchor and the one before it, so the operation fills this gap and no other
+  const bookDifference = (item: DifferenceItem) => {
+    if (!workspace || !isWritable(workspace) || !account || account.archived || !anchors.data) {
+      return undefined
+    }
+    const index = anchors.data.findIndex((anchor) => anchor.id === item.anchorId)
+    const occurredAt =
+      index >= 0
+        ? justBeforeAnchor(anchors.data[index]!.occurredAt, anchors.data[index + 1]?.occurredAt)
+        : null
+    return occurredAt
+      ? () =>
+          setCompensation({
+            amount: Math.abs(item.amount),
+            kind: item.amount > 0 ? 'INCOME' : 'EXPENSE',
+            occurredAt,
+          })
+      : undefined
+  }
 
   return (
     <>
@@ -918,10 +968,20 @@ export function Feed({
         edit={edit}
         editTransfer={editTransfer}
         deleteAnchor={deleteAnchor}
+        bookDifference={bookDifference}
         swipe={swipe}
       />
-      {deletingAnchor && latestAnchor.data && (
-        <DeleteAnchorDialog anchor={latestAnchor.data} onClose={() => setDeletingAnchor(false)} />
+      {deletingAnchor && latestAnchor && (
+        <DeleteAnchorDialog anchor={latestAnchor} onClose={() => setDeletingAnchor(false)} />
+      )}
+      {workspace && compensation && (
+        <OperationDialog
+          workspace={workspace}
+          accountId={account?.id}
+          compensation={compensation}
+          open
+          onClose={() => setCompensation(undefined)}
+        />
       )}
       <UndoBar
         message={

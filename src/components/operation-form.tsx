@@ -42,7 +42,16 @@ export interface FormProps {
   transfer: TransferFeedItem | undefined
   // Adding a transfer filled from this one but dated now
   transferTemplate: TransferFeedItem | undefined
+  // Adding the operation that books an anchor's unexplained difference (§4.6)
+  compensation: Compensation | undefined
   onDone: () => void
+}
+
+// Core's magnitude, the kind its sign says, and the minute just before the anchor
+export interface Compensation {
+  amount: number
+  kind: CategoryKind
+  occurredAt: string
 }
 
 // The form needs both lists to offer its choices; both are usually cached by the feed already
@@ -127,6 +136,7 @@ function OperationForm({
   accountId,
   operation,
   template,
+  compensation,
   onDone,
   accounts,
   categories,
@@ -147,17 +157,22 @@ function OperationForm({
   // Editing starts from the operation as the feed shows it, a repeat from its template but dated now; the feed
   // never offers a transfer leg here
   const source = operation ?? template
+  const startKind = compensation?.kind ?? initialKind
   const [kind, setKind] = useState<CategoryKind>(
-    source ? (source.kind === 'INCOME' ? 'INCOME' : 'EXPENSE') : initialKind,
+    source ? (source.kind === 'INCOME' ? 'INCOME' : 'EXPENSE') : startKind,
   )
-  const [amount, setAmount] = useState(source ? String(source.amount) : initialAmount)
+  const [amount, setAmount] = useState(
+    source ? String(source.amount) : compensation ? String(compensation.amount) : initialAmount,
+  )
   const [account, setAccount] = useState(
     accounts.find((each) => each.id === (source?.accountId ?? accountId)) ?? accounts[0]!,
   )
   const [categoryId, setCategoryId] = useState(
-    source?.categoryId ?? othersOf(categories, initialKind)?.id ?? '',
+    source?.categoryId ?? othersOf(categories, startKind)?.id ?? '',
   )
-  const [occurredAt, setOccurredAt] = useState(() => operation?.occurredAt.slice(0, 16) ?? nowLocal())
+  const [occurredAt, setOccurredAt] = useState(
+    () => operation?.occurredAt.slice(0, 16) ?? compensation?.occurredAt ?? nowLocal(),
+  )
   const [comment, setComment] = useState(source?.comment ?? '')
   const [accountsOpen, setAccountsOpen] = useState(false)
   // Delete asks once more in the button row itself, rather than in a second dialog over this one
@@ -202,7 +217,8 @@ function OperationForm({
         {t(operation ? 'operations.form.editTitle' : 'operations.form.title')}
       </DialogTitle>
 
-      <FormHeader value={kind} onChange={changeKind} withTransfer={!source} />
+      {/* A compensation stays on its account, so it is never a transfer */}
+      <FormHeader value={kind} onChange={changeKind} withTransfer={!source && !compensation} />
 
       <div className="flex flex-col gap-3">
         <AmountInput

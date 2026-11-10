@@ -81,7 +81,9 @@ export function DateTimePicker({
         <input
           type="datetime-local"
           aria-invalid={invalid}
-          value={value}
+          // To the minute it shows: a booked difference carries Core's microseconds, which the input reads as
+          // invalid and past `max`, and the browser then silently refuses to submit the form
+          value={value.slice(0, 16)}
           max={max}
           onChange={(event) => event.target.value && onChange(event.target.value)}
           // A tap alone opens the picker in some browsers only; Chrome focuses a hidden date segment instead

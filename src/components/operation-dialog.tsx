@@ -3,6 +3,7 @@ import { lazy, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pending } from '@/components/cards'
 import { Button } from '@/components/ui/button'
+import type { Compensation } from '@/components/operation-form'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import type { OperationFeedItem, TransferFeedItem, Workspace } from '@/core/api'
 import { isWritable } from '@/core/workspaces'
@@ -61,6 +62,7 @@ export function OperationDialog({
   template,
   transfer,
   transferTemplate,
+  compensation,
   open,
   onClose,
 }: {
@@ -70,6 +72,7 @@ export function OperationDialog({
   template?: OperationFeedItem
   transfer?: TransferFeedItem
   transferTemplate?: TransferFeedItem
+  compensation?: Compensation
   open: boolean
   onClose: () => void
 }) {
@@ -100,6 +103,7 @@ export function OperationDialog({
             template={template}
             transfer={transfer}
             transferTemplate={transferTemplate}
+            compensation={compensation}
             onDone={onClose}
           />
         </Suspense>

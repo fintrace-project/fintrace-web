@@ -30,11 +30,17 @@ const INSIDE: Record<string, string[]> = {
       'workspace-import',
     ].map((page) => [`src/pages/${page}.tsx`, [SHELL, WORKSPACE]]),
   ),
-  // Opened from a page inside the workspace; measured over the layouts alone, the stricter of the two
+  // Opened from a page inside the workspace: over the layouts, and over what its importers load (below)
   'src/components/operation-form.tsx': [SHELL, WORKSPACE],
 }
 
-type Chunk = { file: string; isEntry?: boolean; isDynamicEntry?: boolean; imports?: string[] }
+type Chunk = {
+  file: string
+  isEntry?: boolean
+  isDynamicEntry?: boolean
+  imports?: string[]
+  dynamicImports?: string[]
+}
 const manifest = JSON.parse(readFileSync(`${DIST}/.vite/manifest.json`, 'utf8')) as Record<string, Chunk>
 
 const gzipped = (file: string) => gzipSync(readFileSync(`${DIST}/${file}`), { level: 9 }).length
@@ -64,9 +70,21 @@ if (initialSize > INITIAL_LIMIT) {
   failures.push(`the first load is ${kB(initialSize)}, over ${kB(INITIAL_LIMIT)}`)
 }
 
+// What every chunk importing `key` has loaded before it can ask for it. The operation form is imported from
+// the feed's chunk alone, so the feed is already there when it opens and is not counted against it again.
+function loadedByEveryImporter(key: string): string[] {
+  const importers = Object.keys(manifest).filter((each) => manifest[each].dynamicImports?.includes(key))
+  if (importers.length === 0) {
+    return []
+  }
+  const [first, ...rest] = importers.map((importer) => closure(importer))
+  return [...first].filter((chunk) => rest.every((other) => other.has(chunk)))
+}
+
 for (const key of Object.keys(manifest).filter((key) => manifest[key].isDynamicEntry)) {
   const loaded = new Set(initial)
   INSIDE[key]?.forEach((layout) => closure(layout, loaded))
+  loadedByEveryImporter(key).forEach((chunk) => loaded.add(chunk))
   const added = [...closure(key)].filter((chunk) => !loaded.has(chunk))
   const size = sizeOf(added)
   console.log(`${key.padEnd(40)} ${kB(size).padStart(10)}  of ${kB(LAZY_LIMIT)}`)

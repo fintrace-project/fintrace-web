@@ -60,19 +60,11 @@
   --text-row: 0.9375rem;
 
   --animate-arrive-row: arrive-row 1.8s ease-out;
-  --animate-arrive-note: arrive-note 1.8s ease-out;
 
   @keyframes arrive-row {
     0%,
     30% {
       background-color: color-mix(in srgb, var(--ws) 20%, transparent);
-    }
-  }
-
-  @keyframes arrive-note {
-    0%,
-    30% {
-      color: var(--destructive);
     }
   }
 }

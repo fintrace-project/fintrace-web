@@ -14,15 +14,17 @@ const sameRun = (a: OperationItem, b: OperationItem) =>
   a.kind === b.kind &&
   a.currency === b.currency
 
-// One day's items as the rows they show as: an anchor with its difference as one row, and consecutive
-// operations of one category, account, kind and currency collapsed into a run. Anything else between
-// them ends a run, so a difference is never hidden inside one.
+// One day's items as the rows they show as: consecutive operations of one category, account, kind and
+// currency collapsed into a run, anything else on its own row. A difference is a row of its own under its
+// anchor, which also holds it to mark itself. Anything between operations ends a run, so a difference is
+// never hidden inside one.
 export function feedRows(items: FeedItem[]): FeedRow[] {
   const rows: FeedRow[] = []
   for (const item of items) {
     const last = rows.at(-1)
     if (item.type === 'DIFFERENCE' && last?.kind === 'ITEM' && last.item.type === 'BALANCE_ANCHOR') {
       last.difference = item
+      rows.push({ kind: 'ITEM', item })
     } else if (item.type === 'OPERATION' && last?.kind === 'RUN' && sameRun(last.items[0]!, item)) {
       last.items.push(item)
     } else if (

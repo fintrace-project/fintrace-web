@@ -274,7 +274,8 @@ feed:
   pendingName: …
   accountAndComment: '{{account}} · {{comment}}'
   anchor: Balance recorded
-  difference: '{{amount}} not accounted for'
+  unaccounted: Not accounted for
+  bookIt: Book it as an operation
   anchors: Recorded balances
   newerAnchor: Newer recorded balance
   olderAnchor: Older recorded balance
