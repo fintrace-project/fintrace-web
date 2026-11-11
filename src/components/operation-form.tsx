@@ -24,8 +24,9 @@ import {
   type Workspace,
 } from '@/core/api'
 import { othersOf } from '@/core/categories'
-import { nowLocal } from '@/core/dates'
+import { nowLocal, outsideGap } from '@/core/dates'
 import { toDecimal } from '@/core/decimal'
+import { formatDateTime } from '@/core/format'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useCategories } from '@/hooks/use-categories'
 import { useCreateOperation, useReviseOperation } from '@/hooks/use-operation-mutations'
@@ -47,11 +48,14 @@ export interface FormProps {
   onDone: () => void
 }
 
-// Core's magnitude, the kind its sign says, and the minute just before the anchor
+// Core's magnitude, the kind its sign says, the instant just before the anchor, and the gap it books: from the
+// previous anchor, if any, to this one
 export interface Compensation {
   amount: number
   kind: CategoryKind
   occurredAt: string
+  anchorAt: string
+  previousAt: string | undefined
 }
 
 // The form needs both lists to offer its choices; both are usually cached by the feed already
@@ -179,6 +183,14 @@ function OperationForm({
 
   const errorOf = (field: string) => fieldError(save.error, field)
   const fixedAccount = account.id === accountId
+  const outside = compensation && outsideGap(occurredAt, compensation.anchorAt, compensation.previousAt)
+
+  // The picker works to the minute: back on the preset's own one, the preset's microseconds return, or a
+  // previous anchor earlier in that minute would take the operation into its gap
+  const changeOccurredAt = (next: string) =>
+    setOccurredAt(
+      compensation && next === compensation.occurredAt.slice(0, 16) ? compensation.occurredAt : next,
+    )
   // The amount and the pills carry no message of their own; Core's for them is listed under the pills
   const rowErrors = ['amount', 'accountId', 'occurredAt'].flatMap((field) => errorOf(field) ?? [])
 
@@ -246,11 +258,19 @@ function OperationForm({
           <DateTimePicker
             workspaceId={workspace.id}
             value={occurredAt}
-            onChange={setOccurredAt}
+            onChange={changeOccurredAt}
             invalid={!!errorOf('occurredAt')}
             fill={!!fixedAccount}
           />
         </div>
+        {/* A warning, not a refusal: moving it out of the gap may be meant */}
+        {compensation && outside && (
+          <span role="status" className="text-xs text-muted-foreground">
+            {t(`operations.form.outsideGap.${outside}`, {
+              at: formatDateTime(outside === 'AFTER' ? compensation.anchorAt : compensation.previousAt!),
+            })}
+          </span>
+        )}
         {rowErrors.map((error) => (
           <span key={error} className="text-xs text-destructive">
             {error}

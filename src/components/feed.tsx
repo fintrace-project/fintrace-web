@@ -995,16 +995,17 @@ export function Feed({
       return undefined
     }
     const index = anchors.data.findIndex((anchor) => anchor.id === item.anchorId)
-    const occurredAt =
-      index >= 0
-        ? justBeforeAnchor(anchors.data[index]!.occurredAt, anchors.data[index + 1]?.occurredAt)
-        : null
-    return occurredAt
+    const anchorAt = anchors.data[index]?.occurredAt
+    const previousAt = anchors.data[index + 1]?.occurredAt
+    const occurredAt = anchorAt ? justBeforeAnchor(anchorAt, previousAt) : null
+    return anchorAt && occurredAt
       ? () =>
           setCompensation({
             amount: Math.abs(item.amount),
             kind: item.amount > 0 ? 'INCOME' : 'EXPENSE',
             occurredAt,
+            anchorAt,
+            previousAt,
           })
       : undefined
   }

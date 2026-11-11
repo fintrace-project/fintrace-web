@@ -241,6 +241,10 @@ declare const messages: {
       readonly now: "Now"
       readonly today: "Today"
       readonly yesterday: "Yesterday"
+      readonly outsideGap: {
+        readonly AFTER: "Not before the balance recorded at {{at}}: this operation will not explain its difference."
+        readonly BEFORE: "Not after the previous balance, recorded at {{at}}: this operation will not explain this difference."
+      }
       readonly comment: "Comment (optional)"
       readonly commentPlaceholder: "Comment"
       readonly submit: {
@@ -389,6 +393,14 @@ declare const messages: {
     readonly more_one: "And {{count, number}} more problem."
     readonly more_other: "And {{count, number}} more problems."
     readonly retry: "Choose another file"
+    readonly timedOut: {
+      readonly checking: {
+        readonly title: "The connection gave up before the import answered"
+        readonly text: "The import may still be running. This page checks every few seconds; keep it open."
+      }
+      readonly landed: "The import finished after the connection gave up, so its summary was lost; everything in the file arrived."
+      readonly lost: "The import did not finish, so nothing was kept. {{workspace}} is still empty, so you can try again."
+    }
     readonly notes: "Notes from the importer"
     readonly error: "Error"
     readonly warning: "Warning"

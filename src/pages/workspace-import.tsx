@@ -6,12 +6,12 @@ import { Panel, Pending } from '@/components/cards'
 import { PageHeader } from '@/components/page-header'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
-import type { ImportJob, Workspace } from '@/core/api'
+import { ApiError, type ImportJob, type Workspace } from '@/core/api'
 import { formatBytes, formatCount } from '@/core/format'
 import { diagnosticLabel, entityCount, problemLabel } from '@/core/import-labels'
 import { importSources, type ImportSource } from '@/core/import-sources'
 import { useImportDump } from '@/hooks/use-workspace-mutations'
-import { useWorkspace } from '@/hooks/use-workspaces'
+import { useWorkspace, useWorkspaceSince } from '@/hooks/use-workspaces'
 import { cn } from '@/lib/utils'
 
 // Enough to act on; a file this broken is fixed at its source, not read problem by problem here
@@ -23,10 +23,14 @@ export function WorkspaceImportPage() {
   const importDump = useImportDump(workspace.id)
   const { t } = useTranslation()
 
-  // The result is checked first: a finished import has already moved the workspace out of NEW
+  // The result is checked first: a finished import has already moved the workspace out of NEW. A 504 is the
+  // BFF giving up on the upload, not the import failing, so it is told apart from a refusal
+  const timedOut = importDump.error instanceof ApiError && importDump.error.status === 504
   let body
   if (importDump.data) {
     body = <ImportResult job={importDump.data} workspace={workspace} onRetry={() => importDump.reset()} />
+  } else if (timedOut) {
+    body = <ImportTimedOut workspace={workspace} onRetry={() => importDump.reset()} />
   } else if (importDump.isPending) {
     body = (
       <section
@@ -201,6 +205,43 @@ function ImportClosed({ workspace }: { workspace: Workspace }) {
       <div>
         <Button asChild className="h-11 rounded-control px-5 font-bold">
           <Link to="/workspaces/new">{t('import.closed.action')}</Link>
+        </Button>
+      </div>
+    </Panel>
+  )
+}
+
+// Mounted when the upload timed out; only a read of the workspace made after that says how the import ended
+function ImportTimedOut({ workspace, onRetry }: { workspace: Workspace; onRetry: () => void }) {
+  const [since] = useState(Date.now)
+  const settled = useWorkspaceSince(workspace.id, since)
+  const { t } = useTranslation()
+
+  if (!settled || settled.status === 'IMPORTING') {
+    return (
+      <Panel title={t('import.timedOut.checking.title')}>
+        <Pending>{t('import.timedOut.checking.text')}</Pending>
+      </Panel>
+    )
+  }
+  if (settled.status === 'NEW') {
+    return (
+      <Panel title={t('import.failed')}>
+        <Pending>{t('import.timedOut.lost', { workspace: workspace.name })}</Pending>
+        <div>
+          <Button onClick={onRetry} className="h-11 rounded-control px-5 font-bold">
+            {t('import.retry')}
+          </Button>
+        </div>
+      </Panel>
+    )
+  }
+  return (
+    <Panel title={t('import.done', { workspace: workspace.name })}>
+      <Pending>{t('import.timedOut.landed')}</Pending>
+      <div>
+        <Button asChild className="h-11 rounded-control px-5 font-bold">
+          <Link to={`/w/${workspace.id}`}>{t('import.open')}</Link>
         </Button>
       </div>
     </Panel>

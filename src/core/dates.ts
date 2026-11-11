@@ -45,6 +45,20 @@ export function justBeforeAnchor(anchorAt: string, previousAt: string | undefine
   return previousAt === undefined || at > comparable(previousAt) ? at : null
 }
 
+// Which side of the gap an operation dated `at` lands on, or null inside it: at either anchor's own instant it
+// explains neither difference (§4.6)
+export function outsideGap(
+  at: string,
+  anchorAt: string,
+  previousAt: string | undefined,
+): 'AFTER' | 'BEFORE' | null {
+  const value = comparable(at)
+  if (value >= comparable(anchorAt)) {
+    return 'AFTER'
+  }
+  return previousAt !== undefined && value <= comparable(previousAt) ? 'BEFORE' : null
+}
+
 export function nowLocal(): string {
   const d = new Date()
   return `${isoDate(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`

@@ -19,6 +19,24 @@ export function useWorkspace(workspaceId: string | undefined) {
   return workspaces.data?.find((workspace) => workspace.id === workspaceId)
 }
 
+// The workspace as read after `since`, re-read every 5 s until then and while an import still holds it: an
+// upload whose answer never came learns how it ended from the status alone. Undefined until such a read.
+export function useWorkspaceSince(workspaceId: string, since: number): Workspace | undefined {
+  const query = useQuery({
+    queryKey: ['workspaces'],
+    queryFn: ({ signal }) => listWorkspaces(signal),
+    refetchOnMount: 'always',
+    refetchInterval: ({ state }) =>
+      state.dataUpdatedAt < since ||
+      state.data?.find((workspace) => workspace.id === workspaceId)?.status === 'IMPORTING'
+        ? 5000
+        : false,
+  })
+  return query.dataUpdatedAt >= since
+    ? query.data?.find((workspace) => workspace.id === workspaceId)
+    : undefined
+}
+
 // After a version conflict: fetch the list again, so the next write carries the current version
 export function useReloadWorkspaces() {
   const queryClient = useQueryClient()

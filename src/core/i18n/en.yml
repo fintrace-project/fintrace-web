@@ -231,6 +231,9 @@ operations:
     now: Now
     today: Today
     yesterday: Yesterday
+    outsideGap:
+      AFTER: 'Not before the balance recorded at {{at}}: this operation will not explain its difference.'
+      BEFORE: 'Not after the previous balance, recorded at {{at}}: this operation will not explain this difference.'
     comment: Comment (optional)
     commentPlaceholder: Comment
     submit:
@@ -369,6 +372,12 @@ import:
   more_one: And {{count, number}} more problem.
   more_other: And {{count, number}} more problems.
   retry: Choose another file
+  timedOut:
+    checking:
+      title: The connection gave up before the import answered
+      text: The import may still be running. This page checks every few seconds; keep it open.
+    landed: The import finished after the connection gave up, so its summary was lost; everything in the file arrived.
+    lost: The import did not finish, so nothing was kept. {{workspace}} is still empty, so you can try again.
   notes: Notes from the importer
   error: Error
   warning: Warning
