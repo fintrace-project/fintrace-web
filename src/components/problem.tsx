@@ -2,11 +2,19 @@ import { Trans, useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { ApiError, ForbiddenError, problemOf } from '@/core/api'
 
-// Core's `detail` says what went wrong; on a server failure its trace id is what to quote when reporting it.
-// Without a detail the error's own message is a developer's, so the user reads a sentence from en.yml instead.
+// Refusals a user can walk into, said in our words; Core's `detail` stays a developer's, naming ids
+const OWN_WORDS = ['WORKSPACE_READ_ONLY', 'ACCOUNT_ARCHIVED', 'CATEGORY_ARCHIVED'] as const
+type OwnWords = (typeof OWN_WORDS)[number]
+const inOwnWords = (code: string | undefined): code is OwnWords =>
+  (OWN_WORDS as readonly (string | undefined)[]).includes(code)
+
+// A known code reads a sentence from en.yml, any other Core's `detail`; on a server failure its trace id is
+// what to quote when reporting it. Without a detail the error's own message is a developer's, so the user
+// reads a sentence from en.yml instead.
 export function Problem({ error, onReload }: { error: Error; onReload?: () => void }) {
   const { t } = useTranslation()
   const problem = problemOf(error)
+  const code = problem?.code
 
   if (problem?.code === 'VERSION_CONFLICT' && onReload) {
     return (
@@ -28,6 +36,7 @@ export function Problem({ error, onReload }: { error: Error; onReload?: () => vo
 
   // fetch rejects with a TypeError when the request never got an answer
   const message =
+    (inOwnWords(code) ? t(`errors.code.${code}`) : undefined) ??
     problem?.detail ??
     (error instanceof ApiError
       ? t('errors.serverAnswered', { status: error.status })

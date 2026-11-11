@@ -113,6 +113,18 @@ export function moveTargets(categories: Category[], moving: Category): CategoryO
   return [{ category: root, depth: 0 }, ...below]
 }
 
+// The archived ones a restore can bring back: those under a live parent, as one under an archived parent would
+// have nowhere to show (§4.7). By path, so a branch's members sit together
+export function restorableCategories(categories: Category[], kind: CategoryKind): Category[] {
+  const byId = new Map(categories.map((each) => [each.id, each]))
+  const path = (category: Category) => categoryPath(categories, category.id).join('\u0000')
+  return categories
+    .filter(
+      (each) => each.kind === kind && each.archived && byId.get(each.parentId ?? '')?.archived === false,
+    )
+    .sort((a, b) => path(a).localeCompare(path(b)))
+}
+
 export const rootOf = (categories: Category[], kind: CategoryKind) =>
   categories.find((each) => each.systemCode === `${kind}_ROOT`)
 

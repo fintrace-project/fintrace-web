@@ -8,7 +8,7 @@ import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'
 import { ApiError, type ImportJob, type Workspace } from '@/core/api'
 import { formatBytes, formatCount } from '@/core/format'
-import { diagnosticLabel, entityCount, problemLabel } from '@/core/import-labels'
+import { diagnosticLabel, entityCount, groupDiagnostics, problemLabel } from '@/core/import-labels'
 import { importSources, type ImportSource } from '@/core/import-sources'
 import { useImportDump } from '@/hooks/use-workspace-mutations'
 import { useWorkspace, useWorkspaceSince } from '@/hooks/use-workspaces'
@@ -52,7 +52,11 @@ export function WorkspaceImportPage() {
     body = <ImportClosed workspace={workspace} />
   } else {
     body = (
-      <DumpPicker onImport={(source, file) => importDump.mutate({ source, file })} error={importDump.error} />
+      <DumpPicker
+        workspace={workspace}
+        onImport={(source, file) => importDump.mutate({ source, file })}
+        error={importDump.error}
+      />
     )
   }
 
@@ -64,10 +68,17 @@ export function WorkspaceImportPage() {
   )
 }
 
+// The importer's refusal of the file itself, before Core saw anything: its code is the importer's, outside Core's
+// enum, so compared as a string. Its message names the record at fault, which is what fixing the file needs
+const refusedFile = (error: Error | null) =>
+  error instanceof ApiError && String(error.problem?.code) === 'INVALID_DUMP' ? error.message : undefined
+
 function DumpPicker({
+  workspace,
   onImport,
   error,
 }: {
+  workspace: Workspace
   onImport: (source: ImportSource, file: File) => void
   error: Error | null
 }) {
@@ -125,6 +136,21 @@ function DumpPicker({
           ))}
         </div>
       </fieldset>
+
+      {/* Above the drop zone, where the next file goes, so the reason is read before choosing it */}
+      {refusedFile(error) && (
+        <section
+          role="alert"
+          className="flex flex-col gap-2 rounded-2xl border border-destructive/40 bg-destructive/10 p-5"
+        >
+          <h2 className="flex items-center gap-2 text-base font-bold text-destructive">
+            <CircleAlert className="size-5 shrink-0" aria-hidden />
+            {t('import.failed')}
+          </h2>
+          <p className="text-sm font-semibold break-words text-destructive">{refusedFile(error)}</p>
+          <p className="text-sm">{t('import.stillEmpty', { workspace: workspace.name })}</p>
+        </section>
+      )}
 
       <label
         onDragOver={(event) => {
@@ -184,7 +210,7 @@ function DumpPicker({
         <Button type="submit" disabled={!file || tooBig} className="h-11 rounded-control px-5 font-bold">
           {t('import.submit')}
         </Button>
-        {error && <Problem error={error} />}
+        {error && !refusedFile(error) && <Problem error={error} />}
       </div>
     </form>
   )
@@ -276,7 +302,11 @@ function ImportResult({
           </h2>
           <dl className="grid grid-cols-2 gap-3 sm:grid-cols-5">
             {counts.map(([key, n]) => (
-              <div key={key} className="flex flex-col gap-0.5 rounded-xl bg-muted px-3 py-2.5">
+              // Figures on the tile's floor, so a label wrapping onto two lines does not lower its figure alone
+              <div
+                key={key}
+                className="flex flex-col justify-between gap-0.5 rounded-xl bg-muted px-3 py-2.5"
+              >
                 <dt className="text-xs text-muted-foreground">{t(`import.counts.${key}`)}</dt>
                 <dd className="text-xl font-extrabold">{formatCount(n)}</dd>
               </div>
@@ -349,22 +379,25 @@ function Diagnostics({ job }: { job: ImportJob }) {
   return (
     <Panel title={t('import.notes')}>
       <ul className="flex flex-col">
-        {job.diagnostics.map((diagnostic, index) => (
-          <li key={index} className="flex gap-3 border-t py-2.5">
+        {groupDiagnostics(job.diagnostics).map((group) => (
+          <li key={group.code} className="flex gap-3 border-t py-2.5">
             <TriangleAlert
               className={cn(
                 'mt-0.5 size-4 shrink-0',
-                diagnostic.severity === 'ERROR' ? 'text-destructive' : 'text-muted-foreground',
+                group.severity === 'ERROR' ? 'text-destructive' : 'text-muted-foreground',
               )}
-              aria-label={t(diagnostic.severity === 'ERROR' ? 'import.error' : 'import.warning')}
+              aria-label={t(group.severity === 'ERROR' ? 'import.error' : 'import.warning')}
             />
             <span className="flex min-w-0 flex-col gap-0.5">
               <span className="text-sm font-semibold">
-                {t('import.diagnostic', { label: diagnosticLabel(diagnostic.code), count: diagnostic.count })}
+                {t('import.diagnostic', { label: diagnosticLabel(group.code), count: group.count })}
               </span>
-              {diagnostic.detail && (
-                <span className="text-xs text-muted-foreground">{diagnostic.detail}</span>
-              )}
+              {/* A count beside a detail only when several share the heading, else it repeats the heading's */}
+              {group.details.map(({ detail, count }) => (
+                <span key={detail} className="text-xs text-muted-foreground">
+                  {group.details.length > 1 ? t('import.diagnosticDetail', { detail, count }) : detail}
+                </span>
+              ))}
             </span>
           </li>
         ))}

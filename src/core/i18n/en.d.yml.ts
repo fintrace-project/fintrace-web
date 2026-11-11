@@ -30,6 +30,11 @@ declare const messages: {
     readonly network: "Could not reach the server. Check your connection and try again."
     readonly unexpected: "Something went wrong. Try again."
     readonly reference: "Reference: <code>{{traceId}}</code>"
+    readonly code: {
+      readonly WORKSPACE_READ_ONLY: "This workspace cannot be changed now: it is archived, or an import into it is running."
+      readonly ACCOUNT_ARCHIVED: "This account is archived, so nothing new can be recorded on it. Restore it first."
+      readonly CATEGORY_ARCHIVED: "This category is archived: nothing can be filed under it, nor restored below it."
+    }
   }
   readonly shell: {
     readonly workspaces: "Workspaces"
@@ -211,7 +216,15 @@ declare const messages: {
       readonly action: "Archive"
       readonly archiving: "Archiving…"
       readonly title: "Archive {{name}}?"
-      readonly text: "Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. This cannot be undone."
+      readonly text: "Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. Restoring it later brings back this category alone."
+    }
+    readonly archived: {
+      readonly toggle_one: "{{count, number}} archived"
+      readonly toggle_other: "{{count, number}} archived"
+      readonly text: "Restoring brings back one category. Its subcategories stay archived and appear here once it is back."
+      readonly restore: "Restore"
+      readonly restoring: "Restoring…"
+      readonly restoreName: "Restore {{name}}"
     }
   }
   readonly operations: {
@@ -401,10 +414,11 @@ declare const messages: {
       readonly landed: "The import finished after the connection gave up, so its summary was lost; everything in the file arrived."
       readonly lost: "The import did not finish, so nothing was kept. {{workspace}} is still empty, so you can try again."
     }
-    readonly notes: "Notes from the importer"
+    readonly notes: "Import notes"
     readonly error: "Error"
     readonly warning: "Warning"
     readonly diagnostic: "{{label}}: {{count, number}}"
+    readonly diagnosticDetail: "{{detail}} · {{count, number}}"
   }
   readonly importSources: {
     readonly mok: {

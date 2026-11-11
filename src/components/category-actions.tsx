@@ -1,4 +1,13 @@
-import { Archive, ChevronRight, EllipsisVertical, FolderInput, ListTree, Pencil, Plus } from 'lucide-react'
+import {
+  Archive,
+  ArchiveRestore,
+  ChevronRight,
+  EllipsisVertical,
+  FolderInput,
+  ListTree,
+  Pencil,
+  Plus,
+} from 'lucide-react'
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChildBadge, FoundGroups } from '@/components/category-grid'
@@ -22,10 +31,22 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
-import { fieldError, hasFieldErrors, type Category, type Workspace } from '@/core/api'
-import { childrenOf, lineage, moveTargets, searchCategories } from '@/core/categories'
+import { fieldError, hasFieldErrors, type Category, type CategoryKind, type Workspace } from '@/core/api'
+import {
+  categoryPath,
+  childrenOf,
+  lineage,
+  moveTargets,
+  restorableCategories,
+  searchCategories,
+} from '@/core/categories'
 import { useCategories } from '@/hooks/use-categories'
-import { useArchiveCategory, useCreateCategory, useReviseCategory } from '@/hooks/use-category-mutations'
+import {
+  useArchiveCategory,
+  useCreateCategory,
+  useRestoreCategory,
+  useReviseCategory,
+} from '@/hooks/use-category-mutations'
 import { cn } from '@/lib/utils'
 
 // The dashed tile opening a group, so a long list needs no scrolling to add to it
@@ -426,5 +447,90 @@ function NameForm({
         </Button>
       </DialogFooter>
     </form>
+  )
+}
+
+// Folded by default: tidying a list should not keep what was tidied away in sight. Offered only where a restore
+// can land, so a subcategory shows up once the one above it is back
+export function ArchivedCategories({
+  categories,
+  kind,
+  writable,
+}: {
+  categories: Category[]
+  kind: CategoryKind
+  writable: boolean
+}) {
+  const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
+  const restorable = restorableCategories(categories, kind)
+  if (restorable.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="flex flex-col gap-1 border-t pt-2">
+      <button
+        type="button"
+        aria-expanded={open}
+        onClick={() => setOpen(!open)}
+        className="flex h-11 items-center gap-1.5 rounded-control px-1 text-sm font-semibold text-muted-foreground md:h-9"
+      >
+        <ChevronRight aria-hidden className={cn('size-4 transition-transform', open && 'rotate-90')} />
+        {t('categories.archived.toggle', { count: restorable.length })}
+      </button>
+      {open && (
+        <>
+          <p className="px-1 text-xs text-muted-foreground">{t('categories.archived.text')}</p>
+          <ul className="flex flex-col">
+            {restorable.map((category) => (
+              <ArchivedRow
+                key={category.id}
+                category={category}
+                categories={categories}
+                writable={writable}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
+  )
+}
+
+function ArchivedRow({
+  category,
+  categories,
+  writable,
+}: {
+  category: Category
+  categories: Category[]
+  writable: boolean
+}) {
+  const restore = useRestoreCategory(category)
+  const { t } = useTranslation()
+
+  return (
+    <li className="flex flex-col gap-1 border-t py-1.5 first:border-t-0">
+      <div className="flex items-center justify-between gap-2">
+        <span className="min-w-0 truncate px-1 text-sm">
+          {categoryPath(categories, category.id).join(' › ')}
+        </span>
+        {writable && (
+          <Button
+            type="button"
+            variant="outline"
+            disabled={restore.isPending}
+            onClick={() => restore.mutate()}
+            aria-label={t('categories.archived.restoreName', { name: category.name })}
+            className="h-11 shrink-0 rounded-control px-3 font-semibold md:h-9"
+          >
+            <ArchiveRestore aria-hidden />
+            {t(restore.isPending ? 'categories.archived.restoring' : 'categories.archived.restore')}
+          </Button>
+        )}
+      </div>
+      {restore.error && <Problem error={restore.error} />}
+    </li>
   )
 }

@@ -40,6 +40,23 @@ export function useReviseCategory(category: Category) {
   })
 }
 
+// The category alone, never its subtree (§4.7): the answer is the one row that changed
+export function useRestoreCategory(category: Category) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async () =>
+      dataOf(
+        await api.POST('/api/v1/workspaces/{workspaceId}/categories/{categoryId}/restore', {
+          params: { path: { workspaceId: category.workspaceId, categoryId: category.id } },
+        }),
+      ),
+    onSuccess: (restored) =>
+      queryClient.setQueryData<Category[]>(listKey(category.workspaceId), (list) =>
+        list?.map((each) => (each.id === restored.id ? restored : each)),
+      ),
+  })
+}
+
 export function useArchiveCategory(category: Category) {
   const queryClient = useQueryClient()
   return useMutation({

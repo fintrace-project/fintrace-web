@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
 import { Pending } from '@/components/cards'
-import { AddCategoryTile, CategoryMenu } from '@/components/category-actions'
+import { AddCategoryTile, ArchivedCategories, CategoryMenu } from '@/components/category-actions'
 import { ChildBadge, FoundGroups } from '@/components/category-grid'
 import { CardHeader, EntityTile, TileGroup, type Ring } from '@/components/entity-tile'
 import { KindToggle } from '@/components/form-header'
@@ -239,6 +239,7 @@ function CategoryBrowser({
           {t('categories.holdHint')}
         </p>
       )}
+      {!query && <ArchivedCategories categories={categories} kind={kind} writable={writable} />}
       {query && (
         <>
           <FoundGroups found={found} tile={tile} />

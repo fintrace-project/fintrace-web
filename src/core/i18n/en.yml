@@ -32,6 +32,10 @@ errors:
   network: Could not reach the server. Check your connection and try again.
   unexpected: Something went wrong. Try again.
   reference: 'Reference: <code>{{traceId}}</code>'
+  code:
+    WORKSPACE_READ_ONLY: 'This workspace cannot be changed now: it is archived, or an import into it is running.'
+    ACCOUNT_ARCHIVED: This account is archived, so nothing new can be recorded on it. Restore it first.
+    CATEGORY_ARCHIVED: 'This category is archived: nothing can be filed under it, nor restored below it.'
 
 shell:
   workspaces: Workspaces
@@ -203,7 +207,14 @@ categories:
     action: Archive
     archiving: Archiving…
     title: Archive {{name}}?
-    text: Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. This cannot be undone.
+    text: Its subcategories are archived with it. Past operations stay filed where they are, but nothing new can be filed here. Restoring it later brings back this category alone.
+  archived:
+    toggle_one: '{{count, number}} archived'
+    toggle_other: '{{count, number}} archived'
+    text: Restoring brings back one category. Its subcategories stay archived and appear here once it is back.
+    restore: Restore
+    restoring: Restoring…
+    restoreName: Restore {{name}}
 
 operations:
   add: Add operation
@@ -378,10 +389,11 @@ import:
       text: The import may still be running. This page checks every few seconds; keep it open.
     landed: The import finished after the connection gave up, so its summary was lost; everything in the file arrived.
     lost: The import did not finish, so nothing was kept. {{workspace}} is still empty, so you can try again.
-  notes: Notes from the importer
+  notes: Import notes
   error: Error
   warning: Warning
   diagnostic: '{{label}}: {{count, number}}'
+  diagnosticDetail: '{{detail}} · {{count, number}}'
 
 # What to export from each import source; the source's own name (MOK) is a product name and stays as it is
 importSources:
