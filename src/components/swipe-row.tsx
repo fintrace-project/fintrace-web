@@ -11,8 +11,25 @@ import { cn } from '@/lib/utils'
 
 // How far a finger moves before the gesture is judged a swipe or a scroll
 const LOCK = 8
-// The share of the row's width past which letting go acts
-const THRESHOLD = 0.4
+// The share of the row's width past which letting go acts, capped in pixels so a wide row needs no longer drag
+const THRESHOLD = 0.25
+const THRESHOLD_MAX = 96
+// A flick acts short of the threshold: let go this fast (px/ms), measured over the last moments, this far out
+const FLICK_SPEED = 0.5
+const FLICK_WINDOW = 100
+const FLICK_MIN = 40
+
+const reach = (width: number) => Math.min(width * THRESHOLD, THRESHOLD_MAX)
+
+type Sample = { x: number; t: number }
+
+// Speed over the samples within the window before `now`; zero if the finger rested before letting go
+function speed(samples: Sample[], now: number) {
+  const recent = samples.filter((sample) => now - sample.t <= FLICK_WINDOW)
+  const first = recent.at(0)
+  const last = recent.at(-1)
+  return first && last && last.t > first.t ? (last.x - first.x) / (last.t - first.t) : 0
+}
 
 export interface SwipeAction {
   // Shown on the strip the row uncovers as it slides
@@ -21,8 +38,8 @@ export interface SwipeAction {
   onSwipe: () => void
 }
 
-// A row a finger can slide either way; let go past the threshold and that side's action runs, short of it the
-// row springs back. Sliding left removes: the row slides away for good, coming back only if `restored`. Sliding
+// A row a finger can slide either way; let go past the threshold, or flick, and that side's action runs, short of
+// it the row springs back. Sliding left removes: the row slides away for good, coming back only if `restored`. Sliding
 // right acts and the row comes back. Touch only: a mouse never swipes. Vertical drags stay the browser's
 // scroll (`touch-action: pan-y`), and a drag counts as a swipe only once it is clearly sideways.
 export function SwipeRow({
@@ -45,7 +62,14 @@ export function SwipeRow({
   if (gone && restored) {
     setGone(false)
   }
-  const gesture = useRef<{ id: number; x: number; y: number; width: number; swiping: boolean } | null>(null)
+  const gesture = useRef<{
+    id: number
+    x: number
+    y: number
+    width: number
+    swiping: boolean
+    samples: Sample[]
+  } | null>(null)
   // A swipe ends in a click on whatever is under the finger, which must not open the row's form
   const swiped = useRef(false)
 
@@ -60,6 +84,7 @@ export function SwipeRow({
       y: event.clientY,
       width: event.currentTarget.offsetWidth,
       swiping: false,
+      samples: [],
     }
     swiped.current = false
   }
@@ -83,19 +108,30 @@ export function SwipeRow({
       swiped.current = true
       event.currentTarget.setPointerCapture(event.pointerId)
     }
+    current.samples = [
+      ...current.samples.filter((sample) => event.timeStamp - sample.t <= FLICK_WINDOW),
+      { x: event.clientX, t: event.timeStamp },
+    ]
     // Only towards a side that has an action
     const clamped = Math.max(toLeft ? -Infinity : 0, Math.min(toRight ? Infinity : 0, dx))
     setDrag({ dx: clamped, width: current.width })
   }
 
   const side = gone || (drag && drag.dx < 0) ? 'left' : drag && drag.dx > 0 ? 'right' : undefined
-  const armed = gone || (drag !== null && Math.abs(drag.dx) > drag.width * THRESHOLD)
+  const armed = gone || (drag !== null && Math.abs(drag.dx) > reach(drag.width))
 
   const up = (event: PointerEvent<HTMLDivElement>) => {
-    if (gesture.current && event.pointerId !== gesture.current.id) {
+    const current = gesture.current
+    if (current && event.pointerId !== current.id) {
       return
     }
-    if (gesture.current?.swiping && armed && drag) {
+    const velocity = current ? speed(current.samples, event.timeStamp) : 0
+    const flicked =
+      drag !== null &&
+      Math.abs(drag.dx) >= FLICK_MIN &&
+      Math.sign(velocity) === Math.sign(drag.dx) &&
+      Math.abs(velocity) >= FLICK_SPEED
+    if (current?.swiping && (armed || flicked) && drag) {
       if (drag.dx < 0) {
         setGone(true)
         toLeft?.onSwipe()
