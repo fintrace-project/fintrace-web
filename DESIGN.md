@@ -237,7 +237,7 @@ The system is flat. Depth comes from white cards on tinted paper and from hairli
 
 ### Shadow Vocabulary
 
-- **Float** (`shadow-md`, with a 10% ink ring on popovers and menus): menus, popovers, floating buttons.
+- **Float** (`shadow-md`, with a 10% ink ring on popovers, menus and the undo pill): menus, popovers, floating buttons, the undo pill.
 - **Overlay** (`shadow-lg`): sheets and the cookie notice.
 - **Card Hover** (`shadow-md` on hover): workspace cards on the workspaces page only, the one exception to the rule below.
 
@@ -304,7 +304,7 @@ The signature picker: a 52px round icon in the entity's own colour, with its nam
 
 ### Feed Row
 
-Each item is its own card, tinted by what it is: income green, expense orange, a recorded balance grey, a transfer by its side in an account's feed and blue across the workspace. Inside, an icon, name and detail, then the right-aligned figure. A difference is a dashed, faded phantom card; a run is one card with its members opening inside it. Each day is a white panel holding its cards, concentric with them (Shapes). On a phone, swiping left reveals delete and swiping right reveals repeat, both deepening in colour once letting go would act. A row reached by a jump highlights in the tint and fades over 1.8s. A swipe's delete waits 5s behind an ink bar with Undo, above the bottom tabs and above any other floating notice.
+Each item is its own card, tinted by what it is: income green, expense orange, a recorded balance grey, a transfer by its side in an account's feed and blue across the workspace. Inside, an icon, name and detail, then the right-aligned figure. A difference is a dashed, faded phantom card; a run is one card with its members opening inside it. Each day is a white panel holding its cards, concentric with them (Shapes). On a phone, swiping left reveals delete and swiping right reveals repeat, both deepening in colour once letting go would act. A row reached by a jump highlights in the tint and fades over 1.8s. A swipe's delete waits 2s behind a white pill with Undo in the workspace accent, only as wide as its text, centred above the bottom tabs and above any other floating notice; it slides up in, a hairline in the accent shrinks across its foot as the window runs out, and it slides down out.
 
 ### Amount Field
 

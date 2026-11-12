@@ -78,6 +78,15 @@
       background-color: color-mix(in srgb, var(--ws) 20%, transparent);
     }
   }
+
+  /* The undo bar's time left; its duration is set inline from the undo window */
+  --animate-undo-window: undo-window linear forwards;
+
+  @keyframes undo-window {
+    to {
+      transform: scaleX(0);
+    }
+  }
 }
 
 :root {

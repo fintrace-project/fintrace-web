@@ -39,7 +39,7 @@ import {
 import { useAccounts } from '@/hooks/use-accounts'
 import { useAnchors } from '@/hooks/use-anchors'
 import { useCategories } from '@/hooks/use-categories'
-import { useUndoableDelete } from '@/hooks/use-undoable-delete'
+import { UNDO_WINDOW_MS, useUndoableDelete } from '@/hooks/use-undoable-delete'
 import { useWorkspace } from '@/hooks/use-workspaces'
 import { isWritable } from '@/core/workspaces'
 import { useScrollAnchor } from '@/hooks/use-scroll-anchor'
@@ -1039,6 +1039,8 @@ export function Feed({
         />
       )}
       <UndoBar
+        id={deletion.pending?.id}
+        windowMs={UNDO_WINDOW_MS}
         message={
           deletion.pending &&
           t(deletion.pending.type === 'TRANSFER' ? 'feed.transferDeleted' : 'feed.operationDeleted')

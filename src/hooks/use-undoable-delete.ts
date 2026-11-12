@@ -4,7 +4,7 @@ import type { OperationItem } from '@/core/feed-rows'
 import { useCancelOperation } from '@/hooks/use-operation-mutations'
 import { useCancelTransfer } from '@/hooks/use-transfer-mutations'
 
-const UNDO_WINDOW_MS = 5000
+export const UNDO_WINDOW_MS = 2000
 
 type Removable = OperationItem | TransferFeedItem
 
