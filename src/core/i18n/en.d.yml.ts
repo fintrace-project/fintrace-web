@@ -22,6 +22,7 @@ declare const messages: {
     readonly signingIn: "Signing in…"
     readonly loadWorkspaces: "Could not load workspaces."
     readonly loadAccounts: "Could not load accounts."
+    readonly loadTotals: "Could not load the totals."
     readonly loadFeed: "Could not load the operations."
     readonly loadCategories: "Could not load categories."
     readonly changedElsewhere: "This changed in another tab or device. Reload to get the latest, then try again."
@@ -81,6 +82,8 @@ declare const messages: {
     readonly balance: "Total balance"
     readonly income: "Income this month"
     readonly expenses: "Expenses this month"
+    readonly sourceOnly: "{{currency}} accounts only · conversion coming soon"
+    readonly monthChange: "{{change}} this month"
   }
   readonly archive: {
     readonly archive: "Archive"

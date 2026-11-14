@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BalanceWidget } from '@/components/balance-widget'
+import type { Workspace } from '@/core/api'
 import { initials } from '@/core/format'
 import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
@@ -30,10 +32,13 @@ export function Pending({ children }: { children: ReactNode }) {
   return <p className="text-sm text-muted-foreground">{children}</p>
 }
 
+const TILE =
+  'flex items-center justify-between gap-3 rounded-2xl border bg-card px-5 py-3 sm:flex-col sm:items-start sm:justify-start sm:gap-2 sm:p-5'
+
 function PendingTile({ label }: { label: string }) {
   const { t } = useTranslation()
   return (
-    <div className="flex items-center justify-between gap-3 rounded-2xl border bg-card px-5 py-3 sm:flex-col sm:items-start sm:justify-start sm:gap-2 sm:p-5">
+    <div className={TILE}>
       <span className="text-caption text-muted-foreground">{label}</span>
       <span
         aria-hidden
@@ -46,12 +51,16 @@ function PendingTile({ label }: { label: string }) {
   )
 }
 
-// The workspace's headline figures; each waits for the Core task that computes it
-export function TotalsTiles() {
+// The workspace's headline figures; income and expenses wait for the cashflow endpoint (3.6). The balance widget
+// is the tall one, so the small tiles keep their own height rather than stretch beside it.
+export function TotalsTiles({ workspace }: { workspace: Workspace }) {
   const { t } = useTranslation()
   return (
-    <section aria-label={t('totals.label')} className="grid gap-2 sm:grid-cols-3 sm:gap-4">
-      <PendingTile label={t('totals.balance')} />
+    <section
+      aria-label={t('totals.label')}
+      className="grid items-start gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(0,1.6fr)_1fr_1fr]"
+    >
+      <BalanceWidget workspace={workspace} className="sm:col-span-2 lg:col-span-1" />
       <PendingTile label={t('totals.income')} />
       <PendingTile label={t('totals.expenses')} />
     </section>

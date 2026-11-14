@@ -3,13 +3,30 @@ import type { AccountBalance, OperationFeedItem, UserProfile } from '@/core/api'
 // Display only: every figure comes from Core, the client never computes money.
 const money = new Map<string, Intl.NumberFormat>()
 
-export function formatMoney(amount: number, currency: string): string {
+function moneyFormat(currency: string): Intl.NumberFormat {
   let format = money.get(currency)
   if (!format) {
-    format = new Intl.NumberFormat(undefined, { style: 'currency', currency })
+    // At least two decimals: Intl's customary digits would round Core's 69,807.05 RSD to 69,807
+    format = new Intl.NumberFormat(undefined, { style: 'currency', currency, minimumFractionDigits: 2 })
     money.set(currency, format)
   }
-  return format.format(amount)
+  return format
+}
+
+export function formatMoney(amount: number, currency: string): string {
+  return moneyFormat(currency).format(amount)
+}
+
+// The figure cut at its decimal separator, so the cents can be set smaller; a true minus, as in the feeds
+export function splitMoney(amount: number, currency: string): { whole: string; fraction: string } {
+  const parts = moneyFormat(currency).formatToParts(amount)
+  const cut = parts.findIndex((part) => part.type === 'decimal')
+  const text = (from: number, to?: number) =>
+    parts
+      .slice(from, to)
+      .map((part) => (part.type === 'minusSign' ? '−' : part.value))
+      .join('')
+  return cut < 0 ? { whole: text(0), fraction: '' } : { whole: text(0, cut), fraction: text(cut) }
 }
 
 // "€" for EUR, "$" for USD: the currency's narrow sign, as Intl writes it beside a figure

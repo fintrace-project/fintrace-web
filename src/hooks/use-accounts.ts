@@ -25,7 +25,21 @@ export function useAccountBalances(workspaceId: string) {
           params: { path: { workspaceId }, query: { includeArchived: true } },
           signal,
         }),
-      ),
+      ).balances,
+  })
+}
+
+// Every account's balance summed per currency by Core, archived accounts included as on the pages
+export function useCurrencyTotals(workspaceId: string) {
+  return useQuery({
+    queryKey: ['workspaces', workspaceId, 'balances', 'currencies'],
+    queryFn: async ({ signal }) =>
+      dataOf(
+        await api.GET('/api/v1/workspaces/{workspaceId}/statistics/balances/currencies', {
+          params: { path: { workspaceId }, query: { includeArchived: true } },
+          signal,
+        }),
+      ).totals,
   })
 }
 

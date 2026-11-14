@@ -257,6 +257,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/statistics/balances/currencies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Total balances per currency */
+        get: operations["getBalancesByCurrencies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/statistics/balances/accounts": {
         parameters: {
             query?: never;
@@ -265,7 +282,7 @@ export interface paths {
             cookie?: never;
         };
         /** List account balances */
-        get: operations["getAllBalancesOf"];
+        get: operations["getBalancesByAccounts"];
         put?: never;
         post?: never;
         delete?: never;
@@ -686,11 +703,34 @@ export interface components {
         ListResponseWorkspaceResponse: {
             items: components["schemas"]["WorkspaceResponse"][];
         };
+        BalancesByCurrenciesResponse: {
+            /** Format: date */
+            asOf: string;
+            totals: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        ConvertedAmountResponse: {
+            currency: string;
+            total: number;
+            coveredCurrencies: string[];
+        };
+        CurrencyAmountResponse: {
+            currency: string;
+            total: number;
+        };
+        CurrencyAmountsResponse: {
+            byCurrency: components["schemas"]["CurrencyAmountResponse"][];
+            converted?: components["schemas"]["ConvertedAmountResponse"] | null;
+        };
         AccountBalanceResponse: {
             /** Format: uuid */
             accountId: string;
             currency: string;
             balance: number;
+        };
+        BalancesByAccountsResponse: {
+            /** Format: date */
+            asOf: string;
+            balances: components["schemas"]["AccountBalanceResponse"][];
         };
         /** @enum {string} */
         FeedItemType: "OPERATION" | "TRANSFER" | "BALANCE_ANCHOR" | "DIFFERENCE";
@@ -2429,7 +2469,64 @@ export interface operations {
             };
         };
     };
-    getAllBalancesOf: {
+    getBalancesByCurrencies: {
+        parameters: {
+            query?: {
+                asOf?: string;
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One total per currency the accounts hold, ordered by code, as of the end of `asOf` */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BalancesByCurrenciesResponse"];
+                };
+            };
+            /** @description Malformed `asOf` or `includeArchived` */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getBalancesByAccounts: {
         parameters: {
             query?: {
                 asOf?: string;
@@ -2449,7 +2546,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "*/*": components["schemas"]["AccountBalanceResponse"][];
+                    "*/*": components["schemas"]["BalancesByAccountsResponse"];
                 };
             };
             /** @description Malformed `asOf` or `includeArchived` */

@@ -36,7 +36,7 @@ export function OverviewPage() {
           </>
         }
       />
-      <TotalsTiles />
+      <TotalsTiles workspace={workspace} />
 
       {/* Between md and lg the side column comes first: below a feed that keeps loading it could never be reached */}
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">

@@ -24,6 +24,7 @@ errors:
   signingIn: Signing in…
   loadWorkspaces: Could not load workspaces.
   loadAccounts: Could not load accounts.
+  loadTotals: Could not load the totals.
   loadFeed: Could not load the operations.
   loadCategories: Could not load categories.
   changedElsewhere: This changed in another tab or device. Reload to get the latest, then try again.
@@ -83,6 +84,8 @@ totals:
   balance: Total balance
   income: Income this month
   expenses: Expenses this month
+  sourceOnly: '{{currency}} accounts only · conversion coming soon'
+  monthChange: '{{change}} this month'
 
 archive:
   archive: Archive
