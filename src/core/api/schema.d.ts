@@ -257,6 +257,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/statistics/balances/series": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Balance over time */
+        get: operations["getBalancesSeries"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/statistics/balances/currencies": {
         parameters: {
             query?: never;
@@ -703,10 +720,20 @@ export interface components {
         ListResponseWorkspaceResponse: {
             items: components["schemas"]["WorkspaceResponse"][];
         };
-        BalancesByCurrenciesResponse: {
+        /** @enum {string} */
+        Granularity: "DAY" | "WEEK" | "MONTH" | "YEAR";
+        BalancesSeriesBucketResponse: {
             /** Format: date */
-            asOf: string;
-            totals: components["schemas"]["CurrencyAmountsResponse"];
+            start: string;
+            balance: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        BalancesSeriesResponse: {
+            granularity: components["schemas"]["Granularity"];
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            buckets: components["schemas"]["BalancesSeriesBucketResponse"][];
         };
         ConvertedAmountResponse: {
             currency: string;
@@ -720,6 +747,11 @@ export interface components {
         CurrencyAmountsResponse: {
             byCurrency: components["schemas"]["CurrencyAmountResponse"][];
             converted?: components["schemas"]["ConvertedAmountResponse"] | null;
+        };
+        BalancesByCurrenciesResponse: {
+            /** Format: date */
+            asOf: string;
+            totals: components["schemas"]["CurrencyAmountsResponse"];
         };
         AccountBalanceResponse: {
             /** Format: uuid */
@@ -2460,6 +2492,66 @@ export interface operations {
             };
             /** @description The account is archived, or the workspace is */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getBalancesSeries: {
+        parameters: {
+            query: {
+                granularity: components["schemas"]["Granularity"];
+                from?: string;
+                to?: string;
+                accountIds?: string[];
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One bucket per calendar period, each the balance per currency at its end; bounds widened to whole buckets */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["BalancesSeriesResponse"];
+                };
+            };
+            /** @description Missing or unknown `granularity`, more than 2,000 buckets, `from` after `to`, or an `accountIds` not in this workspace */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

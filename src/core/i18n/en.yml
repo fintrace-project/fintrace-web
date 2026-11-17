@@ -25,6 +25,7 @@ errors:
   loadWorkspaces: Could not load workspaces.
   loadAccounts: Could not load accounts.
   loadTotals: Could not load the totals.
+  loadSeries: Could not load the balance history.
   loadFeed: Could not load the operations.
   loadCategories: Could not load categories.
   changedElsewhere: This changed in another tab or device. Reload to get the latest, then try again.
@@ -301,7 +302,23 @@ statistics:
   pending: The category breakdown is coming soon.
 
 charts:
-  pending: Balance and cashflow charts are coming soon.
+  account: Account
+  allAccounts: All accounts
+  archivedAccount: '{{name}} (archived)'
+  range: Range
+  presets:
+    ALL: All
+    1Y: 1Y
+    3M: 3M
+    1M: 1M
+  granularity:
+    DAY: Daily
+    WEEK: Weekly
+    MONTH: Monthly
+    YEAR: Yearly
+  mouseHint: Drag across a chart to pick a range, Ctrl + scroll to zoom
+  touchHint: Swipe sideways across a chart to pick a range, pinch to zoom
+  empty: No balance recorded yet. Add an account with its balance, or import a dump.
 
 preferences:
   title: Preferences

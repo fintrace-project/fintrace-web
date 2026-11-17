@@ -8,6 +8,12 @@ const DIST = 'dist'
 const INITIAL_LIMIT = 200_000
 const LAZY_LIMIT = 50_000
 
+// ECharts is one dynamic chunk of its own, loaded only where a chart is shown (§3.6): 193.89 kB measured on
+// 2026-11-17 with the balance chart's modules. A static import anywhere else still fails, as that chunk's
+// or the first load's limit.
+const ECHARTS = 'src/core/charts/echarts.ts'
+const OWN_LIMITS: Record<string, number> = { [ECHARTS]: 210_000 }
+
 // The layouts router.tsx renders a lazy chunk inside, already loaded when it is reached. A chunk left
 // out is measured on the first load alone, which is stricter, so a forgotten one fails rather than passes.
 const SHELL = 'src/components/app-shell.tsx'
@@ -87,9 +93,10 @@ for (const key of Object.keys(manifest).filter((key) => manifest[key].isDynamicE
   loadedByEveryImporter(key).forEach((chunk) => loaded.add(chunk))
   const added = [...closure(key)].filter((chunk) => !loaded.has(chunk))
   const size = sizeOf(added)
-  console.log(`${key.padEnd(40)} ${kB(size).padStart(10)}  of ${kB(LAZY_LIMIT)}`)
-  if (size > LAZY_LIMIT) {
-    failures.push(`${key} adds ${kB(size)}, over ${kB(LAZY_LIMIT)}`)
+  const limit = OWN_LIMITS[key] ?? LAZY_LIMIT
+  console.log(`${key.padEnd(40)} ${kB(size).padStart(10)}  of ${kB(limit)}`)
+  if (size > limit) {
+    failures.push(`${key} adds ${kB(size)}, over ${kB(limit)}`)
   }
 }
 

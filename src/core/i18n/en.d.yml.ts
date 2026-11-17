@@ -23,6 +23,7 @@ declare const messages: {
     readonly loadWorkspaces: "Could not load workspaces."
     readonly loadAccounts: "Could not load accounts."
     readonly loadTotals: "Could not load the totals."
+    readonly loadSeries: "Could not load the balance history."
     readonly loadFeed: "Could not load the operations."
     readonly loadCategories: "Could not load categories."
     readonly changedElsewhere: "This changed in another tab or device. Reload to get the latest, then try again."
@@ -317,7 +318,25 @@ declare const messages: {
     readonly pending: "The category breakdown is coming soon."
   }
   readonly charts: {
-    readonly pending: "Balance and cashflow charts are coming soon."
+    readonly account: "Account"
+    readonly allAccounts: "All accounts"
+    readonly archivedAccount: "{{name}} (archived)"
+    readonly range: "Range"
+    readonly presets: {
+      readonly ALL: "All"
+      readonly "1Y": "1Y"
+      readonly "3M": "3M"
+      readonly "1M": "1M"
+    }
+    readonly granularity: {
+      readonly DAY: "Daily"
+      readonly WEEK: "Weekly"
+      readonly MONTH: "Monthly"
+      readonly YEAR: "Yearly"
+    }
+    readonly mouseHint: "Drag across a chart to pick a range, Ctrl + scroll to zoom"
+    readonly touchHint: "Swipe sideways across a chart to pick a range, pinch to zoom"
+    readonly empty: "No balance recorded yet. Add an account with its balance, or import a dump."
   }
   readonly preferences: {
     readonly title: "Preferences"

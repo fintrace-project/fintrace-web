@@ -108,6 +108,11 @@ const count = new Intl.NumberFormat()
 
 export const formatCount = (n: number) => count.format(n)
 
+const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 })
+
+// "80K", "−40K", "1.2M": an axis's figure where the currency is named elsewhere; a true minus, as in the feeds
+export const formatCompact = (n: number) => compact.format(n).replace('-', '−')
+
 // Bytes, kilobytes or megabytes, the unit's name written by Intl in the user's language
 export function formatBytes(bytes: number): string {
   const [value, unit] =
