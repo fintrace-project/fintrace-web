@@ -4,6 +4,7 @@ import { Link, useParams } from 'react-router'
 import { ArchiveButton } from '@/components/archive-controls'
 import { BalancePanel } from '@/components/balance-panel'
 import { InitialsAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
+import { ExpensesPanel } from '@/components/expenses-panel'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'
 import { AddOperationButton } from '@/components/operation-dialog'
@@ -58,9 +59,7 @@ export function OverviewPage() {
               {t('overview.allStatistics')}
             </MoreLink>
           </Panel>
-          <Panel title={t('overview.expensesByMonth')} className="md:max-lg:hidden">
-            <Pending>{t('overview.chartPending')}</Pending>
-          </Panel>
+          <ExpensesPanel workspaceId={workspaceId} currency={display} className="md:max-lg:hidden" />
           <AccountsPanel workspaceId={workspaceId} />
         </aside>
 

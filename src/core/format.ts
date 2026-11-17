@@ -54,6 +54,10 @@ const shortDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 's
 
 export const formatShortDate = (iso: string) => shortDate.format(new Date(`${iso.slice(0, 10)}T00:00`))
 
+const month = new Intl.DateTimeFormat(undefined, { month: 'short' })
+
+// "Nov", for a month's first day
+export const formatMonth = (iso: string) => month.format(new Date(`${iso.slice(0, 10)}T00:00`))
 const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
 // The wire's floating wall-clock value read as local, so the time shown is the time stored

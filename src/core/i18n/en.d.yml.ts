@@ -23,7 +23,7 @@ declare const messages: {
     readonly loadWorkspaces: "Could not load workspaces."
     readonly loadAccounts: "Could not load accounts."
     readonly loadTotals: "Could not load the totals."
-    readonly loadSeries: "Could not load the balance history."
+    readonly loadSeries: "Could not load the charts."
     readonly loadFeed: "Could not load the operations."
     readonly loadCategories: "Could not load categories."
     readonly changedElsewhere: "This changed in another tab or device. Reload to get the latest, then try again."
@@ -83,6 +83,11 @@ declare const messages: {
     readonly balance: "Total balance"
     readonly income: "Income this month"
     readonly expenses: "Expenses this month"
+    readonly month: "This month"
+    readonly incomeIn: "Income · {{month}}"
+    readonly expensesIn: "Expenses · {{month}}"
+    readonly byCategoryPending: "By category coming soon"
+    readonly allCategories: "See all categories →"
     readonly sourceOnly: "{{currency}} accounts only · conversion coming soon"
     readonly monthChange: "{{change}} this month"
   }
@@ -140,7 +145,7 @@ declare const messages: {
     readonly breakdownPending: "The category breakdown is coming soon."
     readonly allStatistics: "All statistics →"
     readonly expensesByMonth: "Expenses by month"
-    readonly chartPending: "The cashflow chart is coming soon."
+    readonly noExpenses: "No expenses over the past year."
     readonly allAccounts: "All accounts →"
     readonly balance: "Balance"
     readonly changePending: "▲ —"
@@ -342,6 +347,13 @@ declare const messages: {
     readonly mouseHint: "Drag across a chart to pick a range, Ctrl + scroll to zoom"
     readonly touchHint: "Swipe sideways across a chart to pick a range, pinch to zoom"
     readonly empty: "No balance recorded yet. Add an account with its balance, or import a dump."
+    readonly cashflow: {
+      readonly title: "Income and expenses"
+      readonly income: "Income"
+      readonly expense: "Expenses"
+      readonly net: "Net"
+      readonly operations: "Operations"
+    }
   }
   readonly preferences: {
     readonly title: "Preferences"

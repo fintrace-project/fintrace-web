@@ -2,7 +2,7 @@ import { Check, ChevronsUpDown } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
-import { BalanceChartView } from '@/components/balance-chart'
+import { BalanceChartView, CashflowChartView } from '@/components/balance-chart'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
 import { PresetPicker } from '@/components/preset-picker'
@@ -12,8 +12,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { Account, BalanceSeries } from '@/core/api'
+import type { Account, BalanceSeries, Cashflow } from '@/core/api'
 import {
+  cashflowOf,
   currenciesOf,
   dailyFetchWindow,
   granularityFor,
@@ -23,6 +24,7 @@ import {
 import { isoDate } from '@/core/dates'
 import { useAccounts } from '@/hooks/use-accounts'
 import { useBalanceSeries } from '@/hooks/use-balance-series'
+import { useCashflow } from '@/hooks/use-cashflow'
 import { useMediaQuery } from '@/hooks/use-media-query'
 import { cn } from '@/lib/utils'
 
@@ -43,12 +45,11 @@ export function ChartsPage() {
   const window = picked ?? span
   const granularity = window ? granularityFor(window) : 'MONTH'
   const fetched = granularity === 'DAY' && window ? dailyFetchWindow(window, today) : undefined
-  const series = useBalanceSeries(workspaceId, {
-    granularity,
-    from: fetched?.from,
-    to: fetched?.to,
-    accountId,
-  })
+  const request = { granularity, from: fetched?.from, to: fetched?.to, accountId }
+  const series = useBalanceSeries(workspaceId, request)
+  // The same request: without a `from`, Core starts the bars at the first operation, inside the line's span
+  const cashflow = useCashflow(workspaceId, request)
+  const error = history.error ?? series.error ?? cashflow.error
 
   const pickAccount = (id: string | undefined) => {
     setAccountId(id)
@@ -71,16 +72,17 @@ export function ChartsPage() {
         )}
       </div>
 
-      {history.error || series.error ? (
+      {error ? (
         <LoadError
           title={t('errors.loadSeries')}
-          error={(history.error ?? series.error)!}
+          error={error}
           onRetry={() => {
             void history.refetch()
             void series.refetch()
+            void cashflow.refetch()
           }}
         />
-      ) : !history.data || !series.data ? (
+      ) : !history.data || !series.data || !cashflow.data ? (
         <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
       ) : !span || !window ? (
         <p className="text-sm text-muted-foreground">{t('charts.empty')}</p>
@@ -88,6 +90,7 @@ export function ChartsPage() {
         <Charts
           workspaceId={workspaceId}
           series={series.data}
+          cashflow={cashflow.data}
           window={window}
           today={today}
           onWindow={setPicked}
@@ -100,25 +103,31 @@ export function ChartsPage() {
 function Charts({
   workspaceId,
   series,
+  cashflow,
   window,
   today,
   onWindow,
 }: {
   workspaceId: string
   series: BalanceSeries
+  cashflow: Cashflow
   window: DateWindow
   today: string
   onWindow: (window: DateWindow) => void
 }) {
   const currencies = currenciesOf(series)
+  // Every chart on the page spans the same dates, so a zoom passed between them means the same days on each
+  const bounds = useMemo(() => ({ from: series.from, to: today }), [series.from, today])
   return (
     <div className="flex flex-col gap-4">
       {currencies.map((currency) => (
         <CurrencyChart
           key={currency}
-          group={`balances-${workspaceId}`}
+          group={`charts-${workspaceId}`}
           currency={currency}
           series={series}
+          cashflow={cashflow}
+          bounds={bounds}
           window={window}
           today={today}
           onWindow={onWindow}
@@ -128,8 +137,10 @@ function Charts({
   )
 }
 
+// A currency's balance line, and its income and expense bars under it on the same time axis
 function CurrencyChart({
   series,
+  cashflow,
   currency,
   today,
   ...chart
@@ -137,15 +148,21 @@ function CurrencyChart({
   group: string
   currency: string
   series: BalanceSeries
+  cashflow: Cashflow
+  bounds: DateWindow
   window: DateWindow
   today: string
   onWindow: (window: DateWindow) => void
 }) {
+  const { t } = useTranslation()
   const points = useMemo(() => lineOf(series, currency, today), [series, currency, today])
+  const bars = useMemo(() => cashflowOf(cashflow, currency), [cashflow, currency])
   return (
     <section aria-label={currency} className="flex flex-col gap-2 rounded-2xl border bg-card px-4 py-3">
       <h2 className="text-sm font-bold">{currency}</h2>
-      <BalanceChartView currency={currency} points={points} {...chart} />
+      <BalanceChartView currency={currency} points={points} slider={false} {...chart} />
+      <h3 className="text-xs font-semibold text-muted-foreground">{t('charts.cashflow.title')}</h3>
+      <CashflowChartView currency={currency} points={bars} className="h-40" {...chart} />
     </section>
   )
 }

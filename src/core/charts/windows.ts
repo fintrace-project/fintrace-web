@@ -1,5 +1,6 @@
-import type { BalanceSeries, Granularity } from '@/core/api'
+import type { BalanceSeries, Cashflow, Granularity } from '@/core/api'
 import { addDays, isoDate, localDate } from '@/core/dates'
+import type { CashflowPoint } from './cashflow-chart'
 
 // A span of whole days, both ends included, as `YYYY-MM-DD`
 export interface DateWindow {
@@ -65,3 +66,31 @@ export function lineOf(series: BalanceSeries, currency: string, today: string): 
 // The currencies a series holds, in Core's order, for one chart each
 export const currenciesOf = (series: BalanceSeries) =>
   series.buckets[0]?.balance.byCurrency.map((amount) => amount.currency) ?? []
+
+// One currency's bars: each bucket's figures for it as Core sent them. A currency the selection does not hold
+// has no bucket to show, and none is invented (D3).
+export function cashflowOf(cashflow: Cashflow, currency: string): CashflowPoint[] {
+  const of = (amounts: { byCurrency: { currency: string; total: number }[] }) =>
+    amounts.byCurrency.find((amount) => amount.currency === currency)?.total
+  return cashflow.buckets.flatMap(({ start, income, expense, net, count }) => {
+    const figures = { income: of(income), expense: of(expense), net: of(net) }
+    if (figures.income === undefined || figures.expense === undefined || figures.net === undefined) return []
+    return [
+      {
+        start,
+        last: bucketEnd(start, cashflow.granularity),
+        income: figures.income,
+        expense: figures.expense,
+        net: figures.net,
+        count: count.find((c) => c.currency === currency)?.count ?? 0,
+      },
+    ]
+  })
+}
+
+// A year of months: from the first day of this month a year ago to this month's last day, thirteen in all, so
+// this month stands beside the same month last year
+export function yearOfMonths(today: string): DateWindow {
+  const from = `${Number(today.slice(0, 4)) - 1}${today.slice(4, 8)}01`
+  return { from, to: bucketEnd(today.slice(0, 8) + '01', 'MONTH') }
+}

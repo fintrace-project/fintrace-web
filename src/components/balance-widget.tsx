@@ -70,16 +70,16 @@ export function BalanceWidget({
 function Headline({ total }: { total: CurrencyAmount | undefined }) {
   if (!total) {
     return (
-      <p aria-hidden className="text-3xl leading-none font-extrabold text-muted-foreground/40">
+      <p aria-hidden className="text-4xl leading-none font-extrabold text-muted-foreground/40">
         —
       </p>
     )
   }
   const { whole, fraction } = splitMoney(total.total, total.currency)
   return (
-    <p className="text-3xl leading-none font-extrabold tracking-tight">
+    <p className="text-4xl leading-none font-extrabold tracking-tight">
       {whole}
-      <span className="text-xl text-muted-foreground">{fraction}</span>
+      <span className="text-2xl text-muted-foreground">{fraction}</span>
     </p>
   )
 }
@@ -114,8 +114,8 @@ function CurrencyRow({
       >
         {currencySymbol(currency)}
       </span>
-      <span className="text-sm font-bold">{currency}</span>
-      <span className="flex-1 text-xs font-semibold text-muted-foreground">—%</span>
+      {/* Its share of the converted total joins here with conversion (3.10) */}
+      <span className="flex-1 text-sm font-bold">{currency}</span>
       <span className="text-row font-extrabold whitespace-nowrap">
         {whole}
         <span className="text-caption font-bold text-muted-foreground">{fraction}</span>

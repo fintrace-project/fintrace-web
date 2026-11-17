@@ -257,6 +257,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/statistics/cashflow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Income and expenses over time */
+        get: operations["getCashflow"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/statistics/balances/series": {
         parameters: {
             query?: never;
@@ -722,18 +739,34 @@ export interface components {
         };
         /** @enum {string} */
         Granularity: "DAY" | "WEEK" | "MONTH" | "YEAR";
-        BalancesSeriesBucketResponse: {
+        CashflowBucketResponse: {
             /** Format: date */
             start: string;
-            balance: components["schemas"]["CurrencyAmountsResponse"];
+            income: components["schemas"]["CurrencyAmountsResponse"];
+            expense: components["schemas"]["CurrencyAmountsResponse"];
+            net: components["schemas"]["CurrencyAmountsResponse"];
+            count: components["schemas"]["CurrencyCountResponse"][];
         };
-        BalancesSeriesResponse: {
+        CashflowPerDayResponse: {
+            income: components["schemas"]["CurrencyAmountsResponse"];
+            expense: components["schemas"]["CurrencyAmountsResponse"];
+            net: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        CashflowResponse: {
             granularity: components["schemas"]["Granularity"];
             /** Format: date */
             from: string;
             /** Format: date */
             to: string;
-            buckets: components["schemas"]["BalancesSeriesBucketResponse"][];
+            buckets: components["schemas"]["CashflowBucketResponse"][];
+            totals: components["schemas"]["CashflowTotalsResponse"];
+        };
+        CashflowTotalsResponse: {
+            income: components["schemas"]["CurrencyAmountsResponse"];
+            expense: components["schemas"]["CurrencyAmountsResponse"];
+            net: components["schemas"]["CurrencyAmountsResponse"];
+            count: components["schemas"]["CurrencyCountResponse"][];
+            perDay: components["schemas"]["CashflowPerDayResponse"];
         };
         ConvertedAmountResponse: {
             currency: string;
@@ -747,6 +780,24 @@ export interface components {
         CurrencyAmountsResponse: {
             byCurrency: components["schemas"]["CurrencyAmountResponse"][];
             converted?: components["schemas"]["ConvertedAmountResponse"] | null;
+        };
+        CurrencyCountResponse: {
+            currency: string;
+            /** Format: int64 */
+            count: number;
+        };
+        BalancesSeriesBucketResponse: {
+            /** Format: date */
+            start: string;
+            balance: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        BalancesSeriesResponse: {
+            granularity: components["schemas"]["Granularity"];
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            buckets: components["schemas"]["BalancesSeriesBucketResponse"][];
         };
         BalancesByCurrenciesResponse: {
             /** Format: date */
@@ -2492,6 +2543,66 @@ export interface operations {
             };
             /** @description The account is archived, or the workspace is */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getCashflow: {
+        parameters: {
+            query: {
+                granularity: components["schemas"]["Granularity"];
+                from?: string;
+                to?: string;
+                accountIds?: string[];
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One bucket per calendar period with its income, expense, net and operations per currency, transfers excluded; the period's totals and daily averages beside them */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CashflowResponse"];
+                };
+            };
+            /** @description Missing or unknown `granularity`, more than 2,000 buckets, `from` after `to`, or an `accountIds` not in this workspace */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

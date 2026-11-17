@@ -25,7 +25,7 @@ errors:
   loadWorkspaces: Could not load workspaces.
   loadAccounts: Could not load accounts.
   loadTotals: Could not load the totals.
-  loadSeries: Could not load the balance history.
+  loadSeries: Could not load the charts.
   loadFeed: Could not load the operations.
   loadCategories: Could not load categories.
   changedElsewhere: This changed in another tab or device. Reload to get the latest, then try again.
@@ -85,6 +85,11 @@ totals:
   balance: Total balance
   income: Income this month
   expenses: Expenses this month
+  month: This month
+  incomeIn: Income · {{month}}
+  expensesIn: Expenses · {{month}}
+  byCategoryPending: By category coming soon
+  allCategories: See all categories →
   sourceOnly: '{{currency}} accounts only · conversion coming soon'
   monthChange: '{{change}} this month'
 
@@ -139,7 +144,7 @@ overview:
   breakdownPending: The category breakdown is coming soon.
   allStatistics: All statistics →
   expensesByMonth: Expenses by month
-  chartPending: The cashflow chart is coming soon.
+  noExpenses: No expenses over the past year.
   allAccounts: All accounts →
   balance: Balance
   changePending: ▲ —
@@ -324,6 +329,12 @@ charts:
   mouseHint: Drag across a chart to pick a range, Ctrl + scroll to zoom
   touchHint: Swipe sideways across a chart to pick a range, pinch to zoom
   empty: No balance recorded yet. Add an account with its balance, or import a dump.
+  cashflow:
+    title: Income and expenses
+    income: Income
+    expense: Expenses
+    net: Net
+    operations: Operations
 
 preferences:
   title: Preferences
