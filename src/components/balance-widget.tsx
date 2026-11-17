@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LoadError } from '@/components/load-error'
 import type { CurrencyAmount, Workspace } from '@/core/api'
@@ -8,19 +7,23 @@ import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
 
 // Each currency's total from Core (4.13a). The converted total and shares wait for conversion (3.10) and the
-// month's change for Core to serve it (3.15), so their places hold placeholders; a row picks the currency they
-// will be shown in, the workspace's own until then.
-export function BalanceWidget({ workspace, className }: { workspace: Workspace; className?: string }) {
+// month's change for Core to serve it (3.15), so their places hold placeholders; a row picks the display
+// currency, which the overview holds so its balance chart follows it.
+export function BalanceWidget({
+  workspace,
+  display,
+  onPick,
+  className,
+}: {
+  workspace: Workspace
+  display: string
+  onPick: (currency: string) => void
+  className?: string
+}) {
   const totals = useCurrencyTotals(workspace.id)
-  const [picked, setPicked] = useState<string>()
   const { t } = useTranslation()
 
   const rows = totals.data?.byCurrency
-  const display =
-    picked ??
-    (rows?.some((row) => row.currency === workspace.defaultCurrency)
-      ? workspace.defaultCurrency
-      : (rows?.[0]?.currency ?? workspace.defaultCurrency))
 
   return (
     <section
@@ -53,7 +56,7 @@ export function BalanceWidget({ workspace, className }: { workspace: Workspace; 
                 currency={currency}
                 total={total}
                 active={currency === display}
-                onPick={() => setPicked(currency)}
+                onPick={() => onPick(currency)}
               />
             </li>
           ))}

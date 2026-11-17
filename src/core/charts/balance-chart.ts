@@ -22,7 +22,11 @@ export interface BalanceChartOptions {
   currency: string
   colours: ChartColours
   onWindow: (window: DateWindow) => void
+  // A glance in a panel: the line and its tooltip, nothing to zoom or select, so no gesture is taken at all
+  compact?: boolean
 }
+
+const NO_INTERACTION: ChartInteraction = { afterRedraw() {}, dispose() {} }
 
 export type ChartEngine = typeof import('./echarts')
 
@@ -90,6 +94,7 @@ export class BalanceChart {
       element: this.element,
       select: (from, to) => this.select(from, to),
     }
+    if (this.options.compact) return NO_INTERACTION
     return this.coarse.matches ? new TouchInteraction(host) : new MouseInteraction(host)
   }
 
@@ -121,11 +126,17 @@ export class BalanceChart {
   }
 
   private option(data: [number, number][]) {
-    const { currency, colours } = this.options
-    const axisLabel = { color: colours.text }
+    const { currency, colours, compact } = this.options
+    const axisLabel = { color: colours.text, ...(compact ? { fontSize: 10 } : {}) }
     return {
       animation: false,
-      grid: { left: 4, right: 12, top: 12, bottom: 40, containLabel: true },
+      grid: {
+        left: 4,
+        right: compact ? 4 : 12,
+        top: compact ? 8 : 12,
+        bottom: compact ? 4 : 40,
+        containLabel: true,
+      },
       tooltip: {
         trigger: 'axis',
         valueFormatter: (value: number) => formatMoney(value, currency).replace('-', '−'),
@@ -150,20 +161,22 @@ export class BalanceChart {
         throttleType: 'debounce',
         throttleDelay: 300,
       },
-      dataZoom: [
-        {
-          type: 'inside',
-          xAxisIndex: 0,
-          filterMode: 'none',
-          // A drag selects a range rather than panning; pinch and Ctrl+wheel zoom
-          moveOnMouseMove: false,
-          preventDefaultMouseMove: false,
-          zoomOnMouseWheel: 'ctrl',
-          moveOnMouseWheel: false,
-        },
-        // On every chart, beside the one being read; connected, any of them moves all
-        { type: 'slider', xAxisIndex: 0, filterMode: 'none', height: 18, bottom: 4, labelFormatter: '' },
-      ],
+      dataZoom: compact
+        ? []
+        : [
+            {
+              type: 'inside',
+              xAxisIndex: 0,
+              filterMode: 'none',
+              // A drag selects a range rather than panning; pinch and Ctrl+wheel zoom
+              moveOnMouseMove: false,
+              preventDefaultMouseMove: false,
+              zoomOnMouseWheel: 'ctrl',
+              moveOnMouseWheel: false,
+            },
+            // On every chart, beside the one being read; connected, any of them moves all
+            { type: 'slider', xAxisIndex: 0, filterMode: 'none', height: 18, bottom: 4, labelFormatter: '' },
+          ],
       series: [
         {
           type: 'line',

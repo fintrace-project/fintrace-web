@@ -141,6 +141,10 @@ overview:
   expensesByMonth: Expenses by month
   chartPending: The cashflow chart is coming soon.
   allAccounts: All accounts →
+  balance: Balance
+  changePending: ▲ —
+  since: vs {{date}}
+  allCharts: All charts →
 
 accounts:
   empty: No accounts yet.
@@ -307,10 +311,11 @@ charts:
   archivedAccount: '{{name}} (archived)'
   range: Range
   presets:
-    ALL: All
-    1Y: 1Y
-    3M: 3M
     1M: 1M
+    3M: 3M
+    6M: 6M
+    1Y: 1Y
+    ALL: All
   granularity:
     DAY: Daily
     WEEK: Weekly

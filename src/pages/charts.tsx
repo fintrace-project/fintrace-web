@@ -5,6 +5,7 @@ import { useParams } from 'react-router'
 import { BalanceChartView } from '@/components/balance-chart'
 import { LoadError } from '@/components/load-error'
 import { PageHeader } from '@/components/page-header'
+import { PresetPicker } from '@/components/preset-picker'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,8 +18,6 @@ import {
   dailyFetchWindow,
   granularityFor,
   lineOf,
-  PRESETS,
-  presetWindow,
   type DateWindow,
 } from '@/core/charts/windows'
 import { isoDate } from '@/core/dates'
@@ -64,30 +63,7 @@ export function ChartsPage() {
         <AccountPicker workspaceId={workspaceId} accountId={accountId} onPick={pickAccount} />
         {span && window && (
           <>
-            <div
-              role="group"
-              aria-label={t('charts.range')}
-              className="flex gap-1 rounded-xl bg-muted/60 p-1"
-            >
-              {PRESETS.map((preset) => {
-                const shown = presetWindow(preset, span)
-                const active = shown.from === window.from && shown.to === window.to
-                return (
-                  <button
-                    key={preset}
-                    type="button"
-                    aria-pressed={active}
-                    onClick={() => setPicked(shown)}
-                    className={cn(
-                      'min-h-11 flex-1 rounded-lg px-3 text-sm font-bold transition-colors md:min-h-9',
-                      active ? 'bg-card shadow-xs' : 'text-muted-foreground hover:text-foreground',
-                    )}
-                  >
-                    {t(`charts.presets.${preset}`)}
-                  </button>
-                )
-              })}
-            </div>
+            <PresetPicker history={span} window={window} onPick={setPicked} />
             <span className="text-sm text-muted-foreground sm:ml-auto">
               {t(`charts.granularity.${granularity}`)} · {t(mouse ? 'charts.mouseHint' : 'charts.touchHint')}
             </span>

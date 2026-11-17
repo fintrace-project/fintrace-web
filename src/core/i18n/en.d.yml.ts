@@ -142,6 +142,10 @@ declare const messages: {
     readonly expensesByMonth: "Expenses by month"
     readonly chartPending: "The cashflow chart is coming soon."
     readonly allAccounts: "All accounts →"
+    readonly balance: "Balance"
+    readonly changePending: "▲ —"
+    readonly since: "vs {{date}}"
+    readonly allCharts: "All charts →"
   }
   readonly accounts: {
     readonly empty: "No accounts yet."
@@ -323,10 +327,11 @@ declare const messages: {
     readonly archivedAccount: "{{name}} (archived)"
     readonly range: "Range"
     readonly presets: {
-      readonly ALL: "All"
-      readonly "1Y": "1Y"
-      readonly "3M": "3M"
       readonly "1M": "1M"
+      readonly "3M": "3M"
+      readonly "6M": "6M"
+      readonly "1Y": "1Y"
+      readonly ALL: "All"
     }
     readonly granularity: {
       readonly DAY: "Daily"

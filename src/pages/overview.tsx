@@ -1,14 +1,16 @@
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
 import { ArchiveButton } from '@/components/archive-controls'
+import { BalancePanel } from '@/components/balance-panel'
 import { InitialsAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'
 import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
+import { displayCurrency } from '@/core/currencies'
 import { formatBalance } from '@/core/format'
-import { useAccountRows } from '@/hooks/use-accounts'
+import { useAccountRows, useCurrencyTotals } from '@/hooks/use-accounts'
 import { useResetFeed, useWorkspaceFeed } from '@/hooks/use-feed'
 import { useMediaQuery, WIDE } from '@/hooks/use-media-query'
 import { useWorkspace } from '@/hooks/use-workspaces'
@@ -21,6 +23,10 @@ export function OverviewPage() {
   // On a phone the feed is the Operations tab's; rendered rather than hidden, so it is not fetched there
   const wide = useMediaQuery(WIDE)
   const { t } = useTranslation()
+  // Picked in the balance widget, followed by the balance chart beside it
+  const [picked, setPicked] = useState<string>()
+  const held = useCurrencyTotals(workspaceId).data?.byCurrency.map((amount) => amount.currency) ?? []
+  const display = displayCurrency(held, picked, workspace.defaultCurrency)
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,7 +42,7 @@ export function OverviewPage() {
           </>
         }
       />
-      <TotalsTiles workspace={workspace} />
+      <TotalsTiles workspace={workspace} display={display} onPick={setPicked} />
 
       {/* Between md and lg the side column comes first: below a feed that keeps loading it could never be reached */}
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
@@ -44,6 +50,7 @@ export function OverviewPage() {
           aria-label={t('overview.summary')}
           className="flex min-w-0 flex-col gap-4 lg:col-start-2 lg:row-start-1"
         >
+          <BalancePanel workspaceId={workspaceId} currency={display} />
           <Panel title={t('overview.whereMoneyWent')} className="md:max-lg:hidden">
             <Pending>{t('overview.breakdownPending')}</Pending>
             {/* Below the list as in the prototype: beside the title it squeezes both onto two lines */}

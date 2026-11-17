@@ -18,10 +18,11 @@ export function granularityFor(window: DateWindow): Granularity {
   return 'DAY'
 }
 
-export const PRESETS = ['ALL', '1Y', '3M', '1M'] as const
+// Shortest first, as a span reads left to right
+export const PRESETS = ['1M', '3M', '6M', '1Y', 'ALL'] as const
 export type Preset = (typeof PRESETS)[number]
 
-const PRESET_DAYS: Record<Exclude<Preset, 'ALL'>, number> = { '1Y': 365, '3M': 91, '1M': 30 }
+const PRESET_DAYS: Record<Exclude<Preset, 'ALL'>, number> = { '1M': 30, '3M': 91, '6M': 182, '1Y': 365 }
 
 // The window a preset shows, ending where the history ends and never starting before it
 export function presetWindow(preset: Preset, history: DateWindow): DateWindow {

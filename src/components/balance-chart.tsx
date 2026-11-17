@@ -9,6 +9,7 @@ export interface BalanceChartViewProps {
   points: [string, number][]
   window: DateWindow
   onWindow: (window: DateWindow) => void
+  compact?: boolean
   className?: string
 }
 
@@ -36,6 +37,7 @@ export function BalanceChartView({
   points,
   window,
   onWindow,
+  compact = false,
   className,
 }: BalanceChartViewProps) {
   const element = useRef<HTMLDivElement>(null)
@@ -58,6 +60,7 @@ export function BalanceChartView({
         currency,
         colours: coloursOf(host),
         onWindow: (next) => handlers.current.onWindow(next),
+        compact,
       })
       setChart(created)
     })
@@ -66,7 +69,7 @@ export function BalanceChartView({
       created?.dispose()
       setChart(undefined)
     }
-  }, [group, currency])
+  }, [group, currency, compact])
 
   useEffect(() => {
     chart?.setLine(points)

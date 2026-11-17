@@ -41,6 +41,17 @@ export function currenciesWith(code: string): Currency[] {
 export const currencyLabel = (currency: Currency) =>
   currency.symbol === currency.code ? currency.code : `${currency.code} (${currency.symbol})`
 
+// The overview's display currency: the one picked, else the workspace's own where an account holds it, else
+// the first the accounts hold
+export function displayCurrency(
+  held: string[],
+  picked: string | undefined,
+  workspaceCurrency: string,
+): string {
+  if (picked && held.includes(picked)) return picked
+  return held.includes(workspaceCurrency) ? workspaceCurrency : (held[0] ?? workspaceCurrency)
+}
+
 export function matchesCurrency(currency: Currency, query: string): boolean {
   const q = query.trim().toLowerCase()
   return (

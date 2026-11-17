@@ -53,14 +53,27 @@ function PendingTile({ label }: { label: string }) {
 
 // The workspace's headline figures; income and expenses wait for the cashflow endpoint (3.6). The balance widget
 // is the tall one, so the small tiles keep their own height rather than stretch beside it.
-export function TotalsTiles({ workspace }: { workspace: Workspace }) {
+export function TotalsTiles({
+  workspace,
+  display,
+  onPick,
+}: {
+  workspace: Workspace
+  display: string
+  onPick: (currency: string) => void
+}) {
   const { t } = useTranslation()
   return (
     <section
       aria-label={t('totals.label')}
       className="grid items-start gap-2 sm:grid-cols-2 sm:gap-4 lg:grid-cols-[minmax(0,1.6fr)_1fr_1fr]"
     >
-      <BalanceWidget workspace={workspace} className="sm:col-span-2 lg:col-span-1" />
+      <BalanceWidget
+        workspace={workspace}
+        display={display}
+        onPick={onPick}
+        className="sm:col-span-2 lg:col-span-1"
+      />
       <PendingTile label={t('totals.income')} />
       <PendingTile label={t('totals.expenses')} />
     </section>
