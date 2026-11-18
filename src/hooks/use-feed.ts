@@ -1,5 +1,6 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, dataOf, type PageCursors } from '@/core/api'
+import { addDays } from '@/core/dates'
 
 // The pages held at once: the reader's and its neighbours. Returning to the tab re-reads exactly these,
 // so its cost does not grow with how far the reader scrolled; a page reached by scrolling is fetched fresh.
@@ -18,7 +19,9 @@ const paging = {
   // Query refetches on by default (refetchOnWindowFocus), or opens the page
 }
 
-const workspaceFeedKey = (workspaceId: string) => ['workspaces', workspaceId, 'feed']
+// A day's feed is a query of its own beside the whole one, under the workspace's key so every write refreshes it
+const workspaceFeedKey = (workspaceId: string, day?: string) =>
+  day ? ['workspaces', workspaceId, 'feed', day] : ['workspaces', workspaceId, 'feed']
 const accountFeedKey = (workspaceId: string, accountId: string, at: string | undefined) => [
   'workspaces',
   workspaceId,
@@ -30,22 +33,27 @@ const accountFeedKey = (workspaceId: string, accountId: string, at: string | und
 
 // Back to the feed's first page. The window has dropped it by then, so this fetches it afresh rather
 // than walking every page in between.
-export function useResetFeed(workspaceId: string, accountId?: string) {
+export function useResetFeed(workspaceId: string, accountId?: string, day?: string) {
   const queryClient = useQueryClient()
   const queryKey = accountId
     ? accountFeedKey(workspaceId, accountId, undefined)
-    : workspaceFeedKey(workspaceId)
+    : workspaceFeedKey(workspaceId, day)
   return () => void queryClient.resetQueries({ queryKey, exact: true })
 }
 
-export function useWorkspaceFeed(workspaceId: string) {
+// With a day, that day's incomes and expenses alone: Core's window takes `from` and excludes `to`, so the next
+// midnight ends it; transfers are left out, as the heatmap that opens it counts none
+export function useWorkspaceFeed(workspaceId: string, day?: string) {
+  const filter = day
+    ? { from: `${day}T00:00:00`, to: `${addDays(day, 1)}T00:00:00`, kinds: ['OPERATION' as const] }
+    : {}
   return useInfiniteQuery({
     ...paging,
-    queryKey: workspaceFeedKey(workspaceId),
+    queryKey: workspaceFeedKey(workspaceId, day),
     queryFn: async ({ pageParam, signal }) =>
       dataOf(
         await api.GET('/api/v1/workspaces/{workspaceId}/feed', {
-          params: { path: { workspaceId }, query: pageParam },
+          params: { path: { workspaceId }, query: { ...filter, ...pageParam } },
           signal,
         }),
       ),

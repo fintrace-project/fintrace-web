@@ -285,6 +285,8 @@ transfers:
 
 feed:
   empty: No operations yet.
+  onDay: 'Income and expenses on {{date}}'
+  allDays: Show every day
   operationDeleted: Operation deleted.
   transferDeleted: Transfer deleted.
   undo: Undo
@@ -335,6 +337,47 @@ charts:
     expense: Expenses
     net: Net
     operations: Operations
+
+heatmap:
+  title: Daily spending
+  label: Daily activity
+  spent: spent
+  spentLabel: Spent
+  net: net
+  netLabel: Net
+  transactions_one: '{{count}} transaction'
+  transactions_other: '{{count}} transactions'
+  scope: '{{from}} – {{to}} · {{currency}} accounts'
+  mode: Show
+  modes:
+    SPENDING: Spending
+    TRANSACTIONS: Transactions
+    NET: Net flow
+  period: Period
+  lastYear: Last 12 months
+  avgPerDay: Avg per day
+  noSpendDays: No-spend days
+  longestStreak: Longest no-spend streak
+  biggestDay: Biggest day
+  days_one: '{{count}} day'
+  days_other: '{{count}} days'
+  biggest: '{{amount}} · {{date}}'
+  selectedDay: Selected day
+  daySpent: Spent
+  dayIncome: Income
+  dayTransactions: Transactions
+  openInFeed: Open in feed →
+  less: Less
+  more: More
+  out: Out
+  in: In
+  cell:
+    SPENDING: '{{date}} · {{amount}} spent'
+    TRANSACTIONS_one: '{{date}} · {{count}} transaction'
+    TRANSACTIONS_other: '{{date}} · {{count}} transactions'
+    NET: '{{date}} · net {{amount}}'
+    nothing: '{{date}} · nothing recorded'
+    future: '{{date}} · not yet'
 
 preferences:
   title: Preferences

@@ -6,6 +6,7 @@ import { BalancePanel } from '@/components/balance-panel'
 import { InitialsAvatar, Panel, Pending, TotalsTiles } from '@/components/cards'
 import { ExpensesPanel } from '@/components/expenses-panel'
 import { Feed } from '@/components/feed'
+import { HeatmapCard } from '@/components/heatmap-card'
 import { LoadError } from '@/components/load-error'
 import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
@@ -44,6 +45,7 @@ export function OverviewPage() {
         }
       />
       <TotalsTiles workspace={workspace} display={display} onPick={setPicked} />
+      <HeatmapCard workspaceId={workspaceId} currency={display} />
 
       {/* Between md and lg the side column comes first: below a feed that keeps loading it could never be reached */}
       <div className="grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">

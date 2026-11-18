@@ -301,6 +301,8 @@ declare const messages: {
   }
   readonly feed: {
     readonly empty: "No operations yet."
+    readonly onDay: "Income and expenses on {{date}}"
+    readonly allDays: "Show every day"
     readonly operationDeleted: "Operation deleted."
     readonly transferDeleted: "Transfer deleted."
     readonly undo: "Undo"
@@ -353,6 +355,49 @@ declare const messages: {
       readonly expense: "Expenses"
       readonly net: "Net"
       readonly operations: "Operations"
+    }
+  }
+  readonly heatmap: {
+    readonly title: "Daily spending"
+    readonly label: "Daily activity"
+    readonly spent: "spent"
+    readonly spentLabel: "Spent"
+    readonly net: "net"
+    readonly netLabel: "Net"
+    readonly transactions_one: "{{count}} transaction"
+    readonly transactions_other: "{{count}} transactions"
+    readonly scope: "{{from}} – {{to}} · {{currency}} accounts"
+    readonly mode: "Show"
+    readonly modes: {
+      readonly SPENDING: "Spending"
+      readonly TRANSACTIONS: "Transactions"
+      readonly NET: "Net flow"
+    }
+    readonly period: "Period"
+    readonly lastYear: "Last 12 months"
+    readonly avgPerDay: "Avg per day"
+    readonly noSpendDays: "No-spend days"
+    readonly longestStreak: "Longest no-spend streak"
+    readonly biggestDay: "Biggest day"
+    readonly days_one: "{{count}} day"
+    readonly days_other: "{{count}} days"
+    readonly biggest: "{{amount}} · {{date}}"
+    readonly selectedDay: "Selected day"
+    readonly daySpent: "Spent"
+    readonly dayIncome: "Income"
+    readonly dayTransactions: "Transactions"
+    readonly openInFeed: "Open in feed →"
+    readonly less: "Less"
+    readonly more: "More"
+    readonly out: "Out"
+    readonly in: "In"
+    readonly cell: {
+      readonly SPENDING: "{{date}} · {{amount}} spent"
+      readonly TRANSACTIONS_one: "{{date}} · {{count}} transaction"
+      readonly TRANSACTIONS_other: "{{date}} · {{count}} transactions"
+      readonly NET: "{{date}} · net {{amount}}"
+      readonly nothing: "{{date}} · nothing recorded"
+      readonly future: "{{date}} · not yet"
     }
   }
   readonly preferences: {

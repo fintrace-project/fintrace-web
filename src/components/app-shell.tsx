@@ -55,7 +55,9 @@ export function AppShell() {
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 pt-2 pb-5 md:px-8 md:pt-7 md:pb-12">
+        {/* w-full min-w-0: centred in a flex column, it would otherwise take its widest content's width and
+            push the page past a phone's screen, rather than leave that content to scroll in its own box */}
+        <main className="mx-auto w-full max-w-6xl min-w-0 px-4 pt-2 pb-5 md:px-8 md:pt-7 md:pb-12">
           <Outlet />
         </main>
       </div>
