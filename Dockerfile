@@ -2,7 +2,7 @@
 # mounted over /app. The production stage, the default target, serves the build as static files.
 # Both bases pinned by digest so a base update is a commit, and an unchanged release still rebuilds for it
 # (§7.8); Dependabot moves the digests
-FROM node:22-bookworm-slim@sha256:18052396bf1d0c6e0a8c58181b5c1457da19409efbd5032a3f4d86974e74d13c AS dev
+FROM node:22-bookworm-slim@sha256:e9f565d32859f0cbfb52125eafe8be39390f24dac302dc3cdf566e8ba3ab21ee AS dev
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
