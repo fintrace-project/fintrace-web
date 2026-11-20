@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, type CSSProperties, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { addDays } from '@/core/dates'
 import { formatFeedDay, formatMoney, formatMonth } from '@/core/format'
@@ -98,9 +98,16 @@ export function HeatmapGrid({
         role="grid"
         aria-label={t('heatmap.label')}
         viewBox={`0 0 ${width} ${height}`}
-        // Shrinks to fit a desktop card, cells down to about 10 px; narrower than that, a phone, it scrolls instead
-        style={{ minWidth: width * MIN_SCALE, maxWidth: width * 1.25 }}
-        className="block h-auto w-full"
+        // A phone draws the cells at full size and scrolls; from md the grid shrinks to fit its card, cells down to
+        // about 10 px, scrolling only below that
+        style={
+          {
+            '--full': `${width}px`,
+            '--fit': `${width * MIN_SCALE}px`,
+            maxWidth: width * 1.25,
+          } as CSSProperties
+        }
+        className="block h-auto w-full min-w-(--full) md:min-w-(--fit)"
         onKeyDown={onKeyDown}
       >
         {layout.months.map(({ column, date }) => (

@@ -50,6 +50,11 @@ const rate = new Intl.NumberFormat(undefined, { maximumFractionDigits: 6 })
 
 export const formatRate = (value: number) => rate.format(value)
 
+const percent = new Intl.NumberFormat(undefined, { style: 'percent', maximumFractionDigits: 0 })
+
+// "42%", for one of Core's ratios (0.4200); Intl scales it, the client computes nothing
+export const formatPercent = (ratio: number) => percent.format(ratio)
+
 const shortDate = new Intl.DateTimeFormat(undefined, { day: 'numeric', month: 'short', year: 'numeric' })
 
 export const formatShortDate = (iso: string) => shortDate.format(new Date(`${iso.slice(0, 10)}T00:00`))
@@ -83,6 +88,16 @@ const feedDay = new Intl.DateTimeFormat(undefined, {
 })
 
 export const formatFeedDay = (iso: string) => feedDay.format(new Date(`${iso.slice(0, 10)}T00:00`))
+
+const shortDay = new Intl.DateTimeFormat(undefined, {
+  weekday: 'short',
+  day: 'numeric',
+  month: 'short',
+  year: 'numeric',
+})
+
+// "Sat, 14 Jun 2025", where a day heads a strip of figures
+export const formatShortDay = (iso: string) => shortDay.format(new Date(`${iso.slice(0, 10)}T00:00`))
 
 const pickerDay = new Intl.DateTimeFormat(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
 const pickerDayOfYear = new Intl.DateTimeFormat(undefined, {

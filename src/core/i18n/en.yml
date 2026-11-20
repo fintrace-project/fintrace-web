@@ -386,7 +386,9 @@ heatmap:
   selectedDay: Selected day
   daySpent: Spent
   dayIncome: Income
-  dayTransactions: Transactions
+  ofIncome: '{{percent}} of income'
+  kept: '{{percent}} of income saved'
+  overspent: '{{percent}} of income overspent'
   openInFeed: Open in feed →
   less: Less
   more: More

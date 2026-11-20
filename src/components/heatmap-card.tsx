@@ -7,7 +7,7 @@ import type { Cashflow } from '@/core/api'
 import type { CashflowPoint } from '@/core/charts/cashflow-chart'
 import { cashflowOf } from '@/core/charts/windows'
 import { isoDate } from '@/core/dates'
-import { formatCount, formatFeedDay, formatMoney, formatShortDate, splitMoney } from '@/core/format'
+import { formatMoney, formatPercent, formatShortDate, formatShortDay, splitMoney } from '@/core/format'
 import {
   heatmapLayout,
   heatmapWindow,
@@ -136,6 +136,18 @@ function Headline({
   const { whole, fraction } = splitMoney(amount, currency)
   const income = of(totals?.income)
   const expense = of(totals?.expense)
+  // Core's share of the period's income spent or kept; a currency with no income has neither (3.6b)
+  const ratio = (mode === 'NET' ? totals?.netRatio : totals?.expenseRatio)?.find(
+    (each) => each.currency === currency,
+  )?.ratio
+  const share =
+    ratio === undefined
+      ? undefined
+      : mode === 'SPENDING'
+        ? t('heatmap.ofIncome', { percent: formatPercent(ratio) })
+        : ratio < 0
+          ? t('heatmap.overspent', { percent: formatPercent(-ratio) })
+          : t('heatmap.kept', { percent: formatPercent(ratio) })
   return (
     <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1">
       {/* Spending is money out, in the expense colour; net takes its sign's, and none at zero */}
@@ -166,6 +178,7 @@ function Headline({
           </span>
         </p>
       )}
+      {share && <p className="text-sm font-bold whitespace-nowrap text-muted-foreground">{share}</p>}
     </div>
   )
 }
@@ -267,6 +280,8 @@ function Facts({
   )
 }
 
+const value = 'text-base leading-tight md:text-sm'
+
 function SelectedDay({
   workspaceId,
   date,
@@ -279,37 +294,49 @@ function SelectedDay({
   currency: string
 }) {
   const { t } = useTranslation()
-  const figures: [string, string][] = day
-    ? [
-        [t('heatmap.daySpent'), money(day.expense, currency)],
-        [t('heatmap.dayIncome'), money(day.income, currency)],
-        [t('heatmap.dayTransactions'), formatCount(day.count)],
-      ]
-    : []
 
-  // A phone: the date and the link on one row, the three figures under them in columns, each its label over
-  // its value. From md, one line: the date, the figures, the link at the end.
+  // A phone: the date with the income and the spending beside it, then the day's operations counted with the link.
+  // From md, one line, the count and the link at its end.
   return (
     <div
       aria-live="polite"
-      className="grid grid-cols-3 items-center gap-x-4 gap-y-2 rounded-xl bg-muted/60 px-4 py-2 text-sm whitespace-nowrap md:flex md:gap-x-6 md:py-1"
+      className="grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-1.5 rounded-xl bg-muted/60 px-4 py-2.5 text-sm whitespace-nowrap md:flex md:gap-x-6 md:py-1"
     >
-      <span className="col-span-2 font-extrabold md:col-auto">
-        <span className="sr-only">{t('heatmap.selectedDay')} </span>
-        {formatFeedDay(date)}
-      </span>
-      <Link
-        to={`/w/${workspaceId}/operations?day=${date}`}
-        className="flex min-h-11 items-center justify-self-end font-bold md:order-last md:ml-auto md:min-h-9"
-      >
-        {t('heatmap.openInFeed')}
-      </Link>
-      {figures.map(([label, value]) => (
-        <span key={label} className="flex flex-col md:flex-row md:gap-1">
-          <span className="text-xs text-muted-foreground md:text-sm md:text-foreground">{label}</span>
-          <b>{value}</b>
+      {/* One row on a phone, the amounts wrapping under the date only where they do not fit; from md its pieces
+          take their places in the line */}
+      <span className="col-span-2 flex flex-wrap items-baseline gap-x-3 gap-y-1 md:contents">
+        <span className="font-extrabold">
+          <span className="sr-only">{t('heatmap.selectedDay')} </span>
+          {formatShortDay(date)}
         </span>
-      ))}
+        {/* Signed and coloured by their side, as the feeds and the net flow show them, a zero muted but shown; the
+            labels are read only */}
+        {day && (
+          <span className="flex items-baseline gap-3 md:gap-6">
+            <b className={cn(value, day.income ? 'text-positive' : 'text-muted-foreground')}>
+              <span className="sr-only">{t('heatmap.dayIncome')} </span>+{money(day.income, currency)}
+            </b>
+            <b className={cn(value, day.expense ? 'text-negative' : 'text-muted-foreground')}>
+              <span className="sr-only">{t('heatmap.daySpent')} </span>−{money(day.expense, currency)}
+            </b>
+          </span>
+        )}
+      </span>
+      {/* The day's operations counted beside the feed that lists them: the last row on a phone, the end of the first
+          line from md */}
+      <span className="order-last col-span-2 flex items-center gap-4 justify-self-end md:order-1 md:ml-auto">
+        {day && (
+          // Every operation of the day, income included
+          <span className="text-muted-foreground">{t('heatmap.transactions', { count: day.count })}</span>
+        )}
+        {/* A full touch target that adds no height to its row */}
+        <Link
+          to={`/w/${workspaceId}/operations?day=${date}`}
+          className="-my-3 flex min-h-11 items-center font-bold md:my-0 md:min-h-9"
+        >
+          {t('heatmap.openInFeed')}
+        </Link>
+      </span>
     </div>
   )
 }
