@@ -12,7 +12,12 @@ import { HeatmapCard } from '@/components/heatmap-card'
 import { LoadError } from '@/components/load-error'
 import { AddOperationButton } from '@/components/operation-dialog'
 import { PageHeader } from '@/components/page-header'
+import { PresetPicker } from '@/components/preset-picker'
+import { TopCategoriesList } from '@/components/top-categories'
+import { presetWindow, type Preset } from '@/core/charts/windows'
 import { displayCurrency } from '@/core/currencies'
+import { addDays, isoDate } from '@/core/dates'
+import { useCashflowYears } from '@/hooks/use-cashflow'
 import { formatBalance } from '@/core/format'
 import { useAccountRows, useCurrencyTotals } from '@/hooks/use-accounts'
 import { useResetFeed, useWorkspaceFeed } from '@/hooks/use-feed'
@@ -56,13 +61,7 @@ export function OverviewPage() {
           className="flex min-w-0 flex-col gap-4 lg:col-start-2 lg:row-start-1"
         >
           <BalancePanel workspaceId={workspaceId} currency={display} />
-          <Panel title={t('overview.whereMoneyWent')} className="md:max-lg:hidden">
-            <Pending>{t('overview.breakdownPending')}</Pending>
-            {/* Below the list as in the prototype: beside the title it squeezes both onto two lines */}
-            <MoreLink to={`/w/${workspaceId}/statistics`} className="self-start">
-              {t('overview.allStatistics')}
-            </MoreLink>
-          </Panel>
+          <WhereMoneyWent workspaceId={workspaceId} currency={display} />
           <ExpensesPanel workspaceId={workspaceId} currency={display} className="md:max-lg:hidden" />
           <AccountsPanel workspaceId={workspaceId} />
         </aside>
@@ -70,6 +69,40 @@ export function OverviewPage() {
         {wide && <Operations workspaceId={workspaceId} />}
       </div>
     </div>
+  )
+}
+
+// The five largest expense categories over a span picked as the balance panel's is, the rest Core's "other"
+function WhereMoneyWent({ workspaceId, currency }: { workspaceId: string; currency: string }) {
+  const { t } = useTranslation()
+  const [today] = useState(() => isoDate(new Date()))
+  const [preset, setPreset] = useState<Preset>('1M')
+  // "All" begins with the first year holding an operation; until the years arrive a year back stands in
+  const firstYear = useCashflowYears(workspaceId).years?.at(-1)
+  const span = { from: firstYear ? `${firstYear}-01-01` : addDays(today, -365), to: today }
+  const window = presetWindow(preset, span)
+
+  return (
+    <Panel
+      title={t('overview.whereMoneyWent')}
+      className="md:max-lg:hidden"
+      // Below the list as in the prototype: beside the title it squeezes both onto two lines
+      footer={
+        <MoreLink to={`/w/${workspaceId}/statistics?currency=${encodeURIComponent(currency)}`}>
+          {t('overview.allStatistics')}
+        </MoreLink>
+      }
+    >
+      <TopCategoriesList
+        workspaceId={workspaceId}
+        kind="EXPENSE"
+        currency={currency}
+        limit={5}
+        // All time is Core's own: without a `from` it starts at the first operation
+        window={preset === 'ALL' ? undefined : window}
+      />
+      <PresetPicker history={span} window={window} onPick={(_, picked) => setPreset(picked)} small />
+    </Panel>
   )
 }
 
@@ -91,6 +124,7 @@ function Operations({ workspaceId }: { workspaceId: string }) {
   )
 }
 
+// A full touch target; the panel's footer or the caller places it
 function MoreLink({ to, className, children }: { to: string; className?: string; children: ReactNode }) {
   return (
     <Link to={to} className={cn('flex min-h-11 items-center px-1 text-caption font-bold', className)}>
@@ -106,7 +140,12 @@ function AccountsPanel({ workspaceId }: { workspaceId: string }) {
   return (
     <Panel
       title={t('sections.accounts')}
-      action={<MoreLink to={`/w/${workspaceId}/accounts`}>{t('overview.allAccounts')}</MoreLink>}
+      action={
+        // Overlapping the padding, so the title row keeps the title's height
+        <MoreLink to={`/w/${workspaceId}/accounts`} className="-my-3">
+          {t('overview.allAccounts')}
+        </MoreLink>
+      }
     >
       {error ? (
         <LoadError title={t('errors.loadAccounts')} error={error} onRetry={retry} />

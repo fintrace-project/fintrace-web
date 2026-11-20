@@ -145,8 +145,7 @@ declare const messages: {
   }
   readonly overview: {
     readonly summary: "Summary"
-    readonly whereMoneyWent: "Where the money went"
-    readonly breakdownPending: "The category breakdown is coming soon."
+    readonly whereMoneyWent: "Expense breakdown"
     readonly allStatistics: "All statistics →"
     readonly expensesByMonth: "Expenses by month"
     readonly noExpenses: "No expenses over the past year."

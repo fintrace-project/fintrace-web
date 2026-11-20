@@ -144,8 +144,7 @@ routeError:
 
 overview:
   summary: Summary
-  whereMoneyWent: Where the money went
-  breakdownPending: The category breakdown is coming soon.
+  whereMoneyWent: Expense breakdown
   allStatistics: All statistics →
   expensesByMonth: Expenses by month
   noExpenses: No expenses over the past year.

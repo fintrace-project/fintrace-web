@@ -46,7 +46,7 @@ export function BalancePanel({ workspaceId, currency }: { workspaceId: string; c
       action={
         <Link
           to={`/w/${workspaceId}/charts`}
-          className="flex min-h-11 items-center px-1 text-caption font-bold whitespace-nowrap"
+          className="-my-3 flex min-h-11 items-center px-1 text-caption font-bold whitespace-nowrap"
         >
           {t('overview.allCharts')}
         </Link>

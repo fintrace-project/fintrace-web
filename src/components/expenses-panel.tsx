@@ -2,8 +2,8 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { ExpenseChartView } from '@/components/balance-chart'
-import { Panel, Pending } from '@/components/panel'
 import { LoadError } from '@/components/load-error'
+import { Panel, Pending } from '@/components/panel'
 import { cashflowOf } from '@/core/charts/windows'
 import { useYearOfMonths } from '@/hooks/use-cashflow'
 
@@ -31,10 +31,10 @@ export function ExpensesPanel({
     <Panel
       title={t('overview.expensesByMonth')}
       className={className}
-      action={
+      footer={
         <Link
           to={`/w/${workspaceId}/charts`}
-          className="flex min-h-11 items-center px-1 text-caption font-bold whitespace-nowrap"
+          className="flex min-h-11 items-center px-1 text-caption font-bold"
         >
           {t('overview.allCharts')}
         </Link>
