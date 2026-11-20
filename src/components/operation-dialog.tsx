@@ -1,7 +1,7 @@
 import { Plus } from 'lucide-react'
 import { lazy, Suspense, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pending } from '@/components/cards'
+import { Pending } from '@/components/panel'
 import { Button } from '@/components/ui/button'
 import type { Compensation } from '@/components/operation-form'
 import { Dialog, DialogContent } from '@/components/ui/dialog'

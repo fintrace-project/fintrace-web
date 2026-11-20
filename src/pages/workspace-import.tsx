@@ -2,7 +2,7 @@ import { CircleAlert, CircleCheck, FileUp, LoaderCircle, TriangleAlert } from 'l
 import { useState, type DragEvent, type FormEvent } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
-import { Panel, Pending } from '@/components/cards'
+import { Panel, Pending } from '@/components/panel'
 import { PageHeader } from '@/components/page-header'
 import { Problem } from '@/components/problem'
 import { Button } from '@/components/ui/button'

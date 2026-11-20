@@ -58,6 +58,18 @@ const month = new Intl.DateTimeFormat(undefined, { month: 'short' })
 
 // "Nov", for a month's first day
 export const formatMonth = (iso: string) => month.format(new Date(`${iso.slice(0, 10)}T00:00`))
+
+const monthYear = new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' })
+
+// "November 2026", for a month's first day
+export const formatMonthYear = (iso: string) => monthYear.format(new Date(`${iso.slice(0, 10)}T00:00`))
+
+const shortMonthYear = new Intl.DateTimeFormat(undefined, { month: 'short', year: 'numeric' })
+
+// "Nov 2026", where the full name does not fit
+export const formatShortMonthYear = (iso: string) =>
+  shortMonthYear.format(new Date(`${iso.slice(0, 10)}T00:00`))
+
 const dateTime = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
 // The wire's floating wall-clock value read as local, so the time shown is the time stored

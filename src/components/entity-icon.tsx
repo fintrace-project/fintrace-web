@@ -1,4 +1,4 @@
-import { InitialsAvatar } from '@/components/cards'
+import { InitialsAvatar } from '@/components/initials-avatar'
 import { accentOf } from '@/lib/accent'
 import { ENTITY_ICONS } from '@/lib/entity-icons'
 import { cn } from '@/lib/utils'

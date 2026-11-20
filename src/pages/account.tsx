@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useParams, useSearchParams } from 'react-router'
-import { Pending } from '@/components/cards'
+import { Pending } from '@/components/panel'
 import { AnchorArrows } from '@/components/anchor-arrows'
 import { Feed } from '@/components/feed'
 import { LoadError } from '@/components/load-error'

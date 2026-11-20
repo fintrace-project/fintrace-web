@@ -314,7 +314,25 @@ feed:
   olderAnchor: Older recorded balance
 
 statistics:
-  pending: The category breakdown is coming soon.
+  expenses: Expenses
+  income: Income
+  period: Period
+  previousMonth: Previous month
+  nextMonth: Next month
+  pickMonth: '{{month}}, pick another month'
+  previousYear: Previous year
+  nextYear: Next year
+  wholeYear: All of {{year}}
+  thisYear: This year
+  allTime: All time
+  currency: Currency
+  scope: '{{currency}} accounts only'
+  path: Category path
+  allExpenses: All expenses
+  allIncome: All income
+  itself: '{{name}} itself'
+  noExpenses: No expenses in this period
+  noIncome: No income in this period
 
 charts:
   account: Account

@@ -13,11 +13,18 @@ const palette: [string, string][] = [
 ]
 
 // Core stores no colour: the id picks one, so a workspace or a user keeps its colour on every device.
-export function accentOf(id: string): CSSProperties {
+function paletteOf(id: string): [string, string] {
   let hash = 0
   for (const char of id) {
     hash = (hash * 31 + char.charCodeAt(0)) | 0
   }
-  const [accent, soft] = palette[Math.abs(hash) % palette.length]!
+  return palette[Math.abs(hash) % palette.length]!
+}
+
+export function accentOf(id: string): CSSProperties {
+  const [accent, soft] = paletteOf(id)
   return { '--ws': accent, '--ws-soft': soft } as CSSProperties
 }
+
+// The accent itself, for a canvas, which reads no CSS variable
+export const accentColour = (id: string) => paletteOf(id)[0]

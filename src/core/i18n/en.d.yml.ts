@@ -330,7 +330,25 @@ declare const messages: {
     readonly olderAnchor: "Older recorded balance"
   }
   readonly statistics: {
-    readonly pending: "The category breakdown is coming soon."
+    readonly expenses: "Expenses"
+    readonly income: "Income"
+    readonly period: "Period"
+    readonly previousMonth: "Previous month"
+    readonly nextMonth: "Next month"
+    readonly pickMonth: "{{month}}, pick another month"
+    readonly previousYear: "Previous year"
+    readonly nextYear: "Next year"
+    readonly wholeYear: "All of {{year}}"
+    readonly thisYear: "This year"
+    readonly allTime: "All time"
+    readonly currency: "Currency"
+    readonly scope: "{{currency}} accounts only"
+    readonly path: "Category path"
+    readonly allExpenses: "All expenses"
+    readonly allIncome: "All income"
+    readonly itself: "{{name}} itself"
+    readonly noExpenses: "No expenses in this period"
+    readonly noIncome: "No income in this period"
   }
   readonly charts: {
     readonly account: "Account"

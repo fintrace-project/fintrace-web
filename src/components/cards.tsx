@@ -1,67 +1,25 @@
-import type { CSSProperties, ReactNode } from 'react'
+import { Ellipsis } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { BalanceWidget } from '@/components/balance-widget'
-import type { CurrencyAmount, TopCategories, Workspace } from '@/core/api'
+import { CategoryBar, CategoryRow, type Segment } from '@/components/category-bar'
+import { EntityIcon } from '@/components/entity-icon'
+import type { TopCategories, Workspace } from '@/core/api'
+import { amountIn } from '@/core/category-breakdown'
 import { cashflowOf } from '@/core/charts/windows'
 import { Link } from 'react-router'
 import type { CashflowPoint } from '@/core/charts/cashflow-chart'
-import { formatMoney, formatMonth, initials, splitMoney } from '@/core/format'
+import { formatMoney, formatMonth, splitMoney } from '@/core/format'
 import { useYearOfMonths } from '@/hooks/use-cashflow'
 import { useCategories } from '@/hooks/use-categories'
 import { useTopCategories } from '@/hooks/use-top-categories'
-import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
-
-export function Panel({
-  title,
-  action,
-  className,
-  children,
-}: {
-  title: string
-  action?: ReactNode
-  className?: string
-  children: ReactNode
-}) {
-  return (
-    <section className={cn('flex flex-col gap-3 rounded-2xl border bg-card p-5', className)}>
-      <div className="flex min-h-9 items-center justify-between gap-2">
-        <h2 className="text-base font-bold">{title}</h2>
-        {action}
-      </div>
-      {children}
-    </section>
-  )
-}
-
-export function Pending({ children }: { children: ReactNode }) {
-  return <p className="text-sm text-muted-foreground">{children}</p>
-}
 
 type Side = 'income' | 'expense'
 
 const TOP_CATEGORIES = 4
 
-const amountIn = (amounts: { byCurrency: CurrencyAmount[] }, currency: string) =>
-  amounts.byCurrency.find((amount) => amount.currency === currency)?.total
-
-function BreakdownRow({ label, amount, style }: { label: string; amount: string; style?: CSSProperties }) {
-  return (
-    <li className="flex items-center gap-2">
-      <span
-        aria-hidden
-        style={style}
-        className={cn('size-2 shrink-0 rounded-full', style ? 'bg-(--ws)' : 'bg-muted-foreground/30')}
-      />
-      <span className="min-w-0 flex-1 truncate">{label}</span>
-      <span className="whitespace-nowrap tabular-nums">{amount}</span>
-    </li>
-  )
-}
-
-// A side's top categories as Core ranked them: each segment sized by its own total through flex-grow, so the
-// browser divides the bar and no share is computed here, Core's "other" last
-function CategoryBreakdown({
+// A side's top categories as Core ranked them, Core's "other" last
+function MonthBreakdown({
   workspaceId,
   side,
   top,
@@ -84,36 +42,51 @@ function CategoryBreakdown({
   if (rows.length === 0) {
     return (
       <>
-        <div aria-hidden className="h-1.5 rounded-full bg-muted" />
+        <CategoryBar segments={[]} />
         <p className="text-xs text-muted-foreground">{t(income ? 'totals.noIncome' : 'totals.noExpenses')}</p>
       </>
     )
   }
+  const segments: Segment[] = rows.map((row) => ({ key: row.id, total: row.total, colorId: row.id }))
   return (
     <>
-      <div aria-hidden className="flex h-1.5 gap-0.5 overflow-hidden rounded-full">
-        {rows.map((row) => (
-          <span
-            key={row.id}
-            style={{ ...accentOf(row.id), flexGrow: row.total }}
-            className="basis-0 bg-(--ws)"
-          />
-        ))}
-        {other ? <span style={{ flexGrow: other }} className="basis-0 bg-muted-foreground/30" /> : null}
-      </div>
+      <CategoryBar segments={other ? [...segments, { key: 'other', total: other }] : segments} />
       <ul
         aria-label={t(income ? 'totals.incomeByCategory' : 'totals.expensesByCategory')}
         className="flex flex-col gap-1.5 text-sm"
       >
-        {rows.map((row) => (
-          <BreakdownRow
-            key={row.id}
-            label={categories?.find((category) => category.id === row.id)?.name ?? ''}
-            amount={formatMoney(row.total, currency)}
-            style={accentOf(row.id)}
+        {rows.map((row) => {
+          const category = categories?.find((each) => each.id === row.id)
+          const name = category?.name ?? ''
+          return (
+            <CategoryRow
+              key={row.id}
+              label={name}
+              amount={formatMoney(row.total, currency)}
+              colorId={row.id}
+              icon={
+                <EntityIcon
+                  entity={{ id: row.id, name, icon: category?.icon }}
+                  className="size-6 rounded-full text-[0.625rem]"
+                />
+              }
+            />
+          )
+        })}
+        {other ? (
+          <CategoryRow
+            label={t('totals.other')}
+            amount={formatMoney(other, currency)}
+            icon={
+              <span
+                aria-hidden
+                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
+              >
+                <Ellipsis className="size-3.5" />
+              </span>
+            }
           />
-        ))}
-        {other ? <BreakdownRow label={t('totals.other')} amount={formatMoney(other, currency)} /> : null}
+        ) : null}
       </ul>
     </>
   )
@@ -160,7 +133,7 @@ function MonthSide({
         </p>
       )}
       {top.data ? (
-        <CategoryBreakdown workspaceId={workspaceId} side={side} top={top.data} currency={currency} />
+        <MonthBreakdown workspaceId={workspaceId} side={side} top={top.data} currency={currency} />
       ) : (
         <div aria-hidden className="h-1.5 rounded-full bg-muted" />
       )}
@@ -213,29 +186,5 @@ export function TotalsTiles({
       <BalanceWidget workspace={workspace} display={display} onPick={onPick} />
       <MonthCard workspaceId={workspace.id} currency={display} />
     </section>
-  )
-}
-
-// An account's or a category's own colour, picked by its id; the workspace's accent stays with the page around it
-export function InitialsAvatar({
-  name,
-  colorId,
-  className,
-}: {
-  name: string
-  colorId: string
-  className?: string
-}) {
-  return (
-    <span
-      aria-hidden
-      style={accentOf(colorId)}
-      className={cn(
-        'flex size-9 shrink-0 items-center justify-center rounded-control bg-(--ws-soft) text-caption font-extrabold text-(--ws)',
-        className,
-      )}
-    >
-      {initials(name)}
-    </span>
   )
 }
