@@ -1,96 +1,19 @@
-import { Ellipsis } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BalanceWidget } from '@/components/balance-widget'
-import { CategoryBar, CategoryRow, type Segment } from '@/components/category-bar'
-import { EntityIcon } from '@/components/entity-icon'
-import type { TopCategories, Workspace } from '@/core/api'
-import { amountIn } from '@/core/category-breakdown'
-import { cashflowOf } from '@/core/charts/windows'
+import { TopCategoriesList } from '@/components/top-categories'
+import type { Workspace } from '@/core/api'
+import { cashflowOf, monthSoFar } from '@/core/charts/windows'
+import { isoDate } from '@/core/dates'
 import { Link } from 'react-router'
 import type { CashflowPoint } from '@/core/charts/cashflow-chart'
-import { formatMoney, formatMonth, splitMoney } from '@/core/format'
+import { formatMonth, splitMoney } from '@/core/format'
 import { useYearOfMonths } from '@/hooks/use-cashflow'
-import { useCategories } from '@/hooks/use-categories'
-import { useTopCategories } from '@/hooks/use-top-categories'
 import { cn } from '@/lib/utils'
 
 type Side = 'income' | 'expense'
 
 const TOP_CATEGORIES = 4
-
-// A side's top categories as Core ranked them, Core's "other" last
-function MonthBreakdown({
-  workspaceId,
-  side,
-  top,
-  currency,
-}: {
-  workspaceId: string
-  side: Side
-  top: TopCategories
-  currency: string
-}) {
-  const { t } = useTranslation()
-  const categories = useCategories(workspaceId).data
-  const income = side === 'income'
-  const rows = top.rows.flatMap((row) => {
-    const total = amountIn(row.total, currency)
-    return total ? [{ id: row.categoryId, total }] : []
-  })
-  const other = amountIn(top.other, currency)
-
-  if (rows.length === 0) {
-    return (
-      <>
-        <CategoryBar segments={[]} />
-        <p className="text-xs text-muted-foreground">{t(income ? 'totals.noIncome' : 'totals.noExpenses')}</p>
-      </>
-    )
-  }
-  const segments: Segment[] = rows.map((row) => ({ key: row.id, total: row.total, colorId: row.id }))
-  return (
-    <>
-      <CategoryBar segments={other ? [...segments, { key: 'other', total: other }] : segments} />
-      <ul
-        aria-label={t(income ? 'totals.incomeByCategory' : 'totals.expensesByCategory')}
-        className="flex flex-col gap-1.5 text-sm"
-      >
-        {rows.map((row) => {
-          const category = categories?.find((each) => each.id === row.id)
-          const name = category?.name ?? ''
-          return (
-            <CategoryRow
-              key={row.id}
-              label={name}
-              amount={formatMoney(row.total, currency)}
-              colorId={row.id}
-              icon={
-                <EntityIcon
-                  entity={{ id: row.id, name, icon: category?.icon }}
-                  className="size-6 rounded-full text-[0.625rem]"
-                />
-              }
-            />
-          )
-        })}
-        {other ? (
-          <CategoryRow
-            label={t('totals.other')}
-            amount={formatMoney(other, currency)}
-            icon={
-              <span
-                aria-hidden
-                className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground"
-              >
-                <Ellipsis className="size-3.5" />
-              </span>
-            }
-          />
-        ) : null}
-      </ul>
-    </>
-  )
-}
 
 // One side of the month: its label with the month's name, Core's figure for the month's bucket signed from its
 // side as the feeds sign an operation, and under it its top categories
@@ -106,8 +29,8 @@ function MonthSide({
   currency: string
 }) {
   const { t } = useTranslation()
+  const [today] = useState(() => isoDate(new Date()))
   const income = side === 'income'
-  const top = useTopCategories(workspaceId, income ? 'INCOME' : 'EXPENSE', currency, TOP_CATEGORIES)
   const figure = month && splitMoney(month[side], currency)
   const label = month
     ? t(income ? 'totals.incomeIn' : 'totals.expensesIn', { month: formatMonth(month.start) })
@@ -132,11 +55,15 @@ function MonthSide({
           —
         </p>
       )}
-      {top.data ? (
-        <MonthBreakdown workspaceId={workspaceId} side={side} top={top.data} currency={currency} />
-      ) : (
-        <div aria-hidden className="h-1.5 rounded-full bg-muted" />
-      )}
+      <TopCategoriesList
+        workspaceId={workspaceId}
+        kind={income ? 'INCOME' : 'EXPENSE'}
+        currency={currency}
+        limit={TOP_CATEGORIES}
+        // The span of the cashflow bucket the headline shows, so the rows add up to it
+        window={monthSoFar(today)}
+        thisMonth
+      />
     </div>
   )
 }
