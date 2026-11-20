@@ -88,6 +88,9 @@ export function cashflowOf(cashflow: Cashflow, currency: string): CashflowPoint[
   })
 }
 
+// This month up to today, the span of the year of months' last bucket as the overview reads it
+export const monthSoFar = (today: string): DateWindow => ({ from: today.slice(0, 8) + '01', to: today })
+
 // A year of months: from the first day of this month a year ago to this month's last day, thirteen in all, so
 // this month stands beside the same month last year
 export function yearOfMonths(today: string): DateWindow {

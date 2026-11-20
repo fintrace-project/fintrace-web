@@ -1,12 +1,14 @@
-import type { ReactNode } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BalanceWidget } from '@/components/balance-widget'
-import type { Workspace } from '@/core/api'
+import type { CurrencyAmount, TopCategories, Workspace } from '@/core/api'
 import { cashflowOf } from '@/core/charts/windows'
 import { Link } from 'react-router'
 import type { CashflowPoint } from '@/core/charts/cashflow-chart'
-import { formatMonth, initials, splitMoney } from '@/core/format'
+import { formatMoney, formatMonth, initials, splitMoney } from '@/core/format'
 import { useYearOfMonths } from '@/hooks/use-cashflow'
+import { useCategories } from '@/hooks/use-categories'
+import { useTopCategories } from '@/hooks/use-top-categories'
 import { accentOf } from '@/lib/accent'
 import { cn } from '@/lib/utils'
 
@@ -38,11 +40,101 @@ export function Pending({ children }: { children: ReactNode }) {
 
 type Side = 'income' | 'expense'
 
+const TOP_CATEGORIES = 4
+
+const amountIn = (amounts: { byCurrency: CurrencyAmount[] }, currency: string) =>
+  amounts.byCurrency.find((amount) => amount.currency === currency)?.total
+
+function BreakdownRow({ label, amount, style }: { label: string; amount: string; style?: CSSProperties }) {
+  return (
+    <li className="flex items-center gap-2">
+      <span
+        aria-hidden
+        style={style}
+        className={cn('size-2 shrink-0 rounded-full', style ? 'bg-(--ws)' : 'bg-muted-foreground/30')}
+      />
+      <span className="min-w-0 flex-1 truncate">{label}</span>
+      <span className="whitespace-nowrap tabular-nums">{amount}</span>
+    </li>
+  )
+}
+
+// A side's top categories as Core ranked them: each segment sized by its own total through flex-grow, so the
+// browser divides the bar and no share is computed here, Core's "other" last
+function CategoryBreakdown({
+  workspaceId,
+  side,
+  top,
+  currency,
+}: {
+  workspaceId: string
+  side: Side
+  top: TopCategories
+  currency: string
+}) {
+  const { t } = useTranslation()
+  const categories = useCategories(workspaceId).data
+  const income = side === 'income'
+  const rows = top.rows.flatMap((row) => {
+    const total = amountIn(row.total, currency)
+    return total ? [{ id: row.categoryId, total }] : []
+  })
+  const other = amountIn(top.other, currency)
+
+  if (rows.length === 0) {
+    return (
+      <>
+        <div aria-hidden className="h-1.5 rounded-full bg-muted" />
+        <p className="text-xs text-muted-foreground">{t(income ? 'totals.noIncome' : 'totals.noExpenses')}</p>
+      </>
+    )
+  }
+  return (
+    <>
+      <div aria-hidden className="flex h-1.5 gap-0.5 overflow-hidden rounded-full">
+        {rows.map((row) => (
+          <span
+            key={row.id}
+            style={{ ...accentOf(row.id), flexGrow: row.total }}
+            className="basis-0 bg-(--ws)"
+          />
+        ))}
+        {other ? <span style={{ flexGrow: other }} className="basis-0 bg-muted-foreground/30" /> : null}
+      </div>
+      <ul
+        aria-label={t(income ? 'totals.incomeByCategory' : 'totals.expensesByCategory')}
+        className="flex flex-col gap-1.5 text-sm"
+      >
+        {rows.map((row) => (
+          <BreakdownRow
+            key={row.id}
+            label={categories?.find((category) => category.id === row.id)?.name ?? ''}
+            amount={formatMoney(row.total, currency)}
+            style={accentOf(row.id)}
+          />
+        ))}
+        {other ? <BreakdownRow label={t('totals.other')} amount={formatMoney(other, currency)} /> : null}
+      </ul>
+    </>
+  )
+}
+
 // One side of the month: its label with the month's name, Core's figure for the month's bucket signed from its
-// side as the feeds sign an operation, and under it the place its categories take with 3.8
-function MonthSide({ side, month, currency }: { side: Side; month?: CashflowPoint; currency: string }) {
+// side as the feeds sign an operation, and under it its top categories
+function MonthSide({
+  workspaceId,
+  side,
+  month,
+  currency,
+}: {
+  workspaceId: string
+  side: Side
+  month?: CashflowPoint
+  currency: string
+}) {
   const { t } = useTranslation()
   const income = side === 'income'
+  const top = useTopCategories(workspaceId, income ? 'INCOME' : 'EXPENSE', currency, TOP_CATEGORIES)
   const figure = month && splitMoney(month[side], currency)
   const label = month
     ? t(income ? 'totals.incomeIn' : 'totals.expensesIn', { month: formatMonth(month.start) })
@@ -67,9 +159,11 @@ function MonthSide({ side, month, currency }: { side: Side; month?: CashflowPoin
           —
         </p>
       )}
-      {/* The categories' bar and rows: 3.8's rolled-up totals, the last row Core's own "other" */}
-      <div aria-hidden className="h-1.5 rounded-full bg-muted" />
-      <p className="text-xs text-muted-foreground">{t('totals.byCategoryPending')}</p>
+      {top.data ? (
+        <CategoryBreakdown workspaceId={workspaceId} side={side} top={top.data} currency={currency} />
+      ) : (
+        <div aria-hidden className="h-1.5 rounded-full bg-muted" />
+      )}
     </div>
   )
 }
@@ -87,8 +181,8 @@ function MonthCard({ workspaceId, currency }: { workspaceId: string; currency: s
       className="flex flex-col gap-4 rounded-2xl border bg-card px-4 py-3"
     >
       <div className="grid gap-6 sm:grid-cols-2">
-        <MonthSide side="income" month={month} currency={currency} />
-        <MonthSide side="expense" month={month} currency={currency} />
+        <MonthSide workspaceId={workspaceId} side="income" month={month} currency={currency} />
+        <MonthSide workspaceId={workspaceId} side="expense" month={month} currency={currency} />
       </div>
       <Link
         to={`/w/${workspaceId}/statistics`}

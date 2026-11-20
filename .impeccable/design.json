@@ -317,7 +317,7 @@
     "rules": [
       {
         "name": "The One Sheet Rule",
-        "body": "Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars.",
+        "body": "Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars, and inside a chart's marks for them: a segment of a breakdown bar and the dot that ties its row to it, never a fill, a border or text around them.",
         "section": "colors"
       },
       {

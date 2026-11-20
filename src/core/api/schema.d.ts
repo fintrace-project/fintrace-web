@@ -257,6 +257,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/workspaces/{workspaceId}/statistics/categories/totals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Totals per category */
+        get: operations["getCategoryTotals"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/workspaces/{workspaceId}/statistics/categories/top": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Largest top-level categories */
+        get: operations["getTopCategories"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/workspaces/{workspaceId}/statistics/cashflow": {
         parameters: {
             query?: never;
@@ -399,7 +433,7 @@ export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
         /** @enum {string} */
-        CoreErrorCode: "VALIDATION_FAILED" | "MALFORMED_REQUEST" | "NOT_AUTHENTICATED" | "NOT_FOUND" | "VERSION_CONFLICT" | "WORKSPACE_STATUS_CONFLICT" | "WORKSPACE_READ_ONLY" | "WORKSPACE_NOT_IMPORTABLE" | "IMPORT_LEASE_LOST" | "ID_TAKEN" | "ACCOUNT_ARCHIVED" | "CATEGORY_ARCHIVED" | "SYSTEM_CATEGORY" | "CATEGORY_KIND_MISMATCH" | "CATEGORY_PARENT_REFUSED" | "TRANSFER_VIA_OPERATIONS" | "ANCHOR_ORDER" | "INTERNAL";
+        CoreErrorCode: "VALIDATION_FAILED" | "MALFORMED_REQUEST" | "NOT_AUTHENTICATED" | "NOT_FOUND" | "VERSION_CONFLICT" | "WORKSPACE_STATUS_CONFLICT" | "WORKSPACE_READ_ONLY" | "WORKSPACE_NOT_IMPORTABLE" | "IMPORT_LEASE_LOST" | "ID_TAKEN" | "ACCOUNT_ARCHIVED" | "CATEGORY_ARCHIVED" | "SYSTEM_CATEGORY" | "CATEGORY_KIND_MISMATCH" | "CATEGORY_PARENT_REFUSED" | "OPERATION_CATEGORY_REFUSED" | "TRANSFER_VIA_OPERATIONS" | "ANCHOR_ORDER" | "INTERNAL";
         FieldError: {
             field: string;
             message: string;
@@ -737,6 +771,50 @@ export interface components {
         ListResponseWorkspaceResponse: {
             items: components["schemas"]["WorkspaceResponse"][];
         };
+        CategoryTotalResponse: {
+            /** Format: uuid */
+            categoryId: string;
+            /** Format: uuid */
+            parentId?: string | null;
+            total: components["schemas"]["CurrencyAmountsResponse"];
+            selfTotal: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        CategoryTotalsResponse: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            kind: components["schemas"]["CategoryKind"];
+            rows: components["schemas"]["CategoryTotalResponse"][];
+        };
+        ConvertedAmountResponse: {
+            currency: string;
+            total: number;
+            coveredCurrencies: string[];
+        };
+        CurrencyAmountResponse: {
+            currency: string;
+            total: number;
+        };
+        CurrencyAmountsResponse: {
+            byCurrency: components["schemas"]["CurrencyAmountResponse"][];
+            converted?: components["schemas"]["ConvertedAmountResponse"] | null;
+        };
+        TopCategoriesResponse: {
+            /** Format: date */
+            from: string;
+            /** Format: date */
+            to: string;
+            kind: components["schemas"]["CategoryKind"];
+            total: components["schemas"]["CurrencyAmountsResponse"];
+            rows: components["schemas"]["TopCategoryResponse"][];
+            other: components["schemas"]["CurrencyAmountsResponse"];
+        };
+        TopCategoryResponse: {
+            /** Format: uuid */
+            categoryId: string;
+            total: components["schemas"]["CurrencyAmountsResponse"];
+        };
         /** @enum {string} */
         Granularity: "DAY" | "WEEK" | "MONTH" | "YEAR";
         CashflowBucketResponse: {
@@ -764,27 +842,20 @@ export interface components {
         CashflowTotalsResponse: {
             income: components["schemas"]["CurrencyAmountsResponse"];
             expense: components["schemas"]["CurrencyAmountsResponse"];
+            expenseRatio: components["schemas"]["CurrencyRatioResponse"][];
             net: components["schemas"]["CurrencyAmountsResponse"];
+            netRatio: components["schemas"]["CurrencyRatioResponse"][];
             count: components["schemas"]["CurrencyCountResponse"][];
             perDay: components["schemas"]["CashflowPerDayResponse"];
-        };
-        ConvertedAmountResponse: {
-            currency: string;
-            total: number;
-            coveredCurrencies: string[];
-        };
-        CurrencyAmountResponse: {
-            currency: string;
-            total: number;
-        };
-        CurrencyAmountsResponse: {
-            byCurrency: components["schemas"]["CurrencyAmountResponse"][];
-            converted?: components["schemas"]["ConvertedAmountResponse"] | null;
         };
         CurrencyCountResponse: {
             currency: string;
             /** Format: int64 */
             count: number;
+        };
+        CurrencyRatioResponse: {
+            currency: string;
+            ratio: number;
         };
         BalancesSeriesBucketResponse: {
             /** Format: date */
@@ -2543,6 +2614,138 @@ export interface operations {
             };
             /** @description The account is archived, or the workspace is */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getCategoryTotals: {
+        parameters: {
+            query: {
+                currency?: string;
+                kind: components["schemas"]["CategoryKind"];
+                from?: string;
+                to?: string;
+                accountIds?: string[];
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description One row per category with operations of `kind` in the period, its total per currency; transfers excluded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["CategoryTotalsResponse"];
+                };
+            };
+            /** @description Missing or unknown `kind` or `mode`, `from` after `to`, or an `accountIds` not in this workspace */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description `mode` not supported yet */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+        };
+    };
+    getTopCategories: {
+        parameters: {
+            query: {
+                limit: number;
+                currency: string;
+                kind: components["schemas"]["CategoryKind"];
+                from?: string;
+                to?: string;
+                accountIds?: string[];
+                includeArchived?: boolean;
+            };
+            header?: never;
+            path: {
+                workspaceId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The branch's total, its `limit` largest top-level categories and the rest as `other`; transfers excluded */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["TopCategoriesResponse"];
+                };
+            };
+            /** @description Missing or unknown `kind`, missing or unknown `currency`, `limit` outside 1 to 100, `from` after `to`, or an `accountIds` not in this workspace */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["CoreProblem"];
+                };
+            };
+            /** @description Not authenticated */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not authorized */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such workspace for this caller */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

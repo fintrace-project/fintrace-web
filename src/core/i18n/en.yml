@@ -88,7 +88,11 @@ totals:
   month: This month
   incomeIn: Income · {{month}}
   expensesIn: Expenses · {{month}}
-  byCategoryPending: By category coming soon
+  incomeByCategory: Income by category
+  expensesByCategory: Expenses by category
+  other: Other
+  noIncome: No income this month
+  noExpenses: No expenses this month
   allCategories: See all categories →
   sourceOnly: '{{currency}} accounts only · conversion coming soon'
   monthChange: '{{change}} this month'

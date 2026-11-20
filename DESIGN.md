@@ -168,7 +168,7 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 ### Primary
 
 - **Ink** (primary): the default action outside a workspace, and all main text.
-- **Workspace Accent** (one of the eight `workspace-*` values, as `--ws`): inside a workspace, the primary action, active tab, chosen tile ring and swipe-to-repeat. The colour is derived from the workspace's id, so it is stable across devices, and white text must stay readable on every accent. Accounts and categories draw from the same palette, keyed by their own ids, for their avatars.
+- **Workspace Accent** (one of the eight `workspace-*` values, as `--ws`): inside a workspace, the primary action, active tab, chosen tile ring and swipe-to-repeat. The colour is derived from the workspace's id, so it is stable across devices, and white text must stay readable on every accent. Accounts and categories draw from the same palette, keyed by their own ids, for their avatars and for the marks that stand for them in a chart.
 
 ### Secondary
 
@@ -195,7 +195,7 @@ A warm neutral base carries one workspace-picked accent; meaning colours appear 
 
 ### Named Rules
 
-**The One Sheet Rule.** Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars. The feed's tints are not accents: they say what an item is, sit on white day panels, and stay pale.
+**The One Sheet Rule.** Only the current workspace's colour may tint the page. A second accent competing with it is a defect; account and category colours stay inside their own avatars, and inside a chart's marks for them — a segment of a breakdown bar and the dot that ties its row to it (2026-11-20, the month card's categories), never a fill, a border or text around them. The feed's tints are not accents: they say what an item is, sit on white day panels, and stay pale.
 
 **The Money Out Is Not An Error Rule.** Expenses are red as income is green, but in `--negative`, never `--destructive`: the two may be tuned apart, and a delete must stay distinguishable from a purchase. (Until 2026-11-10 expenses were plain ink; changed with the feed's cards.)
 
